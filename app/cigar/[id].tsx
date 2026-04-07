@@ -87,6 +87,8 @@ export default function CigarDetailScreen() {
       contentContainerStyle={{ paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + 40 }}
       showsVerticalScrollIndicator={true}
       indicatorStyle="white"
+      bounces={true}
+      alwaysBounceVertical={true}
     >
       {/* Back button */}
       <Button title="Back" variant="ghost" onPress={() => router.back()} style={styles.backBtn} />

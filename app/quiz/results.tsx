@@ -52,6 +52,8 @@ export default function QuizResultsScreen() {
       contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
       showsVerticalScrollIndicator={true}
       indicatorStyle="white"
+      bounces={true}
+      alwaysBounceVertical={true}
     >
       {/* Navigation header */}
       <View style={styles.navRow}>

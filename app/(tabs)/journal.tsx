@@ -53,9 +53,12 @@ export default function JournalScreen() {
       <FlatList
         data={entries}
         keyExtractor={(e) => e.id}
+        style={{ flex: 1 }}
         showsVerticalScrollIndicator={true}
         indicatorStyle="white"
-        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+        bounces={true}
+        alwaysBounceVertical={true}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 80, flexGrow: 1 }}
         ListEmptyComponent={
           <EmptyState
             title="No smokes logged yet"

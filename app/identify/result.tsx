@@ -81,7 +81,10 @@ export default function IdentifyResultScreen() {
     <ScrollView
       style={[styles.screen, { paddingTop: insets.top + SPACING.md }]}
       contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
-      showsVerticalScrollIndicator={false}
+      showsVerticalScrollIndicator={true}
+      indicatorStyle="white"
+      bounces={true}
+      alwaysBounceVertical={true}
     >
       {params.imageUri && (
         <Image source={{ uri: params.imageUri }} style={styles.preview} resizeMode="cover" />
