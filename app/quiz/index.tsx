@@ -84,10 +84,10 @@ export default function QuizScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.md }]}>
-      {/* Header with back button */}
+      {/* Header */}
       <View style={styles.headerRow}>
-        <Pressable onPress={goBack} hitSlop={12} style={styles.backBtn}>
-          <Text style={styles.backText}>{step > 0 ? '← Back' : '← Home'}</Text>
+        <Pressable onPress={() => router.back()} hitSlop={12}>
+          <Text style={styles.closeText}>✕</Text>
         </Pressable>
         <Text style={styles.stepLabel}>{step + 1} / {QUESTIONS.length}</Text>
       </View>
@@ -143,6 +143,15 @@ export default function QuizScreen() {
           </View>
         )}
       </Animated.View>
+
+      {/* Back button — bottom right */}
+      {step > 0 && (
+        <View style={styles.bottomNav}>
+          <Pressable onPress={goBack} hitSlop={12} style={styles.backBtn}>
+            <Text style={styles.backText}>← Previous</Text>
+          </Pressable>
+        </View>
+      )}
     </View>
   );
 }
@@ -159,18 +168,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.sm,
   },
-  backBtn: {
-    paddingVertical: 6,
-    paddingRight: 12,
-  },
-  backText: {
-    fontSize: 15,
+  closeText: {
+    fontSize: 18,
     fontWeight: '600',
-    color: COLORS.accent,
+    color: COLORS.muted,
   },
   stepLabel: {
     fontSize: 13,
+    fontWeight: '600',
     color: COLORS.subtle,
+    letterSpacing: 1,
   },
   progressTrack: {
     height: 4,
@@ -237,5 +244,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: COLORS.muted,
     fontSize: 13,
+  },
+  bottomNav: {
+    alignItems: 'flex-end',
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.xs,
+  },
+  backBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+  },
+  backText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.accent,
   },
 });

@@ -93,16 +93,24 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
 
   return (
     <View style={splashStyles.container}>
-      <Animated.View style={[splashStyles.smokeContainer, smokeStyle]}>
-        <Text style={splashStyles.smoke}>~~~~~</Text>
-      </Animated.View>
+      {/* Gold decorative line */}
+      <Animated.View style={[splashStyles.topLine, smokeStyle]} />
+
       <Animated.View style={iconStyle}>
-        <Text style={splashStyles.icon}>🪵</Text>
+        <Text style={splashStyles.icon}>🚬</Text>
       </Animated.View>
+
+      <Animated.View style={[splashStyles.smokeContainer, smokeStyle]}>
+        <Text style={splashStyles.smoke}>〰️ 〰️ 〰️</Text>
+      </Animated.View>
+
       <Animated.View style={textStyle}>
-        <Text style={splashStyles.brand}>Stick Picks</Text>
-        <Text style={splashStyles.tagline}>Your cigar companion</Text>
+        <Text style={splashStyles.brand}>STICK PICKS</Text>
+        <View style={splashStyles.divider} />
+        <Text style={splashStyles.tagline}>EST. 2025</Text>
       </Animated.View>
+
+      <Animated.View style={[splashStyles.bottomLine, smokeStyle]} />
     </View>
   );
 }
@@ -115,31 +123,57 @@ const splashStyles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 100,
   },
-  smokeContainer: {
+  topLine: {
     position: 'absolute',
-    top: '32%',
+    top: '22%',
+    width: 60,
+    height: 2,
+    backgroundColor: COLORS.accent,
+    borderRadius: 1,
+  },
+  smokeContainer: {
+    marginTop: 8,
+    marginBottom: 16,
   },
   smoke: {
-    fontSize: 32,
+    fontSize: 20,
     color: COLORS.subtle,
-    letterSpacing: 8,
+    letterSpacing: 6,
   },
   icon: {
-    fontSize: 80,
-    marginBottom: 20,
+    fontSize: 72,
+    marginBottom: 4,
   },
   brand: {
     fontFamily: FONTS.display,
-    fontSize: 36,
+    fontSize: 34,
     fontWeight: '800',
     color: COLORS.accent,
     textAlign: 'center',
+    letterSpacing: 6,
+  },
+  divider: {
+    width: 40,
+    height: 2,
+    backgroundColor: COLORS.accent,
+    alignSelf: 'center',
+    marginVertical: 10,
+    borderRadius: 1,
   },
   tagline: {
-    fontSize: 15,
+    fontSize: 12,
+    fontWeight: '600',
     color: COLORS.muted,
     textAlign: 'center',
-    marginTop: 6,
+    letterSpacing: 4,
+  },
+  bottomLine: {
+    position: 'absolute',
+    bottom: '22%',
+    width: 60,
+    height: 2,
+    backgroundColor: COLORS.accent,
+    borderRadius: 1,
   },
 });
 

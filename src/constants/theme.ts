@@ -1,32 +1,37 @@
 import { Platform } from 'react-native';
 
 export const COLORS = {
-  // Surfaces
-  bg: '#0B0C10',
-  card: '#16181D',
-  card2: '#1C1F26',
-  border: '#2A2E37',
+  // Surfaces — deep dark green-black, like a private club at night
+  bg: '#0A1A0F',
+  card: '#12261A',
+  card2: '#1A3324',
+  border: '#264D35',
 
   // Text
-  text: '#F4F4F5',
-  muted: '#A1A1AA',
-  subtle: '#71717A',
+  text: '#F5F1E8',       // warm cream/parchment
+  muted: '#A3B5A8',      // sage gray
+  subtle: '#6B8A72',     // muted green
 
-  // Accent
-  accent: '#C7A24B',
-  accentDim: '#8B7033',
-  accentSoft: '#E2C77A',
+  // Accent — Masters gold
+  accent: '#D4AF37',     // classic gold
+  accentDim: '#9A7B1F',
+  accentSoft: '#E8CC6A',
 
   // Semantic
-  danger: '#EF4444',
-  success: '#22C55E',
-  warning: '#F59E0B',
-  info: '#3B82F6',
+  danger: '#D64545',
+  success: '#3DA55D',
+  warning: '#D4AF37',
+  info: '#4A90D9',
 
   // Utility
-  overlay: 'rgba(0,0,0,0.6)',
+  overlay: 'rgba(6,16,10,0.75)',
   white: '#FFFFFF',
   black: '#000000',
+
+  // Premium green accents
+  green: '#1B5E20',
+  greenLight: '#2E7D32',
+  greenDark: '#0D3B13',
 } as const;
 
 export const SPACING = {

@@ -34,7 +34,12 @@ export default function IdentifyResultScreen() {
         setConfidence(result.confidence);
         setReasoning(result.reasoning);
       } catch (e: any) {
-        setError(e?.message ?? 'Failed to identify cigar');
+        const msg = e?.message ?? 'Failed to identify cigar';
+        if (msg.includes('credit balance') || msg.includes('billing')) {
+          setError('Cigar scanning is temporarily unavailable. Please try again later.');
+        } else {
+          setError(msg);
+        }
       } finally {
         setLoading(false);
       }
