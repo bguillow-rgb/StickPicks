@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Image } from 'react-native';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
@@ -96,20 +96,13 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
       {/* Gold decorative line */}
       <Animated.View style={[splashStyles.topLine, smokeStyle]} />
 
-      {/* Cigar icon — built from shapes */}
+      {/* Real cigar photo */}
       <Animated.View style={iconStyle}>
-        <View style={splashStyles.cigarWrap}>
-          {/* Smoke wisps above cigar */}
-          <Animated.View style={[splashStyles.smokeWisps, smokeStyle]}>
-            <Text style={splashStyles.smokeText}>⠀~⠀~⠀~</Text>
-          </Animated.View>
-          {/* Cigar body */}
-          <View style={splashStyles.cigarBody}>
-            <View style={splashStyles.cigarTip} />
-            <View style={splashStyles.cigarBand} />
-            <View style={splashStyles.cigarFoot} />
-          </View>
-        </View>
+        <Image
+          source={{ uri: 'https://images.unsplash.com/photo-1604784449129-be5d342e5af4?w=400&q=80' }}
+          style={splashStyles.cigarPhoto}
+          resizeMode="cover"
+        />
       </Animated.View>
 
       <Animated.View style={textStyle}>
@@ -139,43 +132,13 @@ const splashStyles = StyleSheet.create({
     backgroundColor: COLORS.accent,
     borderRadius: 1,
   },
-  cigarWrap: {
-    alignItems: 'center',
+  cigarPhoto: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
     marginBottom: 24,
-  },
-  smokeWisps: {
-    marginBottom: 6,
-  },
-  smokeText: {
-    fontSize: 18,
-    color: COLORS.subtle,
-    letterSpacing: 4,
-  },
-  cigarBody: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    height: 18,
-  },
-  cigarTip: {
-    width: 12,
-    height: 18,
-    backgroundColor: '#8B4513',
-    borderTopLeftRadius: 9,
-    borderBottomLeftRadius: 9,
-  },
-  cigarBand: {
-    width: 20,
-    height: 18,
-    backgroundColor: COLORS.accent,
-    borderWidth: 1,
-    borderColor: '#B8941E',
-  },
-  cigarFoot: {
-    width: 100,
-    height: 18,
-    backgroundColor: '#6B3A2A',
-    borderTopRightRadius: 4,
-    borderBottomRightRadius: 4,
+    borderWidth: 2,
+    borderColor: COLORS.accent,
   },
   brand: {
     fontFamily: FONTS.display,

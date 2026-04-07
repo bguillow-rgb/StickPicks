@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useMemo, useRef } from 'react';
@@ -6,6 +6,8 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { Button } from '@/src/components/ui/Button';
 import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
+
+const HERO_IMG = 'https://images.unsplash.com/photo-1694716438178-c6f34bddd64d?w=800&q=80';
 import { QUESTIONS } from '@/src/features/quiz/questions';
 import type { QuizAnswers } from '@/src/types/cigar';
 
@@ -96,6 +98,9 @@ export default function QuizScreen() {
       <View style={styles.progressTrack}>
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
+
+      {/* Hero image */}
+      <Image source={{ uri: HERO_IMG }} style={styles.heroImage} resizeMode="cover" />
 
       <Animated.View
         key={step}
@@ -190,6 +195,13 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: COLORS.accent,
     borderRadius: RADIUS.full,
+  },
+  heroImage: {
+    width: '100%',
+    height: 140,
+    borderRadius: RADIUS.md,
+    marginBottom: SPACING.md,
+    backgroundColor: COLORS.card,
   },
   questionContainer: {
     flex: 1,
