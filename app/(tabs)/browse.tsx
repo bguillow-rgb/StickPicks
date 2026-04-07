@@ -9,9 +9,7 @@ import { COLORS, SPACING, RADIUS, FONTS } from '@/src/constants/theme';
 import type { Cigar } from '@/src/types/cigar';
 
 const POPULAR_BRANDS = [
-  'Padron', 'Arturo Fuente', 'Oliva', 'My Father', 'Liga Privada',
-  'Davidoff', 'Rocky Patel', 'Ashton', 'Perdomo', 'Tatuaje',
-  'Montecristo', 'Macanudo', 'CAO', 'Drew Estate', 'AJ Fernandez',
+  'Padron', 'Arturo Fuente', 'Oliva', 'My Father', 'Liga Privada', 'Davidoff',
 ];
 
 export default function BrowseScreen() {
@@ -21,9 +19,28 @@ export default function BrowseScreen() {
   const [cigars, setCigars] = useState<Cigar[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [activeBrand, setActiveBrand] = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
 
-  const fetchCigars = useCallback(async (search: string) => {
+  const fetchByBrand = useCallback(async (brand: string) => {
+    setLoading(true);
+    setHasSearched(true);
+    try {
+      const { data } = await supabase
+        .from('cigars')
+        .select('*')
+        .eq('brand', brand)
+        .order('name')
+        .limit(100);
+      setCigars((data as Cigar[]) ?? []);
+    } catch {
+      setCigars([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const fetchBySearch = useCallback(async (search: string) => {
     if (!search.trim()) {
       setCigars([]);
       setHasSearched(false);
@@ -33,10 +50,11 @@ export default function BrowseScreen() {
     setLoading(true);
     setHasSearched(true);
     try {
+      // Search brand as exact start-of-string match, name as contains
       const { data } = await supabase
         .from('cigars')
         .select('*')
-        .or(`brand.ilike.%${search}%,name.ilike.%${search}%`)
+        .or(`brand.ilike.${search}%,name.ilike.%${search}%`)
         .order('brand')
         .limit(100);
       setCigars((data as Cigar[]) ?? []);
@@ -48,12 +66,27 @@ export default function BrowseScreen() {
   }, []);
 
   useEffect(() => {
-    const timer = setTimeout(() => fetchCigars(query), 300);
+    if (activeBrand) return; // Skip text search when a chip is active
+    const timer = setTimeout(() => fetchBySearch(query), 300);
     return () => clearTimeout(timer);
-  }, [query, fetchCigars]);
+  }, [query, fetchBySearch, activeBrand]);
 
   const handleBrandTap = (brand: string) => {
+    setActiveBrand(brand);
     setQuery(brand);
+    fetchByBrand(brand);
+  };
+
+  const handleClearSearch = () => {
+    setQuery('');
+    setActiveBrand(null);
+    setCigars([]);
+    setHasSearched(false);
+  };
+
+  const handleQueryChange = (text: string) => {
+    setQuery(text);
+    setActiveBrand(null); // Switch back to text search mode
   };
 
   const renderCigar = useCallback(({ item }: { item: Cigar }) => (
@@ -87,7 +120,7 @@ export default function BrowseScreen() {
         placeholder="Search 538 cigars by brand or name..."
         placeholderTextColor={COLORS.subtle}
         value={query}
-        onChangeText={setQuery}
+        onChangeText={handleQueryChange}
         autoCorrect={false}
         returnKeyType="search"
       />
@@ -150,7 +183,7 @@ export default function BrowseScreen() {
             <View style={styles.noResults}>
               <Text style={styles.noResultsTitle}>No cigars found</Text>
               <Text style={styles.noResultsSub}>Try a different search term</Text>
-              <Pressable onPress={() => setQuery('')} style={styles.clearBtn}>
+              <Pressable onPress={handleClearSearch} style={styles.clearBtn}>
                 <Text style={styles.clearBtnText}>Clear Search</Text>
               </Pressable>
             </View>
@@ -158,7 +191,7 @@ export default function BrowseScreen() {
           ListHeaderComponent={
             <View style={styles.resultHeader}>
               <Text style={styles.resultCount}>{cigars.length} result{cigars.length !== 1 ? 's' : ''}</Text>
-              <Pressable onPress={() => setQuery('')} hitSlop={12}>
+              <Pressable onPress={handleClearSearch} hitSlop={12}>
                 <Text style={styles.clearLink}>Clear</Text>
               </Pressable>
             </View>
