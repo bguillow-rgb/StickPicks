@@ -72,6 +72,8 @@ export default function HumidorScreen() {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
+        showsVerticalScrollIndicator={true}
+        indicatorStyle="white"
         contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
         ListEmptyComponent={
           <EmptyState

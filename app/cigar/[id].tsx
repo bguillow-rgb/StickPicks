@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, Image } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
@@ -85,16 +85,25 @@ export default function CigarDetailScreen() {
     <ScrollView
       style={[styles.screen]}
       contentContainerStyle={{ paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + 40 }}
-      showsVerticalScrollIndicator={false}
+      showsVerticalScrollIndicator={true}
+      indicatorStyle="white"
     >
       {/* Back button */}
       <Button title="Back" variant="ghost" onPress={() => router.back()} style={styles.backBtn} />
 
       {/* Hero */}
       <View style={styles.hero}>
-        <View style={styles.heroImage}>
-          <Ionicons name="leaf-outline" size={48} color={COLORS.accent} />
-        </View>
+        {cigar.image_url ? (
+          <Image
+            source={{ uri: cigar.image_url }}
+            style={styles.heroImg}
+            resizeMode="cover"
+          />
+        ) : (
+          <View style={styles.heroImage}>
+            <Ionicons name="leaf-outline" size={48} color={COLORS.accent} />
+          </View>
+        )}
       </View>
 
       {/* Title */}
@@ -197,6 +206,12 @@ const styles = StyleSheet.create({
   hero: {
     alignItems: 'center',
     marginBottom: SPACING.md,
+  },
+  heroImg: {
+    width: 160,
+    height: 160,
+    borderRadius: 24,
+    backgroundColor: COLORS.card,
   },
   heroImage: {
     width: 120,

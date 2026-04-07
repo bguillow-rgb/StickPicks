@@ -53,6 +53,8 @@ export default function JournalScreen() {
       <FlatList
         data={entries}
         keyExtractor={(e) => e.id}
+        showsVerticalScrollIndicator={true}
+        indicatorStyle="white"
         contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
         ListEmptyComponent={
           <EmptyState

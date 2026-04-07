@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
@@ -50,8 +50,22 @@ export default function QuizResultsScreen() {
     <ScrollView
       style={[styles.screen, { paddingTop: insets.top + SPACING.md }]}
       contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
-      showsVerticalScrollIndicator={false}
+      showsVerticalScrollIndicator={true}
+      indicatorStyle="white"
     >
+      {/* Navigation header */}
+      <View style={styles.navRow}>
+        <Pressable onPress={() => router.replace('/(tabs)')} hitSlop={12}>
+          <Text style={styles.navLink}>Home</Text>
+        </Pressable>
+        <Pressable onPress={() => router.replace('/(tabs)/browse')} hitSlop={12}>
+          <Text style={styles.navLink}>Browse</Text>
+        </Pressable>
+        <Pressable onPress={() => router.replace('/(tabs)/humidor')} hitSlop={12}>
+          <Text style={styles.navLink}>Humidor</Text>
+        </Pressable>
+      </View>
+
       <Text style={styles.header}>Your Match</Text>
       <Text style={styles.subheader}>
         {top ? 'A confident pick based on your preferences.' : 'Loading matches...'}
@@ -115,6 +129,12 @@ export default function QuizResultsScreen() {
         onPress={() => router.replace('/quiz')}
         style={{ marginTop: SPACING.md }}
       />
+      <Button
+        title="Back to Home"
+        variant="ghost"
+        onPress={() => router.replace('/(tabs)')}
+        style={{ marginTop: SPACING.sm }}
+      />
     </ScrollView>
   );
 }
@@ -124,6 +144,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bg,
     paddingHorizontal: SPACING.md,
+  },
+  navRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  navLink: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.accent,
   },
   header: {
     fontFamily: FONTS.display,

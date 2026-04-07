@@ -1,13 +1,12 @@
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { Button } from '@/src/components/ui/Button';
-import { COLORS, SPACING, RADIUS, FONTS } from '@/src/constants/theme';
+import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
 import { QUESTIONS } from '@/src/features/quiz/questions';
-import { scoreQuiz } from '@/src/features/quiz/scoring';
 import type { QuizAnswers } from '@/src/types/cigar';
 
 export default function QuizScreen() {
@@ -24,21 +23,43 @@ export default function QuizScreen() {
     adventure: null,
   });
   const [computing, setComputing] = useState(false);
+  const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const q = QUESTIONS[step];
   const isLast = step === QUESTIONS.length - 1;
-
-  const canContinue = useMemo(() => {
-    if (!q) return false;
-    if (q.type === 'multi') return (answers[q.key as 'flavors'] as string[]).length > 0;
-    return answers[q.key as keyof QuizAnswers] !== null;
-  }, [answers, q]);
-
   const progress = step / (QUESTIONS.length - 1);
+
+  function goToResults() {
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    setComputing(true);
+    setTimeout(() => {
+      setComputing(false);
+      router.push({ pathname: '/quiz/results', params: { answers: JSON.stringify(answers) } });
+    }, 600);
+  }
 
   function selectValue(value: any) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setAnswers((prev) => ({ ...prev, [q.key]: value }));
+    const updated = { ...answers, [q.key]: value };
+    setAnswers(updated);
+
+    // Auto-advance for single-select questions
+    if (q.type !== 'multi') {
+      if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+      autoAdvanceTimer.current = setTimeout(() => {
+        if (isLast) {
+          // Need to use the updated answers since setState is async
+          setComputing(true);
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+          setTimeout(() => {
+            setComputing(false);
+            router.push({ pathname: '/quiz/results', params: { answers: JSON.stringify(updated) } });
+          }, 600);
+        } else {
+          setStep((s) => s + 1);
+        }
+      }, 350);
+    }
   }
 
   function toggleMulti(value: string) {
@@ -51,28 +72,30 @@ export default function QuizScreen() {
     });
   }
 
-  async function handleNext() {
-    if (isLast) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      setComputing(true);
-      // Score will be computed on results page with DB data
-      setTimeout(() => {
-        setComputing(false);
-        router.push({ pathname: '/quiz/results', params: { answers: JSON.stringify(answers) } });
-      }, 600);
-      return;
+  function goBack() {
+    if (step > 0) {
+      setStep((s) => s - 1);
+    } else {
+      router.back();
     }
-    setStep((s) => s + 1);
   }
+
+  const canContinueMulti = q.type === 'multi' && answers.flavors.length > 0;
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.md }]}>
+      {/* Header with back button */}
+      <View style={styles.headerRow}>
+        <Pressable onPress={goBack} hitSlop={12} style={styles.backBtn}>
+          <Text style={styles.backText}>{step > 0 ? '← Back' : '← Home'}</Text>
+        </Pressable>
+        <Text style={styles.stepLabel}>{step + 1} / {QUESTIONS.length}</Text>
+      </View>
+
       {/* Progress bar */}
       <View style={styles.progressTrack}>
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
-
-      <Text style={styles.stepLabel}>Question {step + 1} of {QUESTIONS.length}</Text>
 
       <Animated.View
         key={step}
@@ -86,7 +109,7 @@ export default function QuizScreen() {
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={styles.options}
-          showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={true}
         >
           {q.options.map((opt) => {
             const selected =
@@ -109,23 +132,17 @@ export default function QuizScreen() {
         </ScrollView>
 
         {q.type === 'multi' && (
-          <Text style={styles.hint}>Selected {answers.flavors.length} of {q.max ?? 3}</Text>
+          <View style={styles.multiFooter}>
+            <Text style={styles.hint}>Selected {answers.flavors.length} of {q.max ?? 3}</Text>
+            <Button
+              title={isLast ? (computing ? 'Finding...' : 'See Matches') : 'Next'}
+              onPress={() => isLast ? goToResults() : setStep((s) => s + 1)}
+              disabled={!canContinueMulti || computing}
+              loading={computing}
+            />
+          </View>
         )}
       </Animated.View>
-
-      <View style={styles.nav}>
-        <Button
-          title="Back"
-          variant="secondary"
-          onPress={() => step > 0 ? setStep(s => s - 1) : router.back()}
-        />
-        <Button
-          title={isLast ? (computing ? 'Finding...' : 'See Matches') : 'Next'}
-          onPress={handleNext}
-          disabled={!canContinue || computing}
-          loading={computing}
-        />
-      </View>
     </View>
   );
 }
@@ -136,23 +153,36 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
     paddingHorizontal: SPACING.md,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.sm,
+  },
+  backBtn: {
+    paddingVertical: 6,
+    paddingRight: 12,
+  },
+  backText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: COLORS.accent,
+  },
+  stepLabel: {
+    fontSize: 13,
+    color: COLORS.subtle,
+  },
   progressTrack: {
     height: 4,
     borderRadius: RADIUS.full,
     backgroundColor: COLORS.border,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.lg,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
     backgroundColor: COLORS.accent,
     borderRadius: RADIUS.full,
-  },
-  stepLabel: {
-    fontSize: 12,
-    color: COLORS.subtle,
-    textAlign: 'center',
-    marginBottom: SPACING.sm,
   },
   questionContainer: {
     flex: 1,
@@ -199,15 +229,13 @@ const styles = StyleSheet.create({
   optionTextSelected: {
     color: COLORS.bg,
   },
+  multiFooter: {
+    gap: SPACING.sm,
+    paddingTop: SPACING.sm,
+  },
   hint: {
     textAlign: 'center',
     color: COLORS.muted,
     fontSize: 13,
-    marginTop: SPACING.xs,
-  },
-  nav: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: SPACING.sm,
   },
 });

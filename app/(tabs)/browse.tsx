@@ -55,6 +55,8 @@ export default function BrowseScreen() {
         <FlatList
           data={cigars}
           keyExtractor={(c) => c.id}
+          showsVerticalScrollIndicator={true}
+          indicatorStyle="white"
           contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
           ListEmptyComponent={
             <EmptyState

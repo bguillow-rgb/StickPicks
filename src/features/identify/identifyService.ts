@@ -1,4 +1,4 @@
-import * as FileSystem from 'expo-file-system';
+import { File, Paths } from 'expo-file-system/next';
 import { supabase } from '@/lib/supabase';
 import type { Cigar } from '@/src/types/cigar';
 
@@ -33,15 +33,34 @@ If you cannot identify the cigar, respond with:
   "reasoning": "Explanation of why identification failed"
 }`;
 
+async function readFileAsBase64(uri: string): Promise<string> {
+  try {
+    const file = new File(uri);
+    const base64 = await file.base64();
+    return base64;
+  } catch {
+    // Fallback: fetch as blob and convert
+    const response = await fetch(uri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const dataUrl = reader.result as string;
+        resolve(dataUrl.split(',')[1] || '');
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+}
+
 export async function identifyCigar(imageUri: string): Promise<IdentifyResult> {
   if (!ANTHROPIC_API_KEY) {
     throw new Error('Anthropic API key not configured. Set EXPO_PUBLIC_ANTHROPIC_API_KEY in .env.local');
   }
 
   // Read image as base64
-  const base64 = await FileSystem.readAsStringAsync(imageUri, {
-    encoding: 'base64' as any,
-  });
+  const base64 = await readFileAsBase64(imageUri);
 
   // Determine media type
   const ext = imageUri.split('.').pop()?.toLowerCase();
@@ -90,7 +109,6 @@ export async function identifyCigar(imageUri: string): Promise<IdentifyResult> {
 
   let parsed: any;
   try {
-    // Extract JSON from response (handle markdown code blocks)
     const jsonMatch = textContent.match(/\{[\s\S]*\}/);
     parsed = JSON.parse(jsonMatch ? jsonMatch[0] : textContent);
   } catch {
@@ -101,7 +119,6 @@ export async function identifyCigar(imageUri: string): Promise<IdentifyResult> {
   let matchedCigar: Cigar | null = null;
 
   if (parsed.brand && parsed.name) {
-    // Exact match attempt
     const { data } = await supabase
       .from('cigars')
       .select('*')
@@ -112,7 +129,6 @@ export async function identifyCigar(imageUri: string): Promise<IdentifyResult> {
     if (data && data.length > 0) {
       matchedCigar = data[0] as Cigar;
     } else {
-      // Fallback: brand-only match
       const { data: brandData } = await supabase
         .from('cigars')
         .select('*')
@@ -128,22 +144,20 @@ export async function identifyCigar(imageUri: string): Promise<IdentifyResult> {
   // Save scan to database for training
   try {
     const { data: { user } } = await supabase.auth.getUser();
-
-    // Upload image to storage
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
     const filePath = user ? `${user.id}/${fileName}` : `anonymous/${fileName}`;
 
+    const imageResponse = await fetch(imageUri);
+    const imageBlob = await imageResponse.blob();
+
     await supabase.storage
       .from('scan-uploads')
-      .upload(filePath, await fetch(imageUri).then((r) => r.blob()), {
-        contentType: mediaType,
-      });
+      .upload(filePath, imageBlob, { contentType: mediaType });
 
     const { data: urlData } = supabase.storage
       .from('scan-uploads')
       .getPublicUrl(filePath);
 
-    // Insert scan record
     await supabase.from('scan_images').insert({
       user_id: user?.id ?? null,
       image_url: urlData.publicUrl,
@@ -153,7 +167,6 @@ export async function identifyCigar(imageUri: string): Promise<IdentifyResult> {
       raw_llm_response: apiResult,
     });
   } catch {
-    // Non-critical: don't block identification if save fails
     console.warn('Failed to save scan data');
   }
 

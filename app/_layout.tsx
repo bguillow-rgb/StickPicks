@@ -1,11 +1,22 @@
-import { useEffect } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSequence,
+  withDelay,
+  runOnJS,
+  Easing,
+  withRepeat,
+} from 'react-native-reanimated';
 import 'react-native-reanimated';
-import { COLORS } from '@/src/constants/theme';
+import { COLORS, FONTS } from '@/src/constants/theme';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -28,8 +39,113 @@ const StickPicksDark = {
   },
 };
 
+function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
+  const scale = useSharedValue(0.6);
+  const opacity = useSharedValue(0);
+  const textOpacity = useSharedValue(0);
+  const smokeOpacity = useSharedValue(0);
+
+  useEffect(() => {
+    // Cigar icon fades in and pulses
+    opacity.value = withTiming(1, { duration: 400 });
+    scale.value = withSequence(
+      withTiming(1.1, { duration: 600, easing: Easing.out(Easing.back(1.5)) }),
+      withTiming(0.95, { duration: 300 }),
+      withTiming(1, { duration: 300 }),
+    );
+
+    // Smoke wisps
+    smokeOpacity.value = withDelay(500, withRepeat(
+      withSequence(
+        withTiming(0.6, { duration: 800 }),
+        withTiming(0.2, { duration: 800 }),
+      ),
+      3,
+      true,
+    ));
+
+    // Text slides in
+    textOpacity.value = withDelay(600, withTiming(1, { duration: 500 }));
+
+    // Fade out and finish
+    const timeout = setTimeout(() => {
+      opacity.value = withTiming(0, { duration: 400 });
+      textOpacity.value = withTiming(0, { duration: 300 }, () => {
+        runOnJS(onFinish)();
+      });
+    }, 2800);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+    opacity: opacity.value,
+  }));
+
+  const smokeStyle = useAnimatedStyle(() => ({
+    opacity: smokeOpacity.value,
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+  }));
+
+  return (
+    <View style={splashStyles.container}>
+      <Animated.View style={[splashStyles.smokeContainer, smokeStyle]}>
+        <Text style={splashStyles.smoke}>~~~~~</Text>
+      </Animated.View>
+      <Animated.View style={iconStyle}>
+        <Text style={splashStyles.icon}>🪵</Text>
+      </Animated.View>
+      <Animated.View style={textStyle}>
+        <Text style={splashStyles.brand}>Stick Picks</Text>
+        <Text style={splashStyles.tagline}>Your cigar companion</Text>
+      </Animated.View>
+    </View>
+  );
+}
+
+const splashStyles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: COLORS.bg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 100,
+  },
+  smokeContainer: {
+    position: 'absolute',
+    top: '32%',
+  },
+  smoke: {
+    fontSize: 32,
+    color: COLORS.subtle,
+    letterSpacing: 8,
+  },
+  icon: {
+    fontSize: 80,
+    marginBottom: 20,
+  },
+  brand: {
+    fontFamily: FONTS.display,
+    fontSize: 36,
+    fontWeight: '800',
+    color: COLORS.accent,
+    textAlign: 'center',
+  },
+  tagline: {
+    fontSize: 15,
+    color: COLORS.muted,
+    textAlign: 'center',
+    marginTop: 6,
+  },
+});
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({});
+  const [showSplash, setShowSplash] = useState(true);
 
   useEffect(() => {
     if (error) throw error;
@@ -40,6 +156,10 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  const handleSplashFinish = useCallback(() => {
+    setShowSplash(false);
+  }, []);
 
   if (!loaded) return null;
 
@@ -55,6 +175,7 @@ export default function RootLayout() {
         <Stack.Screen name="identify/result" />
         <Stack.Screen name="cigar/[id]" />
       </Stack>
+      {showSplash && <AnimatedSplash onFinish={handleSplashFinish} />}
     </ThemeProvider>
   );
 }
