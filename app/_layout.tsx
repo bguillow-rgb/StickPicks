@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import Animated, {
@@ -17,6 +17,8 @@ import Animated, {
 } from 'react-native-reanimated';
 import 'react-native-reanimated';
 import { COLORS, FONTS } from '@/src/constants/theme';
+import { supabase } from '@/lib/supabase';
+import { Session } from '@supabase/supabase-js';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -39,6 +41,25 @@ const StickPicksDark = {
   },
 };
 
+function useProtectedRoute(session: Session | null, isLoading: boolean) {
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const inAuthGroup = segments[0] === 'auth';
+
+    if (!session && !inAuthGroup) {
+      // No session — redirect to login
+      router.replace('/auth/login');
+    } else if (session && inAuthGroup) {
+      // Has session but on login page — go to tabs
+      router.replace('/(tabs)');
+    }
+  }, [session, segments, isLoading]);
+}
+
 function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
   const scale = useSharedValue(0.6);
   const opacity = useSharedValue(0);
@@ -46,7 +67,6 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
   const smokeOpacity = useSharedValue(0);
 
   useEffect(() => {
-    // Cigar icon fades in and pulses
     opacity.value = withTiming(1, { duration: 400 });
     scale.value = withSequence(
       withTiming(1.1, { duration: 600, easing: Easing.out(Easing.back(1.5)) }),
@@ -54,7 +74,6 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
       withTiming(1, { duration: 300 }),
     );
 
-    // Smoke wisps
     smokeOpacity.value = withDelay(500, withRepeat(
       withSequence(
         withTiming(0.6, { duration: 800 }),
@@ -64,10 +83,8 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
       true,
     ));
 
-    // Text slides in
     textOpacity.value = withDelay(600, withTiming(1, { duration: 500 }));
 
-    // Fade out and finish
     const timeout = setTimeout(() => {
       opacity.value = withTiming(0, { duration: 400 });
       textOpacity.value = withTiming(0, { duration: 300 }, () => {
@@ -93,10 +110,8 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
 
   return (
     <View style={splashStyles.container}>
-      {/* Gold decorative line */}
       <Animated.View style={[splashStyles.topLine, smokeStyle]} />
 
-      {/* Real cigar photo */}
       <Animated.View style={iconStyle}>
         <Image
           source={{ uri: 'https://images.unsplash.com/photo-1604784449129-be5d342e5af4?w=400&q=80' }}
@@ -176,6 +191,25 @@ const splashStyles = StyleSheet.create({
 export default function RootLayout() {
   const [loaded, error] = useFonts({});
   const [showSplash, setShowSplash] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // Listen for auth state changes
+  useEffect(() => {
+    // Check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    // Subscribe to changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (error) throw error;
@@ -191,6 +225,9 @@ export default function RootLayout() {
     setShowSplash(false);
   }, []);
 
+  // Protect routes based on auth state
+  useProtectedRoute(session, authLoading || showSplash);
+
   if (!loaded) return null;
 
   return (
@@ -198,7 +235,7 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="auth/login" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="auth/login" options={{ presentation: 'modal', gestureEnabled: false }} />
         <Stack.Screen name="quiz/index" />
         <Stack.Screen name="quiz/results" />
         <Stack.Screen name="identify/camera" />
