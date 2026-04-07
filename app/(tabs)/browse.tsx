@@ -40,6 +40,27 @@ export default function BrowseScreen() {
     }
   }, []);
 
+  const fetchByStrength = useCallback(async (label: string, min: number, max: number) => {
+    setLoading(true);
+    setHasSearched(true);
+    setActiveBrand(label);
+    setQuery(label);
+    try {
+      const { data } = await supabase
+        .from('cigars')
+        .select('*')
+        .gte('strength', min)
+        .lte('strength', max)
+        .order('brand')
+        .limit(100);
+      setCigars((data as Cigar[]) ?? []);
+    } catch {
+      setCigars([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const fetchBySearch = useCallback(async (search: string) => {
     if (!search.trim()) {
       setCigars([]);
@@ -147,19 +168,19 @@ export default function BrowseScreen() {
             ))}
           </View>
 
-          <Text style={[styles.sectionLabel, { marginTop: SPACING.xl }]}>BROWSE BY</Text>
+          <Text style={[styles.sectionLabel, { marginTop: SPACING.xl }]}>BROWSE BY STRENGTH</Text>
           <View style={styles.browseOptions}>
-            <Pressable onPress={() => setQuery('Mild')} style={styles.browseCard}>
+            <Pressable onPress={() => fetchByStrength('Mild', 1, 2)} style={styles.browseCard}>
               <Text style={styles.browseCardTitle}>Mild</Text>
-              <Text style={styles.browseCardSub}>Easy-going smokes</Text>
+              <Text style={styles.browseCardSub}>Easy-going</Text>
             </Pressable>
-            <Pressable onPress={() => setQuery('Medium')} style={styles.browseCard}>
+            <Pressable onPress={() => fetchByStrength('Medium', 3, 3)} style={styles.browseCard}>
               <Text style={styles.browseCardTitle}>Medium</Text>
-              <Text style={styles.browseCardSub}>Balanced flavor</Text>
+              <Text style={styles.browseCardSub}>Balanced</Text>
             </Pressable>
-            <Pressable onPress={() => setQuery('Full')} style={styles.browseCard}>
+            <Pressable onPress={() => fetchByStrength('Full', 4, 5)} style={styles.browseCard}>
               <Text style={styles.browseCardTitle}>Full</Text>
-              <Text style={styles.browseCardSub}>Bold & complex</Text>
+              <Text style={styles.browseCardSub}>Bold</Text>
             </Pressable>
           </View>
         </ScrollView>
