@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { EmptyState } from '@/src/components/ui/EmptyState';
@@ -25,6 +25,7 @@ export default function JournalScreen() {
   const insets = useSafeAreaInsets();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const listRef = useRef<FlatList>(null);
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
@@ -51,6 +52,7 @@ export default function JournalScreen() {
       <Text style={styles.title}>Smoking Journal</Text>
 
       <FlatList
+        ref={listRef}
         data={entries}
         keyExtractor={(e) => e.id}
         style={{ flex: 1 }}
@@ -58,6 +60,7 @@ export default function JournalScreen() {
         indicatorStyle="white"
         bounces={true}
         alwaysBounceVertical={true}
+        onContentSizeChange={() => listRef.current?.flashScrollIndicators()}
         contentContainerStyle={{ paddingBottom: insets.bottom + 80, flexGrow: 1 }}
         ListEmptyComponent={
           <EmptyState

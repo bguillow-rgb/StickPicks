@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
@@ -25,6 +25,7 @@ export default function HumidorScreen() {
   const [filter, setFilter] = useState<Filter>('all');
   const [items, setItems] = useState<HumidorItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const listRef = useRef<FlatList>(null);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -70,6 +71,7 @@ export default function HumidorScreen() {
       </View>
 
       <FlatList
+        ref={listRef}
         data={filtered}
         keyExtractor={(item) => item.id}
         style={{ flex: 1 }}
@@ -77,6 +79,7 @@ export default function HumidorScreen() {
         indicatorStyle="white"
         bounces={true}
         alwaysBounceVertical={true}
+        onContentSizeChange={() => listRef.current?.flashScrollIndicators()}
         contentContainerStyle={{ paddingBottom: insets.bottom + 80, flexGrow: 1 }}
         ListEmptyComponent={
           <EmptyState

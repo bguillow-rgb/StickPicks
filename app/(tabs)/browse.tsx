@@ -1,29 +1,44 @@
-import { View, Text, TextInput, StyleSheet, FlatList, ActivityIndicator, Image } from 'react-native';
+import { View, Text, TextInput, StyleSheet, FlatList, ActivityIndicator, Image, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
-import { EmptyState } from '@/src/components/ui/EmptyState';
-import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
+import { COLORS, SPACING, RADIUS, FONTS } from '@/src/constants/theme';
 import type { Cigar } from '@/src/types/cigar';
+
+const POPULAR_BRANDS = [
+  'Padron', 'Arturo Fuente', 'Oliva', 'My Father', 'Liga Privada',
+  'Davidoff', 'Rocky Patel', 'Ashton', 'Perdomo', 'Tatuaje',
+  'Montecristo', 'Macanudo', 'CAO', 'Drew Estate', 'AJ Fernandez',
+];
 
 export default function BrowseScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [query, setQuery] = useState('');
   const [cigars, setCigars] = useState<Cigar[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [hasSearched, setHasSearched] = useState(false);
+  const listRef = useRef<FlatList>(null);
 
   const fetchCigars = useCallback(async (search: string) => {
+    if (!search.trim()) {
+      setCigars([]);
+      setHasSearched(false);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
+    setHasSearched(true);
     try {
-      let q = supabase.from('cigars').select('*').order('brand').limit(100);
-      if (search.trim()) {
-        q = q.or(`brand.ilike.%${search}%,name.ilike.%${search}%`);
-      }
-      const { data } = await q;
+      const { data } = await supabase
+        .from('cigars')
+        .select('*')
+        .or(`brand.ilike.%${search}%,name.ilike.%${search}%`)
+        .order('brand')
+        .limit(100);
       setCigars((data as Cigar[]) ?? []);
     } catch {
       setCigars([]);
@@ -36,6 +51,10 @@ export default function BrowseScreen() {
     const timer = setTimeout(() => fetchCigars(query), 300);
     return () => clearTimeout(timer);
   }, [query, fetchCigars]);
+
+  const handleBrandTap = (brand: string) => {
+    setQuery(brand);
+  };
 
   const renderCigar = useCallback(({ item }: { item: Cigar }) => (
     <Card style={styles.cigarCard} onPress={() => router.push(`/cigar/${item.id}`)}>
@@ -65,17 +84,57 @@ export default function BrowseScreen() {
       <Text style={styles.title}>Browse Cigars</Text>
       <TextInput
         style={styles.search}
-        placeholder="Search by brand or name..."
+        placeholder="Search 538 cigars by brand or name..."
         placeholderTextColor={COLORS.subtle}
         value={query}
         onChangeText={setQuery}
         autoCorrect={false}
         returnKeyType="search"
       />
-      {loading ? (
+
+      {!hasSearched && !loading ? (
+        /* Default state — no search yet */
+        <ScrollView
+          style={{ flex: 1 }}
+          showsVerticalScrollIndicator={true}
+          indicatorStyle="white"
+          bounces={true}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
+        >
+          <Text style={styles.sectionLabel}>POPULAR BRANDS</Text>
+          <View style={styles.brandGrid}>
+            {POPULAR_BRANDS.map((brand) => (
+              <Pressable
+                key={brand}
+                onPress={() => handleBrandTap(brand)}
+                style={({ pressed }) => [styles.brandChip, pressed && styles.brandChipPressed]}
+              >
+                <Text style={styles.brandChipText}>{brand}</Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <Text style={[styles.sectionLabel, { marginTop: SPACING.xl }]}>BROWSE BY</Text>
+          <View style={styles.browseOptions}>
+            <Pressable onPress={() => setQuery('Mild')} style={styles.browseCard}>
+              <Text style={styles.browseCardTitle}>Mild</Text>
+              <Text style={styles.browseCardSub}>Easy-going smokes</Text>
+            </Pressable>
+            <Pressable onPress={() => setQuery('Medium')} style={styles.browseCard}>
+              <Text style={styles.browseCardTitle}>Medium</Text>
+              <Text style={styles.browseCardSub}>Balanced flavor</Text>
+            </Pressable>
+            <Pressable onPress={() => setQuery('Full')} style={styles.browseCard}>
+              <Text style={styles.browseCardTitle}>Full</Text>
+              <Text style={styles.browseCardSub}>Bold & complex</Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      ) : loading ? (
         <ActivityIndicator color={COLORS.accent} style={{ marginTop: SPACING.xl }} />
       ) : (
         <FlatList
+          ref={listRef}
           data={cigars}
           keyExtractor={(c) => c.id}
           renderItem={renderCigar}
@@ -86,14 +145,23 @@ export default function BrowseScreen() {
           bounces={true}
           alwaysBounceVertical={true}
           keyboardDismissMode="on-drag"
+          onContentSizeChange={() => listRef.current?.flashScrollIndicators()}
           ListEmptyComponent={
-            <EmptyState
-              title="No cigars found"
-              subtitle={query ? 'Try a different search term' : 'Cigars will appear here once data is seeded'}
-            />
+            <View style={styles.noResults}>
+              <Text style={styles.noResultsTitle}>No cigars found</Text>
+              <Text style={styles.noResultsSub}>Try a different search term</Text>
+              <Pressable onPress={() => setQuery('')} style={styles.clearBtn}>
+                <Text style={styles.clearBtnText}>Clear Search</Text>
+              </Pressable>
+            </View>
           }
           ListHeaderComponent={
-            <Text style={styles.resultCount}>{cigars.length} cigars</Text>
+            <View style={styles.resultHeader}>
+              <Text style={styles.resultCount}>{cigars.length} result{cigars.length !== 1 ? 's' : ''}</Text>
+              <Pressable onPress={() => setQuery('')} hitSlop={12}>
+                <Text style={styles.clearLink}>Clear</Text>
+              </Pressable>
+            </View>
           }
         />
       )}
@@ -122,6 +190,68 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: COLORS.text,
+    marginBottom: SPACING.md,
+  },
+
+  // Default state
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: COLORS.subtle,
+    letterSpacing: 2,
+    marginBottom: SPACING.sm,
+  },
+  brandGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  brandChip: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.card,
+  },
+  brandChipPressed: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+  brandChipText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  browseOptions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+  },
+  browseCard: {
+    flex: 1,
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: SPACING.md,
+    alignItems: 'center',
+  },
+  browseCardTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: COLORS.accent,
+  },
+  browseCardSub: {
+    fontSize: 11,
+    color: COLORS.muted,
+    marginTop: 4,
+  },
+
+  // Results
+  resultHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: SPACING.sm,
   },
   resultCount: {
@@ -130,7 +260,11 @@ const styles = StyleSheet.create({
     color: COLORS.subtle,
     letterSpacing: 1,
     textTransform: 'uppercase',
-    marginBottom: SPACING.sm,
+  },
+  clearLink: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.accent,
   },
   list: {
     flex: 1,
@@ -177,5 +311,34 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 4,
+  },
+
+  // No results
+  noResults: {
+    alignItems: 'center',
+    paddingTop: SPACING.xxl,
+  },
+  noResultsTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  noResultsSub: {
+    fontSize: 14,
+    color: COLORS.muted,
+    marginTop: SPACING.xs,
+  },
+  clearBtn: {
+    marginTop: SPACING.md,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+  },
+  clearBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.accent,
   },
 });
