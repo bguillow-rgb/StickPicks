@@ -96,12 +96,20 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
       {/* Gold decorative line */}
       <Animated.View style={[splashStyles.topLine, smokeStyle]} />
 
+      {/* Cigar icon — built from shapes */}
       <Animated.View style={iconStyle}>
-        <Text style={splashStyles.icon}>🚬</Text>
-      </Animated.View>
-
-      <Animated.View style={[splashStyles.smokeContainer, smokeStyle]}>
-        <Text style={splashStyles.smoke}>〰️ 〰️ 〰️</Text>
+        <View style={splashStyles.cigarWrap}>
+          {/* Smoke wisps above cigar */}
+          <Animated.View style={[splashStyles.smokeWisps, smokeStyle]}>
+            <Text style={splashStyles.smokeText}>⠀~⠀~⠀~</Text>
+          </Animated.View>
+          {/* Cigar body */}
+          <View style={splashStyles.cigarBody}>
+            <View style={splashStyles.cigarTip} />
+            <View style={splashStyles.cigarBand} />
+            <View style={splashStyles.cigarFoot} />
+          </View>
+        </View>
       </Animated.View>
 
       <Animated.View style={textStyle}>
@@ -131,18 +139,43 @@ const splashStyles = StyleSheet.create({
     backgroundColor: COLORS.accent,
     borderRadius: 1,
   },
-  smokeContainer: {
-    marginTop: 8,
-    marginBottom: 16,
+  cigarWrap: {
+    alignItems: 'center',
+    marginBottom: 24,
   },
-  smoke: {
-    fontSize: 20,
+  smokeWisps: {
+    marginBottom: 6,
+  },
+  smokeText: {
+    fontSize: 18,
     color: COLORS.subtle,
-    letterSpacing: 6,
+    letterSpacing: 4,
   },
-  icon: {
-    fontSize: 72,
-    marginBottom: 4,
+  cigarBody: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 18,
+  },
+  cigarTip: {
+    width: 12,
+    height: 18,
+    backgroundColor: '#8B4513',
+    borderTopLeftRadius: 9,
+    borderBottomLeftRadius: 9,
+  },
+  cigarBand: {
+    width: 20,
+    height: 18,
+    backgroundColor: COLORS.accent,
+    borderWidth: 1,
+    borderColor: '#B8941E',
+  },
+  cigarFoot: {
+    width: 100,
+    height: 18,
+    backgroundColor: '#6B3A2A',
+    borderTopRightRadius: 4,
+    borderBottomRightRadius: 4,
   },
   brand: {
     fontFamily: FONTS.display,

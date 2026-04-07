@@ -5,9 +5,10 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONTS, RADIUS } from '@/src/constants/theme';
 
-// Using high-quality Unsplash cigar images
-const CIGARS_GROUP_IMG = 'https://images.unsplash.com/photo-1589461475640-d06e4290ba8d?w=800&q=80';
-const SINGLE_CIGAR_IMG = 'https://images.unsplash.com/photo-1570303345338-e1f0eddf4946?w=800&q=80';
+// Group of cigars in humidor — "Find Your Stick"
+const CIGARS_GROUP_IMG = 'https://images.unsplash.com/photo-1694716438178-c6f34bddd64d?w=800&q=80';
+// Single cigar with band on wood — "Scan a Stick"
+const SINGLE_CIGAR_IMG = 'https://images.unsplash.com/photo-1537752609-53bd413e0aa0?w=800&q=80';
 
 export default function HomeScreen() {
   const router = useRouter();
