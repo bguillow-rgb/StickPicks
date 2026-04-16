@@ -1,9 +1,13 @@
-import { View, Text, StyleSheet, ImageBackground, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ImageBackground, Pressable, Image, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONTS, RADIUS } from '@/src/constants/theme';
+import { useCigarCount } from '@/src/hooks/useCigarCount';
+import { useProStore } from '@/src/stores/useProStore';
+import { useUserAvatar } from '@/src/hooks/useUserAvatar';
+import { useScanCount } from '@/src/hooks/useScanCount';
 
 // Group of cigars in humidor — "Find Your Stick"
 const CIGARS_GROUP_IMG = 'https://images.unsplash.com/photo-1694716438178-c6f34bddd64d?w=800&q=80';
@@ -13,6 +17,37 @@ const SINGLE_CIGAR_IMG = 'https://images.unsplash.com/photo-1537752609-53bd413e0
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const cigarCount = useCigarCount();
+  const isPro = useProStore((s) => s.isPro);
+  const hasHydrated = useProStore((s) => s.hasHydrated);
+  // Treat as Pro until hydration completes — avoids Pro users seeing "· Pro" / scan-limit
+  // copy flash on every cold start while AsyncStorage rehydrates.
+  const treatAsPro = !hasHydrated || isPro;
+  const avatarUrl = useUserAvatar();
+  const { remaining, limitReached } = useScanCount();
+
+  function handleScan() {
+    if (!treatAsPro && limitReached) {
+      Alert.alert(
+        'Scan Limit Reached',
+        'Free accounts include 5 scans. Upgrade to Pro for unlimited scanning.',
+        [
+          { text: 'Not Now', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => router.push('/paywall') },
+        ]
+      );
+      return;
+    }
+    router.push('/identify/camera');
+  }
+
+  function handleAdvancedQuiz() {
+    if (treatAsPro) {
+      router.push('/quiz?mode=advanced');
+    } else {
+      router.push('/paywall');
+    }
+  }
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + SPACING.sm }]}>
@@ -23,9 +58,13 @@ export default function HomeScreen() {
           <View style={styles.brandRule} />
         </View>
         <Pressable onPress={() => router.push('/(tabs)/profile')} hitSlop={12}>
-          <View style={styles.avatarCircle}>
-            <Ionicons name="person-outline" size={18} color={COLORS.accent} />
-          </View>
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={styles.avatarImage} />
+          ) : (
+            <View style={styles.avatarCircle}>
+              <Ionicons name="person-outline" size={18} color={COLORS.accent} />
+            </View>
+          )}
         </Pressable>
       </View>
 
@@ -33,7 +72,7 @@ export default function HomeScreen() {
 
       {/* CTA Cards */}
       <View style={styles.cards}>
-        {/* Find Your Stick */}
+        {/* Quick Quiz (Free) */}
         <Pressable
           onPress={() => router.push('/quiz')}
           style={({ pressed }) => [styles.ctaCard, pressed && styles.pressed]}
@@ -50,19 +89,32 @@ export default function HomeScreen() {
             >
               <View style={styles.ctaLabelRow}>
                 <View style={styles.ctaDot} />
-                <Text style={styles.ctaLabel}>RECOMMENDATION</Text>
+                <Text style={styles.ctaLabel}>QUICK MATCH</Text>
               </View>
               <Text style={styles.ctaTitle}>Find Your Stick</Text>
               <Text style={styles.ctaSubtitle}>
-                Take the quiz — we'll match your palate to the perfect cigar
+                3 questions — we'll match your palate to the perfect cigar
               </Text>
             </LinearGradient>
           </ImageBackground>
         </Pressable>
 
+        {/* Advanced Quiz (Pro) */}
+        <Pressable
+          onPress={handleAdvancedQuiz}
+          style={({ pressed }) => [styles.ctaCardSmall, pressed && styles.pressed]}
+        >
+          <Ionicons name="flask-outline" size={20} color={COLORS.accent} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.ctaSmallTitle}>Advanced Quiz{!treatAsPro ? ' · Pro' : ''}</Text>
+            <Text style={styles.ctaSmallSub}>9 questions for precision picks</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={16} color={COLORS.muted} />
+        </Pressable>
+
         {/* Scan a Stick */}
         <Pressable
-          onPress={() => router.push('/identify/camera')}
+          onPress={handleScan}
           style={({ pressed }) => [styles.ctaCard, pressed && styles.pressed]}
         >
           <ImageBackground
@@ -81,7 +133,9 @@ export default function HomeScreen() {
               </View>
               <Text style={styles.ctaTitle}>Scan a Stick</Text>
               <Text style={styles.ctaSubtitle}>
-                Point your camera at any cigar band — we'll tell you everything
+                {!treatAsPro && remaining !== null
+                  ? `${remaining} free scan${remaining !== 1 ? 's' : ''} remaining`
+                  : 'Point your camera at any cigar band — we\'ll tell you everything'}
               </Text>
             </LinearGradient>
           </ImageBackground>
@@ -89,7 +143,7 @@ export default function HomeScreen() {
       </View>
 
       {/* Bottom tagline */}
-      <Text style={styles.footer}>538 cigars in the library</Text>
+      <Text style={styles.footer}>{cigarCount !== null ? `${cigarCount} cigars in the library` : ''}</Text>
     </View>
   );
 }
@@ -119,6 +173,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.accent,
     marginTop: 4,
     borderRadius: 1,
+  },
+  avatarImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: COLORS.accent,
   },
   avatarCircle: {
     width: 40,
@@ -177,6 +238,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.accent,
   },
   ctaLabel: {
+    fontFamily: 'Cormorant',
     fontSize: 10,
     fontWeight: '700',
     color: COLORS.accent,
@@ -190,11 +252,35 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   ctaSubtitle: {
+    fontFamily: 'Cormorant',
     fontSize: 13,
     color: COLORS.muted,
     lineHeight: 18,
   },
+  ctaCardSmall: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: SPACING.md,
+  },
+  ctaSmallTitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 15,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  ctaSmallSub: {
+    fontFamily: 'Cormorant',
+    fontSize: 12,
+    color: COLORS.muted,
+    marginTop: 2,
+  },
   footer: {
+    fontFamily: 'Cormorant',
     textAlign: 'center',
     fontSize: 11,
     fontWeight: '600',

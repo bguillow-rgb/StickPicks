@@ -17,8 +17,19 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.bobguillow.stickpicks",
+      "appleTeamId": "ZNS5TNLB2D",
       "infoPlist": {
-        "NSCameraUsageDescription": "Stick Picks uses your camera to identify cigars by scanning the band or wrapper."
+        "NSCameraUsageDescription": "Stick Picks uses your camera to identify cigars by scanning the band or wrapper.",
+        "NSPhotoLibraryUsageDescription": "Stick Picks needs access to your photo library so you can attach photos to journal entries and your profile.",
+        "NSPhotoLibraryAddUsageDescription": "Stick Picks saves cigar scan photos to your library when you choose to keep them.",
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.172292646973-3l3utmm05gcj2nemr9d9r3elf7fr78o7"
+            ]
+          }
+        ],
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
@@ -27,7 +38,10 @@
         "backgroundColor": "#0A1A0F"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.bobguillow.stickpicks"
+      "package": "com.bobguillow.stickpicks",
+      "permissions": [
+        "android.permission.CAMERA"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -39,15 +53,33 @@
       "expo-camera",
       "expo-image-picker",
       "expo-secure-store",
+      "expo-apple-authentication",
       [
         "expo-font",
         {
-          "fonts": []
+          "fonts": [
+            "./assets/fonts/Cormorant-Variable.ttf",
+            "./assets/fonts/Cormorant-Italic-Variable.ttf"
+          ]
         }
-      ]
+      ],
+      "@react-native-google-signin/google-signin",
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "d8ae80f6-93e7-49ee-9299-dc87fabf76f7"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d8ae80f6-93e7-49ee-9299-dc87fabf76f7"
     }
   }
 }

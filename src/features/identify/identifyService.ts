@@ -1,37 +1,50 @@
-import { File, Paths } from 'expo-file-system/next';
+import { File } from 'expo-file-system/next';
 import { supabase } from '@/lib/supabase';
 import type { Cigar } from '@/src/types/cigar';
 
-const ANTHROPIC_API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY;
-
 interface IdentifyResult {
   cigar: Cigar | null;
+  scanId: string | null; // scan_images row ID for corrections
+  displayName: string; // name with vitola stripped if vitola is uncertain
+  displayVitola: string | null; // separate vitola to show, or null if uncertain
+  vitolaConfident: boolean;
   confidence: number;
   reasoning: string;
   rawResponse: Record<string, unknown>;
 }
 
-const IDENTIFY_PROMPT = `You are a cigar identification expert. Analyze this image and identify the cigar.
+// Known vitola words we strip from DB names when vitola is not confident
+const VITOLA_WORDS = [
+  'Robusto', 'Toro', 'Torpedo', 'Churchill', 'Corona', 'Lonsdale', 'Lancero',
+  'Panetela', 'Perfecto', 'Belicoso', 'Figurado', 'Gigante', 'Double Corona',
+  'Gordo', 'Petit Corona', 'Presidente', 'Pyramid', 'Rothschild', 'Salomon',
+];
 
-Look at the cigar band, wrapper color, size, and any visible text or logos.
-
-Respond ONLY with valid JSON in this exact format:
-{
-  "brand": "the brand name",
-  "name": "the specific cigar line/name",
-  "vitola": "the size/shape if identifiable",
-  "confidence": 0.85,
-  "reasoning": "Brief explanation of how you identified it"
+function stripVitolaFromName(name: string, vitola?: string | null): string {
+  let result = name;
+  // Strip the specific vitola first if present
+  if (vitola) {
+    const re = new RegExp(`\\s*\\b${vitola}\\b\\s*$`, 'i');
+    result = result.replace(re, '');
+  }
+  // Strip any trailing generic vitola word
+  for (const word of VITOLA_WORDS) {
+    const re = new RegExp(`\\s+${word}$`, 'i');
+    result = result.replace(re, '');
+  }
+  return result.trim();
 }
 
-If you cannot identify the cigar, respond with:
-{
-  "brand": null,
-  "name": null,
-  "vitola": null,
-  "confidence": 0,
-  "reasoning": "Explanation of why identification failed"
-}`;
+function isConfidentVitola(v: unknown): v is string {
+  if (typeof v !== 'string') return false;
+  const t = v.trim().toLowerCase();
+  if (!t) return false;
+  if (t === 'null' || t === 'unknown') return false;
+  if (t.startsWith('cannot') || t.startsWith('unable') || t.startsWith('not ')) return false;
+  if (t.includes(' or ')) return false; // "Robusto or Toro" = uncertain
+  if (t.includes('?')) return false;
+  return true;
+}
 
 async function readFileAsBase64(uri: string): Promise<string> {
   try {
@@ -54,58 +67,46 @@ async function readFileAsBase64(uri: string): Promise<string> {
   }
 }
 
-export async function identifyCigar(imageUri: string): Promise<IdentifyResult> {
-  if (!ANTHROPIC_API_KEY) {
-    throw new Error('Anthropic API key not configured. Set EXPO_PUBLIC_ANTHROPIC_API_KEY in .env.local');
+function mediaTypeFor(uri: string): string {
+  const ext = uri.split('.').pop()?.toLowerCase();
+  return ext === 'png' ? 'image/png' : 'image/jpeg';
+}
+
+export async function identifyCigar(imageUriOrUris: string | string[]): Promise<IdentifyResult> {
+  // Normalize to array — supports both single-photo (legacy) and multi-frame burst
+  const uris = Array.isArray(imageUriOrUris) ? imageUriOrUris : [imageUriOrUris];
+  if (uris.length === 0) throw new Error('No image provided');
+  const primaryUri = uris[0];
+
+  // Read each image as base64
+  const images = await Promise.all(
+    uris.map(async (u) => ({
+      base64: await readFileAsBase64(u),
+      mediaType: mediaTypeFor(u),
+    })),
+  );
+
+  // Call our Supabase Edge Function — keeps Anthropic key server-side.
+  // supabase.functions.invoke automatically attaches the user's JWT.
+  const { data: apiResult, error: invokeError } = await supabase.functions.invoke(
+    'identify-cigar',
+    { body: { images } },
+  );
+
+  if (invokeError) {
+    // Map function errors to user-friendly copy. Never leak raw transport details.
+    const status = (invokeError as any).context?.status;
+    if (status === 401) {
+      throw new Error('Please sign in again and try scanning.');
+    }
+    throw new Error('Cigar scanning is temporarily unavailable. Please try again later.');
   }
 
-  // Read image as base64
-  const base64 = await readFileAsBase64(imageUri);
-
-  // Determine media type
-  const ext = imageUri.split('.').pop()?.toLowerCase();
-  const mediaType = ext === 'png' ? 'image/png' : 'image/jpeg';
-
-  // Call Claude Vision API
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
-      messages: [
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'image',
-              source: {
-                type: 'base64',
-                media_type: mediaType,
-                data: base64,
-              },
-            },
-            {
-              type: 'text',
-              text: IDENTIFY_PROMPT,
-            },
-          ],
-        },
-      ],
-    }),
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API request failed: ${response.status} - ${errorText}`);
+  if (!apiResult || (apiResult as any).error) {
+    throw new Error((apiResult as any)?.error ?? 'Cigar scanning is temporarily unavailable.');
   }
 
-  const apiResult = await response.json();
-  const textContent = apiResult.content?.find((c: any) => c.type === 'text')?.text ?? '{}';
+  const textContent = (apiResult as any).content?.find((c: any) => c.type === 'text')?.text ?? '{}';
 
   let parsed: any;
   try {
@@ -115,20 +116,38 @@ export async function identifyCigar(imageUri: string): Promise<IdentifyResult> {
     parsed = { brand: null, name: null, confidence: 0, reasoning: 'Failed to parse response' };
   }
 
-  // Try to match against our database
+  // Back-compat: older responses used "name" instead of "line"
+  const parsedLine: string | null = parsed.line ?? parsed.name ?? null;
+  const claudeVitola: string | null = isConfidentVitola(parsed.vitola) ? parsed.vitola : null;
+  const vitolaConfident = claudeVitola !== null;
+
+  // Try to match against our database using the `line` column
   let matchedCigar: Cigar | null = null;
 
-  if (parsed.brand && parsed.name) {
+  if (parsed.brand && parsedLine) {
+    // Fetch ALL rows that match brand + line, so we can pick the right vitola.
+    // Query `line` (canonical) — falls back transparently to pre-migration `name` when `line` = `name`.
     const { data } = await supabase
       .from('cigars')
       .select('*')
       .ilike('brand', `%${parsed.brand}%`)
-      .ilike('name', `%${parsed.name}%`)
-      .limit(1);
+      .ilike('line', `%${parsedLine}%`)
+      .limit(20);
 
     if (data && data.length > 0) {
-      matchedCigar = data[0] as Cigar;
+      if (vitolaConfident && claudeVitola) {
+        // Prefer the SKU whose vitola matches Claude's confident guess
+        const vitolaMatch = data.find(
+          (c: any) => c.vitola && c.vitola.toLowerCase() === claudeVitola.toLowerCase()
+        );
+        matchedCigar = (vitolaMatch ?? data[0]) as Cigar;
+      } else {
+        // Claude couldn't determine size — just grab the first SKU of this line.
+        // UI will show line name + "size unclear" so user isn't misled.
+        matchedCigar = data[0] as Cigar;
+      }
     } else {
+      // Fallback: brand-only, grab any record for the brand
       const { data: brandData } = await supabase
         .from('cigars')
         .select('*')
@@ -141,39 +160,61 @@ export async function identifyCigar(imageUri: string): Promise<IdentifyResult> {
     }
   }
 
-  // Save scan to database for training
+  // Compute display fields using the new `line` column (preferred) with name fallback
+  let displayName = parsedLine ?? 'Unknown';
+  let displayVitola: string | null = null;
+
+  if (matchedCigar) {
+    // Prefer the canonical line column; fall back to stripped name for any unmigrated rows
+    displayName = matchedCigar.line ?? stripVitolaFromName(matchedCigar.name, matchedCigar.vitola);
+    if (vitolaConfident) {
+      displayVitola = matchedCigar.vitola ?? claudeVitola;
+    } else {
+      displayVitola = null;
+    }
+  }
+
+  // Save scan to database for training (use primary frame as the canonical image)
+  let scanId: string | null = null;
   try {
     const { data: { user } } = await supabase.auth.getUser();
+    const primaryMediaType = mediaTypeFor(primaryUri);
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
     const filePath = user ? `${user.id}/${fileName}` : `anonymous/${fileName}`;
 
-    const imageResponse = await fetch(imageUri);
+    const imageResponse = await fetch(primaryUri);
     const imageBlob = await imageResponse.blob();
 
     await supabase.storage
       .from('scan-uploads')
-      .upload(filePath, imageBlob, { contentType: mediaType });
+      .upload(filePath, imageBlob, { contentType: primaryMediaType });
 
     const { data: urlData } = supabase.storage
       .from('scan-uploads')
       .getPublicUrl(filePath);
 
-    await supabase.from('scan_images').insert({
+    const { data: scanRow } = await supabase.from('scan_images').insert({
       user_id: user?.id ?? null,
       image_url: urlData.publicUrl,
       identified_cigar_id: matchedCigar?.id ?? null,
       confidence: parsed.confidence ?? null,
       user_confirmed: false,
-      raw_llm_response: apiResult,
-    });
+      raw_llm_response: { ...(apiResult as Record<string, unknown>), frame_count: uris.length },
+    }).select('id').single();
+
+    scanId = scanRow?.id ?? null;
   } catch {
     console.warn('Failed to save scan data');
   }
 
   return {
     cigar: matchedCigar,
+    scanId,
+    displayName,
+    displayVitola,
+    vitolaConfident,
     confidence: parsed.confidence ?? 0,
     reasoning: parsed.reasoning ?? '',
-    rawResponse: apiResult,
+    rawResponse: apiResult as Record<string, unknown>,
   };
 }

@@ -1,6 +1,6 @@
 import { Pressable, Text, StyleSheet, ActivityIndicator, ViewStyle, TextStyle } from 'react-native';
 import * as Haptics from 'expo-haptics';
-import { COLORS, RADIUS } from '@/src/constants/theme';
+import { COLORS, FONTS, RADIUS } from '@/src/constants/theme';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 
@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.98 }],
   },
   text: {
+    fontFamily: FONTS.body,
     fontSize: 16,
     fontWeight: '700',
   },

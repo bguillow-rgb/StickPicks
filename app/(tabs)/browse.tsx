@@ -5,7 +5,12 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
+import { CommunityRating } from '@/src/components/cigar/CommunityRating';
+import { useCommunityRatings } from '@/src/hooks/useCommunityRating';
+import { useHumidorStatuses } from '@/src/hooks/useHumidorStatuses';
+import { StatusChips } from '@/src/components/ui/StatusChip';
 import { COLORS, SPACING, RADIUS, FONTS } from '@/src/constants/theme';
+import { useCigarCount } from '@/src/hooks/useCigarCount';
 import type { Cigar } from '@/src/types/cigar';
 
 const POPULAR_BRANDS = [
@@ -21,6 +26,9 @@ export default function BrowseScreen() {
   const [hasSearched, setHasSearched] = useState(false);
   const [activeBrand, setActiveBrand] = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
+  const cigarCount = useCigarCount();
+  const ratingsMap = useCommunityRatings(cigars.map((c) => c.id));
+  const humidorMap = useHumidorStatuses(cigars.map((c) => c.id));
 
   const fetchByBrand = useCallback(async (brand: string) => {
     setLoading(true);
@@ -110,35 +118,43 @@ export default function BrowseScreen() {
     setActiveBrand(null); // Switch back to text search mode
   };
 
-  const renderCigar = useCallback(({ item }: { item: Cigar }) => (
-    <Card style={styles.cigarCard} onPress={() => router.push(`/cigar/${item.id}`)}>
-      <View style={styles.cardRow}>
-        {item.image_url ? (
-          <Image source={{ uri: item.image_url }} style={styles.thumb} resizeMode="cover" />
-        ) : (
-          <View style={[styles.thumb, styles.thumbPlaceholder]}>
-            <Text style={styles.thumbText}>{item.brand.charAt(0)}</Text>
-          </View>
-        )}
-        <View style={styles.cardContent}>
-          <Text style={styles.cigarName} numberOfLines={1}>{item.name}</Text>
-          <Text style={styles.cigarBrand}>{item.brand}</Text>
-          <View style={styles.flavors}>
-            {item.flavors.slice(0, 3).map((f) => (
-              <Badge key={f} label={f} />
-            ))}
+  const renderCigar = useCallback(({ item }: { item: Cigar }) => {
+    const rating = ratingsMap.get(item.id);
+    const statuses = humidorMap.get(item.id);
+    return (
+      <Card style={styles.cigarCard} onPress={() => router.push(`/(tabs)/cigar/${item.id}`)}>
+        <View style={styles.cardRow}>
+          {item.image_url ? (
+            <Image source={{ uri: item.image_url }} style={styles.thumb} resizeMode="cover" />
+          ) : (
+            <View style={[styles.thumb, styles.thumbPlaceholder]}>
+              <Text style={styles.thumbText}>{item.brand.charAt(0)}</Text>
+            </View>
+          )}
+          <View style={styles.cardContent}>
+            <Text style={styles.cigarName} numberOfLines={1}>{item.line ?? item.name}</Text>
+            <Text style={styles.cigarBrand}>{item.brand}</Text>
+            <View style={styles.flavors}>
+              {item.flavors.slice(0, 3).map((f) => (
+                <Badge key={f} label={f} />
+              ))}
+            </View>
+            <StatusChips statuses={statuses ?? []} />
+            {rating && rating.count > 0 && (
+              <CommunityRating average={rating.average} count={rating.count} variant="compact" />
+            )}
           </View>
         </View>
-      </View>
-    </Card>
-  ), [router]);
+      </Card>
+    );
+  }, [router, ratingsMap, humidorMap]);
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + SPACING.sm }]}>
       <Text style={styles.title}>Browse Cigars</Text>
       <TextInput
         style={styles.search}
-        placeholder="Search 538 cigars by brand or name..."
+        placeholder={cigarCount ? `Search ${cigarCount} cigars by brand or name...` : 'Search cigars by brand or name...'}
         placeholderTextColor={COLORS.subtle}
         value={query}
         onChangeText={handleQueryChange}
@@ -192,6 +208,7 @@ export default function BrowseScreen() {
           data={cigars}
           keyExtractor={(c) => c.id}
           renderItem={renderCigar}
+          extraData={[ratingsMap, humidorMap]}
           style={styles.list}
           contentContainerStyle={{ paddingBottom: insets.bottom + 100, flexGrow: 1 }}
           showsVerticalScrollIndicator={true}
@@ -230,12 +247,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
   },
   title: {
+    fontFamily: 'Cormorant',
     fontSize: 22,
     fontWeight: '800',
     color: COLORS.text,
     marginBottom: SPACING.sm,
   },
   search: {
+    fontFamily: 'Cormorant',
     backgroundColor: COLORS.card,
     borderRadius: RADIUS.md,
     borderWidth: 1,
@@ -249,6 +268,7 @@ const styles = StyleSheet.create({
 
   // Default state
   sectionLabel: {
+    fontFamily: 'Cormorant',
     fontSize: 11,
     fontWeight: '700',
     color: COLORS.subtle,
@@ -273,6 +293,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.accent,
   },
   brandChipText: {
+    fontFamily: 'Cormorant',
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.text,
@@ -291,11 +312,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   browseCardTitle: {
+    fontFamily: 'Cormorant',
     fontSize: 16,
     fontWeight: '800',
     color: COLORS.accent,
   },
   browseCardSub: {
+    fontFamily: 'Cormorant',
     fontSize: 11,
     color: COLORS.muted,
     marginTop: 4,
@@ -309,6 +332,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   resultCount: {
+    fontFamily: 'Cormorant',
     fontSize: 12,
     fontWeight: '600',
     color: COLORS.subtle,
@@ -316,6 +340,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   clearLink: {
+    fontFamily: 'Cormorant',
     fontSize: 13,
     fontWeight: '700',
     color: COLORS.accent,
@@ -343,6 +368,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.border,
   },
   thumbText: {
+    fontFamily: 'Cormorant',
     fontSize: 20,
     fontWeight: '800',
     color: COLORS.accent,
@@ -351,11 +377,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   cigarName: {
+    fontFamily: 'Cormorant',
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.text,
   },
   cigarBrand: {
+    fontFamily: 'Cormorant',
     fontSize: 13,
     color: COLORS.muted,
     marginTop: 2,
@@ -373,11 +401,13 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.xxl,
   },
   noResultsTitle: {
+    fontFamily: 'Cormorant',
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.text,
   },
   noResultsSub: {
+    fontFamily: 'Cormorant',
     fontSize: 14,
     color: COLORS.muted,
     marginTop: SPACING.xs,
@@ -391,6 +421,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.accent,
   },
   clearBtnText: {
+    fontFamily: 'Cormorant',
     fontSize: 14,
     fontWeight: '700',
     color: COLORS.accent,

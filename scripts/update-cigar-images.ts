@@ -48,16 +48,25 @@ function getImageForCigar(index: number, strength: number): string {
 }
 
 async function main() {
-  // Fetch all cigars that don't have images
-  const { data: cigars, error } = await supabase
-    .from('cigars')
-    .select('id, brand, name, strength')
-    .is('image_url', null)
-    .order('brand');
-
-  if (error) {
-    console.error('Failed to fetch cigars:', error.message);
-    process.exit(1);
+  // Fetch all cigars that don't have images (paginated)
+  const cigars: { id: string; brand: string; name: string; strength: number }[] = [];
+  let from = 0;
+  const PAGE = 1000;
+  while (true) {
+    const { data, error } = await supabase
+      .from('cigars')
+      .select('id, brand, name, strength')
+      .is('image_url', null)
+      .order('brand')
+      .range(from, from + PAGE - 1);
+    if (error) {
+      console.error('Failed to fetch cigars:', error.message);
+      process.exit(1);
+    }
+    if (!data || data.length === 0) break;
+    cigars.push(...data);
+    from += PAGE;
+    if (data.length < PAGE) break;
   }
 
   console.log(`Found ${cigars.length} cigars without images`);

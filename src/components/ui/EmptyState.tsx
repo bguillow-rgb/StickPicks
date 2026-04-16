@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, SPACING } from '@/src/constants/theme';
+import { COLORS, FONTS, SPACING } from '@/src/constants/theme';
 import { Button } from './Button';
 
 interface EmptyStateProps {
@@ -34,12 +34,14 @@ const styles = StyleSheet.create({
     padding: SPACING.xl,
   },
   title: {
+    fontFamily: FONTS.body,
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.text,
     textAlign: 'center',
   },
   subtitle: {
+    fontFamily: FONTS.body,
     fontSize: 14,
     color: COLORS.muted,
     textAlign: 'center',

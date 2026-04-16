@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS, RADIUS } from '@/src/constants/theme';
+import { COLORS, FONTS, RADIUS } from '@/src/constants/theme';
 
 interface MeterProps {
   label: string;
@@ -14,8 +14,9 @@ const LABELS: Record<string, Record<number, string>> = {
 };
 
 export function Meter({ label, value, max = 5 }: MeterProps) {
+  const clamped = Math.min(Math.max(Math.round(value), 1), max);
   const pct = Math.min(Math.max(value / max, 0), 1);
-  const valueLabel = LABELS[label]?.[value] ?? `${value}/${max}`;
+  const valueLabel = LABELS[label]?.[clamped] ?? `${clamped}/${max}`;
 
   return (
     <View style={styles.container}>
@@ -40,11 +41,13 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   label: {
+    fontFamily: FONTS.body,
     fontSize: 13,
     fontWeight: '700',
     color: COLORS.muted,
   },
   value: {
+    fontFamily: FONTS.body,
     fontSize: 13,
     fontWeight: '700',
     color: COLORS.text,

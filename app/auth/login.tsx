@@ -1,24 +1,76 @@
-import { View, Text, StyleSheet, Alert, Platform } from 'react-native';
+import { View, Text, StyleSheet, Alert, Platform, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import * as Crypto from 'expo-crypto';
-import * as WebBrowser from 'expo-web-browser';
-import { makeRedirectUri } from 'expo-auth-session';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import { supabase } from '@/lib/supabase';
 import { Button } from '@/src/components/ui/Button';
 import { COLORS, SPACING, FONTS } from '@/src/constants/theme';
+import { useProStore } from '@/src/stores/useProStore';
 
-WebBrowser.maybeCompleteAuthSession();
+// Accounts that get Pro comped automatically (owner / demo accounts)
+const COMPED_EMAILS = new Set(
+  (process.env.EXPO_PUBLIC_COMPED_EMAILS ?? '').split(',').filter(Boolean).map((e) => e.trim().toLowerCase())
+);
+
+GoogleSignin.configure({
+  iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
+  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
+});
 
 export default function LoginScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [loading, setLoading] = useState(false);
+  const activatePro = useProStore((s) => s.activate);
 
-  const goHome = () => {
+  // Comp Pro for owner/demo accounts after a successful sign-in
+  const maybeCompPro = async () => {
+    const { data } = await supabase.auth.getUser();
+    const email = data.user?.email?.toLowerCase();
+    if (email && COMPED_EMAILS.has(email)) {
+      activatePro();
+    }
+  };
+
+  const goHome = async () => {
+    await maybeCompPro();
     router.replace('/(tabs)');
+  };
+
+  // ── Google Sign-In (native SDK) ──
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true);
+      await GoogleSignin.hasPlayServices();
+
+      // Native Google sign-in: nonce checks skipped in Supabase config.
+      // The id_token is still fully verified against Google's servers.
+      const response = await GoogleSignin.signIn();
+
+      if (!response.data?.idToken) {
+        Alert.alert('Google Sign-In Error', 'No ID token received from Google.');
+        return;
+      }
+
+      const { error } = await supabase.auth.signInWithIdToken({
+        provider: 'google',
+        token: response.data.idToken,
+      });
+      if (error) throw error;
+      goHome();
+    } catch (e: any) {
+      if (e?.code === statusCodes.SIGN_IN_CANCELLED) return;
+      if (e?.code === statusCodes.IN_PROGRESS) return;
+      Alert.alert('Google Sign-In Error', e?.message ?? 'Unknown error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ── Apple Sign-In ──
@@ -66,53 +118,14 @@ export default function LoginScreen() {
     }
   };
 
-  // ── Google Sign-In via Supabase OAuth ──
-  const handleGoogleSignIn = async () => {
-    try {
-      setLoading(true);
-
-      const redirectTo = makeRedirectUri();
-
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-          skipBrowserRedirect: true,
-        },
-      });
-
-      if (error) throw error;
-      if (!data.url) throw new Error('No auth URL returned');
-
-      const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
-
-      if (result.type === 'success') {
-        const url = new URL(result.url);
-        // Extract tokens from URL fragment
-        const params = new URLSearchParams(url.hash.substring(1));
-        const accessToken = params.get('access_token');
-        const refreshToken = params.get('refresh_token');
-
-        if (accessToken && refreshToken) {
-          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
-          goHome();
-        }
-      }
-    } catch (e: any) {
-      if (e?.message?.includes('canceled') || e?.message?.includes('dismiss')) return;
-      Alert.alert('Google Sign-In Error', e?.message ?? 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // ── Guest Mode ──
+  // Guest = free tier (no Pro). Sign in with comped email for Pro.
   const handleGuest = async () => {
     try {
       setLoading(true);
       const { error } = await supabase.auth.signInAnonymously();
       if (error) throw error;
-      goHome();
+      router.replace('/(tabs)');
     } catch (e: any) {
       Alert.alert('Error', e?.message ?? 'Failed to continue as guest');
     } finally {
@@ -130,12 +143,12 @@ export default function LoginScreen() {
 
       <View style={styles.buttons}>
         {Platform.OS === 'ios' && (
-          <Button
-            title="Continue with Apple"
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+            cornerRadius={8}
+            style={styles.appleButton}
             onPress={handleAppleSignIn}
-            disabled={loading}
-            style={styles.appleBtn}
-            textStyle={{ color: COLORS.bg }}
           />
         )}
 
@@ -163,6 +176,16 @@ export default function LoginScreen() {
       <Text style={styles.note}>
         Guest data stays on this device. Sign in later to sync.
       </Text>
+
+      <View style={styles.legalLinks}>
+        <Pressable onPress={() => router.push('/legal/privacy')}>
+          <Text style={styles.legalLink}>Privacy Policy</Text>
+        </Pressable>
+        <Text style={styles.legalDot}>{'\u00B7'}</Text>
+        <Pressable onPress={() => router.push('/legal/terms')}>
+          <Text style={styles.legalLink}>Terms of Service</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -191,6 +214,7 @@ const styles = StyleSheet.create({
     borderRadius: 1,
   },
   tagline: {
+    fontFamily: 'Cormorant',
     fontSize: 15,
     color: COLORS.muted,
     textAlign: 'center',
@@ -200,8 +224,9 @@ const styles = StyleSheet.create({
     marginTop: SPACING.xxl,
     gap: SPACING.sm,
   },
-  appleBtn: {
-    backgroundColor: COLORS.text,
+  appleButton: {
+    width: '100%',
+    height: 48,
   },
   dividerRow: {
     flexDirection: 'row',
@@ -215,14 +240,33 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
   },
   dividerText: {
+    fontFamily: 'Cormorant',
     fontSize: 13,
     color: COLORS.subtle,
   },
   note: {
+    fontFamily: 'Cormorant',
     fontSize: 12,
     color: COLORS.subtle,
     textAlign: 'center',
     marginTop: SPACING.xl,
     lineHeight: 18,
+  },
+  legalLinks: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: SPACING.xxl,
+    gap: SPACING.sm,
+  },
+  legalLink: {
+    fontFamily: 'Cormorant',
+    fontSize: 12,
+    color: COLORS.muted,
+    textDecorationLine: 'underline',
+  },
+  legalDot: {
+    color: COLORS.subtle,
+    fontSize: 12,
   },
 });

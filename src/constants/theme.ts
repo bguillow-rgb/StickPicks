@@ -52,8 +52,8 @@ export const RADIUS = {
 } as const;
 
 export const FONTS = {
-  display: Platform.select({ ios: 'Georgia', default: 'serif' }),
-  body: Platform.select({ ios: 'System', default: 'sans-serif' }),
+  display: 'Cormorant',
+  body: 'Cormorant',
 } as const;
 
 export const TYPE = {
@@ -70,26 +70,31 @@ export const TYPE = {
     color: COLORS.text,
   },
   heading: {
+    fontFamily: FONTS.body,
     fontSize: 18,
     fontWeight: '700' as const,
     color: COLORS.text,
   },
   body: {
+    fontFamily: FONTS.body,
     fontSize: 16,
     fontWeight: '400' as const,
     color: COLORS.text,
   },
   bodySmall: {
+    fontFamily: FONTS.body,
     fontSize: 14,
     fontWeight: '400' as const,
     color: COLORS.muted,
   },
   caption: {
+    fontFamily: FONTS.body,
     fontSize: 12,
     fontWeight: '500' as const,
     color: COLORS.subtle,
   },
   label: {
+    fontFamily: FONTS.body,
     fontSize: 14,
     fontWeight: '600' as const,
     letterSpacing: 0.5,

@@ -1,3 +1,4 @@
+import { Text } from 'react-native';
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -21,9 +22,17 @@ export default function TabLayout() {
           borderTopColor: COLORS.border,
           borderTopWidth: 0.5,
         },
+        // Each tab gets exactly 1/N of the width → perfectly even spacing.
+        tabBarItemStyle: {
+          flex: 1,
+          paddingHorizontal: 0,
+        },
         tabBarLabelStyle: {
+          fontFamily: 'Cormorant',
           fontSize: 11,
           fontWeight: '600',
+          includeFontPadding: false,
+          textAlign: 'center',
         },
       }}
       screenListeners={{
@@ -49,15 +58,38 @@ export default function TabLayout() {
       <Tabs.Screen
         name="humidor"
         options={{
-          title: 'Humidor',
+          title: 'myHumidor',
+          // Match the default tab label metrics exactly: single text node, same
+          // fontSize/lineHeight as tabBarLabelStyle. Italic "my" via nested Text.
+          tabBarLabel: ({ color }) => (
+            <Text
+              numberOfLines={1}
+              style={{
+                fontFamily: 'Cormorant',
+                fontSize: 11,
+                lineHeight: 14,
+                fontWeight: '600',
+                textAlign: 'center',
+                includeFontPadding: false,
+                color,
+              }}
+            >
+              <Text style={{ fontStyle: 'italic' }}>my</Text>Humidor
+            </Text>
+          ),
           tabBarIcon: ({ color, size }) => <TabIcon name="archive-outline" color={color} size={size} />,
         }}
       />
       <Tabs.Screen
         name="journal"
         options={{
-          title: 'Journal',
-          tabBarIcon: ({ color, size }) => <TabIcon name="book-outline" color={color} size={size} />,
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="cigar/[id]"
+        options={{
+          href: null,
         }}
       />
       <Tabs.Screen

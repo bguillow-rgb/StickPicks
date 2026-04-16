@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, ViewStyle } from 'react-native';
-import { COLORS, RADIUS } from '@/src/constants/theme';
+import { COLORS, FONTS, RADIUS } from '@/src/constants/theme';
 
 interface BadgeProps {
   label: string;
@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card2,
   },
   text: {
+    fontFamily: FONTS.body,
     fontSize: 12,
     fontWeight: '700',
     color: COLORS.text,

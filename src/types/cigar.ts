@@ -1,7 +1,8 @@
 export interface Cigar {
   id: string;
   brand: string;
-  name: string;
+  line: string; // canonical product line, e.g. "Serie V Melanio"
+  name: string; // legacy full name, may include vitola — prefer `line` for display
   vitola: string | null;
   strength: number; // 1-5
   body: number; // 1-5
@@ -13,6 +14,7 @@ export interface Cigar {
   flavors: string[];
   description: string | null;
   image_url: string | null;
+  price_usd_cents: number | null;
   created_at: string;
 }
 
@@ -21,6 +23,8 @@ export interface HumidorItem {
   user_id: string;
   cigar_id: string;
   status: 'wishlist' | 'owned' | 'smoked';
+  quantity: number;
+  purchase_price_cents: number | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
@@ -59,6 +63,8 @@ export interface QuizAnswers {
   price: number | null;
   flavors: string[];
   adventure: string | null;
+  wrapper: string | null;
+  origin: string | null;
 }
 
 export interface QuizResult {
@@ -68,6 +74,19 @@ export interface QuizResult {
   top_match_id: string | null;
   all_matches: { cigar_id: string; score: number; reasons: string[] }[];
   created_at: string;
+}
+
+export interface CigarReview {
+  id: string;
+  user_id: string;
+  cigar_id: string;
+  overall_rating: number; // 1-5
+  draw_rating: number | null; // 1-5
+  burn_rating: number | null; // 1-5
+  flavor_rating: number | null; // 1-5
+  review_text: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface UserProfile {

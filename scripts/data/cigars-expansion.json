@@ -1,0 +1,1682 @@
+[
+  {
+    "brand": "Casdagli",
+    "name": "Daughters of the Wind",
+    "vitola": "Robusto",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "sweet spice"
+    ],
+    "description": "Exotic boutique Dominican blend with refined character."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Daughters of the Wind",
+    "vitola": "Toro",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "sweet spice"
+    ],
+    "description": "Exotic boutique Dominican blend with refined character."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Daughters of the Wind",
+    "vitola": "Churchill",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "sweet spice"
+    ],
+    "description": "Exotic boutique Dominican blend with refined character."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Daughters of the Wind",
+    "vitola": "Corona",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "sweet spice"
+    ],
+    "description": "Exotic boutique Dominican blend with refined character."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Daughters of the Wind",
+    "vitola": "Gordo",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "sweet spice"
+    ],
+    "description": "Exotic boutique Dominican blend with refined character."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Daughters of the Wind",
+    "vitola": "Lancero",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "sweet spice"
+    ],
+    "description": "Exotic boutique Dominican blend with refined character."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Basilica",
+    "vitola": "Robusto",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Mexican San Andres",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Peruvian"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "spice"
+    ],
+    "description": "Architectural blend built on San Andres foundation."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Basilica",
+    "vitola": "Toro",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Mexican San Andres",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Peruvian"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "spice"
+    ],
+    "description": "Architectural blend built on San Andres foundation."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Basilica",
+    "vitola": "Churchill",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Mexican San Andres",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Peruvian"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "spice"
+    ],
+    "description": "Architectural blend built on San Andres foundation."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Basilica",
+    "vitola": "Corona",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Mexican San Andres",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Peruvian"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "spice"
+    ],
+    "description": "Architectural blend built on San Andres foundation."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Basilica",
+    "vitola": "Gordo",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Mexican San Andres",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Peruvian"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "spice"
+    ],
+    "description": "Architectural blend built on San Andres foundation."
+  },
+  {
+    "brand": "Casdagli",
+    "name": "Basilica",
+    "vitola": "Lancero",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Mexican San Andres",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Peruvian"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "spice"
+    ],
+    "description": "Architectural blend built on San Andres foundation."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Tierra Volcan",
+    "vitola": "Robusto",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "earth",
+      "pepper",
+      "cream"
+    ],
+    "description": "Volcanic soil-grown Nicaraguan tobacco blend."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Tierra Volcan",
+    "vitola": "Toro",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "earth",
+      "pepper",
+      "cream"
+    ],
+    "description": "Volcanic soil-grown Nicaraguan tobacco blend."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Tierra Volcan",
+    "vitola": "Churchill",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "earth",
+      "pepper",
+      "cream"
+    ],
+    "description": "Volcanic soil-grown Nicaraguan tobacco blend."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Tierra Volcan",
+    "vitola": "Corona",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "earth",
+      "pepper",
+      "cream"
+    ],
+    "description": "Volcanic soil-grown Nicaraguan tobacco blend."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Tierra Volcan",
+    "vitola": "Gordo",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "earth",
+      "pepper",
+      "cream"
+    ],
+    "description": "Volcanic soil-grown Nicaraguan tobacco blend."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Tierra Volcan",
+    "vitola": "Lancero",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "earth",
+      "pepper",
+      "cream"
+    ],
+    "description": "Volcanic soil-grown Nicaraguan tobacco blend."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Liga Maestro",
+    "vitola": "Robusto",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "pepper"
+    ],
+    "description": "Master league dark wrapper with Nicaraguan power."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Liga Maestro",
+    "vitola": "Toro",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "pepper"
+    ],
+    "description": "Master league dark wrapper with Nicaraguan power."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Liga Maestro",
+    "vitola": "Churchill",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "pepper"
+    ],
+    "description": "Master league dark wrapper with Nicaraguan power."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Liga Maestro",
+    "vitola": "Corona",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "pepper"
+    ],
+    "description": "Master league dark wrapper with Nicaraguan power."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Liga Maestro",
+    "vitola": "Gordo",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "pepper"
+    ],
+    "description": "Master league dark wrapper with Nicaraguan power."
+  },
+  {
+    "brand": "Mombacho",
+    "name": "Liga Maestro",
+    "vitola": "Lancero",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 4,
+    "wrapper": "Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "pepper"
+    ],
+    "description": "Master league dark wrapper with Nicaraguan power."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Summa",
+    "vitola": "Robusto",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "spice"
+    ],
+    "description": "Michael Herklots' flagship — the pinnacle of blending."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Summa",
+    "vitola": "Toro",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "spice"
+    ],
+    "description": "Michael Herklots' flagship — the pinnacle of blending."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Summa",
+    "vitola": "Churchill",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "spice"
+    ],
+    "description": "Michael Herklots' flagship — the pinnacle of blending."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Summa",
+    "vitola": "Corona",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "spice"
+    ],
+    "description": "Michael Herklots' flagship — the pinnacle of blending."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Summa",
+    "vitola": "Gordo",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "spice"
+    ],
+    "description": "Michael Herklots' flagship — the pinnacle of blending."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Summa",
+    "vitola": "Lancero",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 4,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "cream",
+      "leather",
+      "spice"
+    ],
+    "description": "Michael Herklots' flagship — the pinnacle of blending."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Panamericana",
+    "vitola": "Robusto",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "pepper",
+      "cream",
+      "nuts"
+    ],
+    "description": "Pan-American tribute blending Dominican and Nicaraguan leaf."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Panamericana",
+    "vitola": "Toro",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "pepper",
+      "cream",
+      "nuts"
+    ],
+    "description": "Pan-American tribute blending Dominican and Nicaraguan leaf."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Panamericana",
+    "vitola": "Churchill",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "pepper",
+      "cream",
+      "nuts"
+    ],
+    "description": "Pan-American tribute blending Dominican and Nicaraguan leaf."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Panamericana",
+    "vitola": "Corona",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "pepper",
+      "cream",
+      "nuts"
+    ],
+    "description": "Pan-American tribute blending Dominican and Nicaraguan leaf."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Panamericana",
+    "vitola": "Gordo",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "pepper",
+      "cream",
+      "nuts"
+    ],
+    "description": "Pan-American tribute blending Dominican and Nicaraguan leaf."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Panamericana",
+    "vitola": "Lancero",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 3,
+    "wrapper": "Ecuadorian Habano",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cedar",
+      "pepper",
+      "cream",
+      "nuts"
+    ],
+    "description": "Pan-American tribute blending Dominican and Nicaraguan leaf."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Supreme",
+    "vitola": "Robusto",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 3,
+    "wrapper": "Connecticut Broadleaf",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "pepper"
+    ],
+    "description": "Supreme broadleaf-wrapped expression of the Timeless line."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Supreme",
+    "vitola": "Toro",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 3,
+    "wrapper": "Connecticut Broadleaf",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "pepper"
+    ],
+    "description": "Supreme broadleaf-wrapped expression of the Timeless line."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Supreme",
+    "vitola": "Churchill",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 3,
+    "wrapper": "Connecticut Broadleaf",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "pepper"
+    ],
+    "description": "Supreme broadleaf-wrapped expression of the Timeless line."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Supreme",
+    "vitola": "Corona",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 3,
+    "wrapper": "Connecticut Broadleaf",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "pepper"
+    ],
+    "description": "Supreme broadleaf-wrapped expression of the Timeless line."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Supreme",
+    "vitola": "Gordo",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 3,
+    "wrapper": "Connecticut Broadleaf",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "pepper"
+    ],
+    "description": "Supreme broadleaf-wrapped expression of the Timeless line."
+  },
+  {
+    "brand": "Ferio Tego",
+    "name": "Timeless Supreme",
+    "vitola": "Lancero",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 3,
+    "wrapper": "Connecticut Broadleaf",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cocoa",
+      "leather",
+      "earth",
+      "pepper"
+    ],
+    "description": "Supreme broadleaf-wrapped expression of the Timeless line."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Maduro",
+    "vitola": "Robusto",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 2,
+    "wrapper": "Brazilian Maduro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cocoa",
+      "coffee",
+      "earth",
+      "sweet spice"
+    ],
+    "description": "Approachable Brazilian maduro at an everyday price."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Maduro",
+    "vitola": "Toro",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 2,
+    "wrapper": "Brazilian Maduro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cocoa",
+      "coffee",
+      "earth",
+      "sweet spice"
+    ],
+    "description": "Approachable Brazilian maduro at an everyday price."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Maduro",
+    "vitola": "Churchill",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 2,
+    "wrapper": "Brazilian Maduro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cocoa",
+      "coffee",
+      "earth",
+      "sweet spice"
+    ],
+    "description": "Approachable Brazilian maduro at an everyday price."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Maduro",
+    "vitola": "Corona",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 2,
+    "wrapper": "Brazilian Maduro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cocoa",
+      "coffee",
+      "earth",
+      "sweet spice"
+    ],
+    "description": "Approachable Brazilian maduro at an everyday price."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Maduro",
+    "vitola": "Gordo",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 2,
+    "wrapper": "Brazilian Maduro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cocoa",
+      "coffee",
+      "earth",
+      "sweet spice"
+    ],
+    "description": "Approachable Brazilian maduro at an everyday price."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Maduro",
+    "vitola": "Lancero",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 2,
+    "wrapper": "Brazilian Maduro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cocoa",
+      "coffee",
+      "earth",
+      "sweet spice"
+    ],
+    "description": "Approachable Brazilian maduro at an everyday price."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Cameroon",
+    "vitola": "Robusto",
+    "strength": 2,
+    "body": 2,
+    "price_tier": 2,
+    "wrapper": "African Cameroon",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "cream",
+      "nuts",
+      "earth"
+    ],
+    "description": "Mild Cameroon-wrapped Nicaraguan value smoke."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Cameroon",
+    "vitola": "Toro",
+    "strength": 2,
+    "body": 2,
+    "price_tier": 2,
+    "wrapper": "African Cameroon",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "cream",
+      "nuts",
+      "earth"
+    ],
+    "description": "Mild Cameroon-wrapped Nicaraguan value smoke."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Cameroon",
+    "vitola": "Churchill",
+    "strength": 2,
+    "body": 2,
+    "price_tier": 2,
+    "wrapper": "African Cameroon",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "cream",
+      "nuts",
+      "earth"
+    ],
+    "description": "Mild Cameroon-wrapped Nicaraguan value smoke."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Cameroon",
+    "vitola": "Corona",
+    "strength": 2,
+    "body": 2,
+    "price_tier": 2,
+    "wrapper": "African Cameroon",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "cream",
+      "nuts",
+      "earth"
+    ],
+    "description": "Mild Cameroon-wrapped Nicaraguan value smoke."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Cameroon",
+    "vitola": "Gordo",
+    "strength": 2,
+    "body": 2,
+    "price_tier": 2,
+    "wrapper": "African Cameroon",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "cream",
+      "nuts",
+      "earth"
+    ],
+    "description": "Mild Cameroon-wrapped Nicaraguan value smoke."
+  },
+  {
+    "brand": "Oliva",
+    "name": "Serie G Cameroon",
+    "vitola": "Lancero",
+    "strength": 2,
+    "body": 2,
+    "price_tier": 2,
+    "wrapper": "African Cameroon",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Nicaragua",
+    "flavors": [
+      "cedar",
+      "cream",
+      "nuts",
+      "earth"
+    ],
+    "description": "Mild Cameroon-wrapped Nicaraguan value smoke."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill Late Hour",
+    "vitola": "Robusto",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Habano Oscuro",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "spice"
+    ],
+    "description": "Dark and powerful — for Churchill's late-night hours."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill Late Hour",
+    "vitola": "Toro",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Habano Oscuro",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "spice"
+    ],
+    "description": "Dark and powerful — for Churchill's late-night hours."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill Late Hour",
+    "vitola": "Churchill",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Habano Oscuro",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "spice"
+    ],
+    "description": "Dark and powerful — for Churchill's late-night hours."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill Late Hour",
+    "vitola": "Corona",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Habano Oscuro",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "spice"
+    ],
+    "description": "Dark and powerful — for Churchill's late-night hours."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill Late Hour",
+    "vitola": "Gordo",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Habano Oscuro",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "spice"
+    ],
+    "description": "Dark and powerful — for Churchill's late-night hours."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill Late Hour",
+    "vitola": "Lancero",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Habano Oscuro",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "leather",
+      "espresso",
+      "dark chocolate",
+      "spice"
+    ],
+    "description": "Dark and powerful — for Churchill's late-night hours."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill The Traveller",
+    "vitola": "Robusto",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Connecticut",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cream",
+      "cedar",
+      "vanilla",
+      "leather"
+    ],
+    "description": "Travel-inspired mild blend from the Churchill series."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill The Traveller",
+    "vitola": "Toro",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Connecticut",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cream",
+      "cedar",
+      "vanilla",
+      "leather"
+    ],
+    "description": "Travel-inspired mild blend from the Churchill series."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill The Traveller",
+    "vitola": "Churchill",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Connecticut",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cream",
+      "cedar",
+      "vanilla",
+      "leather"
+    ],
+    "description": "Travel-inspired mild blend from the Churchill series."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill The Traveller",
+    "vitola": "Corona",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Connecticut",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cream",
+      "cedar",
+      "vanilla",
+      "leather"
+    ],
+    "description": "Travel-inspired mild blend from the Churchill series."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill The Traveller",
+    "vitola": "Gordo",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Connecticut",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cream",
+      "cedar",
+      "vanilla",
+      "leather"
+    ],
+    "description": "Travel-inspired mild blend from the Churchill series."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Winston Churchill The Traveller",
+    "vitola": "Lancero",
+    "strength": 3,
+    "body": 3,
+    "price_tier": 5,
+    "wrapper": "Ecuadorian Connecticut",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "cream",
+      "cedar",
+      "vanilla",
+      "leather"
+    ],
+    "description": "Travel-inspired mild blend from the Churchill series."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Yamasa",
+    "vitola": "Robusto",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Dominican Yamasá",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "earth",
+      "leather",
+      "dark chocolate"
+    ],
+    "description": "Dark Yamasá region wrapper — bold and innovative."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Yamasa",
+    "vitola": "Toro",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Dominican Yamasá",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "earth",
+      "leather",
+      "dark chocolate"
+    ],
+    "description": "Dark Yamasá region wrapper — bold and innovative."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Yamasa",
+    "vitola": "Churchill",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Dominican Yamasá",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "earth",
+      "leather",
+      "dark chocolate"
+    ],
+    "description": "Dark Yamasá region wrapper — bold and innovative."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Yamasa",
+    "vitola": "Corona",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Dominican Yamasá",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "earth",
+      "leather",
+      "dark chocolate"
+    ],
+    "description": "Dark Yamasá region wrapper — bold and innovative."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Yamasa",
+    "vitola": "Gordo",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Dominican Yamasá",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "earth",
+      "leather",
+      "dark chocolate"
+    ],
+    "description": "Dark Yamasá region wrapper — bold and innovative."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Yamasa",
+    "vitola": "Lancero",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Dominican Yamasá",
+    "binder": "Dominican",
+    "filler": [
+      "Dominican",
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "earth",
+      "leather",
+      "dark chocolate"
+    ],
+    "description": "Dark Yamasá region wrapper — bold and innovative."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Nicaragua",
+    "vitola": "Robusto",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Nicaraguan Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "leather",
+      "espresso",
+      "earth"
+    ],
+    "description": "Full Nicaraguan puro — Davidoff's boldest expression."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Nicaragua",
+    "vitola": "Toro",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Nicaraguan Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "leather",
+      "espresso",
+      "earth"
+    ],
+    "description": "Full Nicaraguan puro — Davidoff's boldest expression."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Nicaragua",
+    "vitola": "Churchill",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Nicaraguan Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "leather",
+      "espresso",
+      "earth"
+    ],
+    "description": "Full Nicaraguan puro — Davidoff's boldest expression."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Nicaragua",
+    "vitola": "Corona",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Nicaraguan Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "leather",
+      "espresso",
+      "earth"
+    ],
+    "description": "Full Nicaraguan puro — Davidoff's boldest expression."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Nicaragua",
+    "vitola": "Gordo",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Nicaraguan Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "leather",
+      "espresso",
+      "earth"
+    ],
+    "description": "Full Nicaraguan puro — Davidoff's boldest expression."
+  },
+  {
+    "brand": "Davidoff",
+    "name": "Nicaragua",
+    "vitola": "Lancero",
+    "strength": 4,
+    "body": 4,
+    "price_tier": 5,
+    "wrapper": "Nicaraguan Habano Oscuro",
+    "binder": "Nicaraguan",
+    "filler": [
+      "Nicaraguan"
+    ],
+    "origin": "Dominican Republic",
+    "flavors": [
+      "pepper",
+      "leather",
+      "espresso",
+      "earth"
+    ],
+    "description": "Full Nicaraguan puro — Davidoff's boldest expression."
+  }
+]

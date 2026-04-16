@@ -25,6 +25,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg,
   },
   title: {
+    fontFamily: 'Cormorant',
     fontSize: 18,
     fontWeight: '700',
     color: COLORS.text,
@@ -33,6 +34,7 @@ const styles = StyleSheet.create({
     marginTop: SPACING.md,
   },
   linkText: {
+    fontFamily: 'Cormorant',
     fontSize: 14,
     color: COLORS.accent,
     fontWeight: '600',

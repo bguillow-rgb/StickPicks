@@ -1,19 +1,23 @@
 import { View, Text, StyleSheet, Pressable, ScrollView, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useMemo, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { Button } from '@/src/components/ui/Button';
 import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
 
-const HERO_IMG = 'https://images.unsplash.com/photo-1694716438178-c6f34bddd64d?w=800&q=80';
-import { QUESTIONS } from '@/src/features/quiz/questions';
+import { BASIC_QUESTIONS, ALL_QUESTIONS } from '@/src/features/quiz/questions';
 import type { QuizAnswers } from '@/src/types/cigar';
 
 export default function QuizScreen() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ mode?: string }>();
   const insets = useSafeAreaInsets();
+
+  const isAdvanced = params.mode === 'advanced';
+  const questions = isAdvanced ? ALL_QUESTIONS : BASIC_QUESTIONS;
+
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswers>({
     strength: null,
@@ -23,20 +27,35 @@ export default function QuizScreen() {
     price: null,
     flavors: [],
     adventure: null,
+    wrapper: null,
+    origin: null,
   });
   const [computing, setComputing] = useState(false);
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const q = QUESTIONS[step];
-  const isLast = step === QUESTIONS.length - 1;
-  const progress = step / (QUESTIONS.length - 1);
+  // Clear timer on unmount to prevent leak
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
+    };
+  }, []);
 
-  function goToResults() {
+  const q = questions[step];
+  const isLast = step === questions.length - 1;
+  const progress = questions.length > 1 ? step / (questions.length - 1) : 1;
+
+  function navigateToResults(ans: QuizAnswers) {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setComputing(true);
     setTimeout(() => {
       setComputing(false);
-      router.push({ pathname: '/quiz/results', params: { answers: JSON.stringify(answers) } });
+      router.push({
+        pathname: '/quiz/results',
+        params: {
+          answers: JSON.stringify(ans),
+          mode: isAdvanced ? 'advanced' : 'basic',
+        },
+      });
     }, 600);
   }
 
@@ -45,18 +64,11 @@ export default function QuizScreen() {
     const updated = { ...answers, [q.key]: value };
     setAnswers(updated);
 
-    // Auto-advance for single-select questions
     if (q.type !== 'multi') {
       if (autoAdvanceTimer.current) clearTimeout(autoAdvanceTimer.current);
       autoAdvanceTimer.current = setTimeout(() => {
         if (isLast) {
-          // Need to use the updated answers since setState is async
-          setComputing(true);
-          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          setTimeout(() => {
-            setComputing(false);
-            router.push({ pathname: '/quiz/results', params: { answers: JSON.stringify(updated) } });
-          }, 600);
+          navigateToResults(updated);
         } else {
           setStep((s) => s + 1);
         }
@@ -91,7 +103,10 @@ export default function QuizScreen() {
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <Text style={styles.closeText}>✕</Text>
         </Pressable>
-        <Text style={styles.stepLabel}>{step + 1} / {QUESTIONS.length}</Text>
+        <Text style={styles.stepLabel}>
+          {step + 1} / {questions.length}
+          {isAdvanced ? '  ·  Pro' : ''}
+        </Text>
       </View>
 
       {/* Progress bar */}
@@ -100,7 +115,11 @@ export default function QuizScreen() {
       </View>
 
       {/* Hero image */}
-      <Image source={{ uri: HERO_IMG }} style={styles.heroImage} resizeMode="cover" />
+      <Image
+        source={{ uri: 'https://images.unsplash.com/photo-1694716438178-c6f34bddd64d?w=800&q=80' }}
+        style={styles.heroImage}
+        resizeMode="cover"
+      />
 
       <Animated.View
         key={step}
@@ -141,7 +160,7 @@ export default function QuizScreen() {
             <Text style={styles.hint}>Selected {answers.flavors.length} of {q.max ?? 3}</Text>
             <Button
               title={isLast ? (computing ? 'Finding...' : 'See Matches') : 'Next'}
-              onPress={() => isLast ? goToResults() : setStep((s) => s + 1)}
+              onPress={() => isLast ? navigateToResults(answers) : setStep((s) => s + 1)}
               disabled={!canContinueMulti || computing}
               loading={computing}
             />
@@ -149,7 +168,7 @@ export default function QuizScreen() {
         )}
       </Animated.View>
 
-      {/* Back button — bottom right */}
+      {/* Back button */}
       {step > 0 && (
         <View style={styles.bottomNav}>
           <Pressable onPress={goBack} hitSlop={12} style={styles.backBtn}>
@@ -174,11 +193,13 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.sm,
   },
   closeText: {
+    fontFamily: 'Cormorant',
     fontSize: 18,
     fontWeight: '600',
     color: COLORS.muted,
   },
   stepLabel: {
+    fontFamily: 'Cormorant',
     fontSize: 13,
     fontWeight: '600',
     color: COLORS.subtle,
@@ -207,12 +228,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   title: {
+    fontFamily: 'Cormorant',
     fontSize: 24,
     fontWeight: '800',
     color: COLORS.text,
     textAlign: 'center',
   },
   subtitle: {
+    fontFamily: 'Cormorant',
     fontSize: 14,
     color: COLORS.muted,
     textAlign: 'center',
@@ -241,6 +264,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.accent,
   },
   optionText: {
+    fontFamily: 'Cormorant',
     fontSize: 14,
     fontWeight: '700',
     color: COLORS.text,
@@ -253,6 +277,7 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.sm,
   },
   hint: {
+    fontFamily: 'Cormorant',
     textAlign: 'center',
     color: COLORS.muted,
     fontSize: 13,
@@ -267,6 +292,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
   },
   backText: {
+    fontFamily: 'Cormorant',
     fontSize: 14,
     fontWeight: '700',
     color: COLORS.accent,

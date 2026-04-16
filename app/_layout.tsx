@@ -19,6 +19,16 @@ import 'react-native-reanimated';
 import { COLORS, FONTS } from '@/src/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { Session } from '@supabase/supabase-js';
+import { initRevenueCat, identifyUser, getCustomerInfo, isProActive } from '@/src/lib/revenuecat';
+import { useProStore } from '@/src/stores/useProStore';
+import { useAgeGateStore, useHydrateAgeGate } from '@/src/stores/useAgeGateStore';
+import {
+  initAnalytics,
+  initErrorReporting,
+  identify as identifyAnalytics,
+  resetAnalytics,
+  setErrorUser,
+} from '@/src/lib/observability';
 
 export { ErrorBoundary } from 'expo-router';
 
@@ -41,23 +51,41 @@ const StickPicksDark = {
   },
 };
 
-function useProtectedRoute(session: Session | null, isLoading: boolean) {
+function useProtectedRoute(
+  session: Session | null,
+  isLoading: boolean,
+  ageState: 'verified' | 'blocked' | 'unknown' | 'loading',
+) {
   const segments = useSegments();
   const router = useRouter();
 
   useEffect(() => {
     if (isLoading) return;
+    if (ageState === 'loading') return;
 
+    const inAgeGate = segments[0] === 'age-gate';
     const inAuthGroup = segments[0] === 'auth';
 
+    // 1) Age gate is the floor — everyone hits it first until they answer yes.
+    if (ageState === 'unknown' && !inAgeGate) {
+      router.replace('/age-gate');
+      return;
+    }
+    if (ageState === 'blocked' && segments.join('/') !== 'age-gate/blocked') {
+      router.replace('/age-gate/blocked');
+      return;
+    }
+
+    // Don't redirect anyone OUT of age-gate routes — they own the flow once inside.
+    if (inAgeGate) return;
+
+    // 2) Auth gate
     if (!session && !inAuthGroup) {
-      // No session — redirect to login
       router.replace('/auth/login');
     } else if (session && inAuthGroup) {
-      // Has session but on login page — go to tabs
       router.replace('/(tabs)');
     }
-  }, [session, segments, isLoading]);
+  }, [session, segments, isLoading, ageState]);
 }
 
 function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
@@ -114,7 +142,7 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
 
       <Animated.View style={iconStyle}>
         <Image
-          source={{ uri: 'https://images.unsplash.com/photo-1604784449129-be5d342e5af4?w=400&q=80' }}
+          source={require('../assets/images/splash-icon.png')}
           style={splashStyles.cigarPhoto}
           resizeMode="cover"
         />
@@ -172,6 +200,7 @@ const splashStyles = StyleSheet.create({
     borderRadius: 1,
   },
   tagline: {
+    fontFamily: 'Cormorant',
     fontSize: 12,
     fontWeight: '600',
     color: COLORS.muted,
@@ -189,23 +218,63 @@ const splashStyles = StyleSheet.create({
 });
 
 export default function RootLayout() {
-  const [loaded, error] = useFonts({});
+  const [loaded, error] = useFonts({
+    'Cormorant': require('../assets/fonts/Cormorant-Variable.ttf'),
+    'Cormorant-Italic': require('../assets/fonts/Cormorant-Italic-Variable.ttf'),
+  });
   const [showSplash, setShowSplash] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const ageState = useAgeGateStore((s) => s.status);
+  useHydrateAgeGate();
 
-  // Listen for auth state changes
+  // Init RevenueCat + observability (analytics + error reporting).
+  // Observability is no-op when EXPO_PUBLIC_SENTRY_DSN / EXPO_PUBLIC_POSTHOG_API_KEY are empty.
   useEffect(() => {
-    // Check existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setAuthLoading(false);
+    initErrorReporting();
+    initAnalytics();
+    initRevenueCat().catch((e) => {
+      if (__DEV__) console.warn('[RevenueCat] Init failed:', e);
     });
+  }, []);
+
+  // Listen for auth state changes + sync RevenueCat user
+  useEffect(() => {
+    const activate = useProStore.getState().activate;
+    let identifiedUserId: string | null = null;
+
+    const syncRevenueCat = async (userId: string) => {
+      if (identifiedUserId === userId) return; // Prevent double-fire
+      identifiedUserId = userId;
+      try {
+        await identifyUser(userId);
+        const info = await getCustomerInfo();
+        if (info && isProActive(info)) activate();
+      } catch {
+        // RevenueCat not available
+      }
+    };
+
+    const onSession = (sess: Session | null) => {
+      setSession(sess);
+      setAuthLoading(false);
+      if (sess?.user?.id) {
+        syncRevenueCat(sess.user.id);
+        identifyAnalytics(sess.user.id, { is_anonymous: !!sess.user.is_anonymous });
+        setErrorUser({ id: sess.user.id, email: sess.user.email ?? null });
+      } else {
+        resetAnalytics();
+        setErrorUser(null);
+        identifiedUserId = null;
+      }
+    };
+
+    // Check existing session
+    supabase.auth.getSession().then(({ data: { session } }) => onSession(session));
 
     // Subscribe to changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setAuthLoading(false);
+      onSession(session);
     });
 
     return () => subscription.unsubscribe();
@@ -225,8 +294,8 @@ export default function RootLayout() {
     setShowSplash(false);
   }, []);
 
-  // Protect routes based on auth state
-  useProtectedRoute(session, authLoading || showSplash);
+  // Protect routes based on age + auth state
+  useProtectedRoute(session, authLoading || showSplash, ageState);
 
   if (!loaded) return null;
 
@@ -235,12 +304,17 @@ export default function RootLayout() {
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="age-gate/index" options={{ gestureEnabled: false }} />
+        <Stack.Screen name="age-gate/blocked" options={{ gestureEnabled: false }} />
         <Stack.Screen name="auth/login" options={{ presentation: 'modal', gestureEnabled: false }} />
         <Stack.Screen name="quiz/index" />
         <Stack.Screen name="quiz/results" />
         <Stack.Screen name="identify/camera" />
         <Stack.Screen name="identify/result" />
         <Stack.Screen name="cigar/[id]" />
+        <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="legal/privacy" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="legal/terms" options={{ presentation: 'modal' }} />
       </Stack>
       {showSplash && <AnimatedSplash onFinish={handleSplashFinish} />}
     </ThemeProvider>

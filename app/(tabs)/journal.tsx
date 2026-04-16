@@ -1,24 +1,14 @@
 import { View, Text, StyleSheet, FlatList, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { EmptyState } from '@/src/components/ui/EmptyState';
 import { COLORS, SPACING } from '@/src/constants/theme';
+import { StarRating } from '@/src/components/ui/StarRating';
 import type { JournalEntry } from '@/src/types/cigar';
-
-function StarRating({ value }: { value: number }) {
-  return (
-    <View style={{ flexDirection: 'row', gap: 2 }}>
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Text key={i} style={{ fontSize: 14, color: i <= value ? COLORS.accent : COLORS.border }}>
-          ★
-        </Text>
-      ))}
-    </View>
-  );
-}
 
 export default function JournalScreen() {
   const router = useRouter();
@@ -43,9 +33,11 @@ export default function JournalScreen() {
     }
   }, []);
 
-  useEffect(() => {
-    fetchEntries();
-  }, [fetchEntries]);
+  useFocusEffect(
+    useCallback(() => {
+      fetchEntries();
+    }, [fetchEntries])
+  );
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + SPACING.sm }]}>
@@ -73,14 +65,14 @@ export default function JournalScreen() {
         renderItem={({ item }) => (
           <Card
             style={styles.entryCard}
-            onPress={() => item.cigar_id && router.push(`/cigar/${item.cigar_id}`)}
+            onPress={() => item.cigar_id && router.push(`/(tabs)/cigar/${item.cigar_id}`)}
           >
             <View style={styles.entryHeader}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.entryName}>{item.cigar?.name ?? 'Unknown Cigar'}</Text>
+                <Text style={styles.entryName}>{item.cigar?.line ?? item.cigar?.name ?? 'Unknown Cigar'}</Text>
                 <Text style={styles.entryBrand}>{item.cigar?.brand ?? ''}</Text>
               </View>
-              <StarRating value={item.rating} />
+              <StarRating value={item.rating} size={14} />
             </View>
             {item.notes ? (
               <Text style={styles.entryNotes} numberOfLines={2}>{item.notes}</Text>
@@ -102,6 +94,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: SPACING.md,
   },
   title: {
+    fontFamily: 'Cormorant',
     fontSize: 22,
     fontWeight: '800',
     color: COLORS.text,
@@ -116,22 +109,26 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   entryName: {
+    fontFamily: 'Cormorant',
     fontSize: 16,
     fontWeight: '700',
     color: COLORS.text,
   },
   entryBrand: {
+    fontFamily: 'Cormorant',
     fontSize: 13,
     color: COLORS.muted,
     marginTop: 2,
   },
   entryNotes: {
+    fontFamily: 'Cormorant',
     fontSize: 14,
     color: COLORS.muted,
     marginTop: 8,
     lineHeight: 20,
   },
   entryDate: {
+    fontFamily: 'Cormorant',
     fontSize: 12,
     color: COLORS.subtle,
     marginTop: 8,

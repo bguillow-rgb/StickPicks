@@ -39,3 +39,14 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+
+# Local build artifacts (not needed in source control)
+build/
+
+# Large image datasets (sourced from external storage, not tracked)
+scripts/data/adventura-images/
+scripts/data/crux-images/
+scripts/data/dropbox-images/
+scripts/data/fuente-images/
+scripts/data/gurkha-images/
+scripts/data/padron-images/
