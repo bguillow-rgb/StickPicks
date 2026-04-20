@@ -27,12 +27,15 @@ elif [ -f "$MM_FILE" ]; then
 fi
 
 if [ -n "$TARGET" ]; then
-  # Use a sentinel to guard against repeated runs.
-  if grep -q "^#import <VisionCameraProxy.h>" "$TARGET"; then
-    # Use a temp file so BSD sed on macOS doesn't require an extension arg.
-    sed 's|^#import <VisionCameraProxy\.h>|#import <VisionCamera/VisionCameraProxy.h>|' \
+  # VisionCameraProxy.h is NOT a public header in VisionCamera 4.x — only
+  # VisionCameraProxyHolder.h is. The plugin doesn't actually use Proxy (only
+  # ProxyHolder in an initWithProxy: signature), so delete the dead import.
+  # Also rewrite historical bare-<> forms to the namespaced pod form, in case
+  # a future plugin release pre-namespaces some imports but keeps this one.
+  if grep -qE "^#import <VisionCamera(/)?VisionCameraProxy\.h>" "$TARGET"; then
+    sed -E '/^#import <VisionCamera(\/)?VisionCameraProxy\.h>/d' \
       "$TARGET" > "$TARGET.tmp" && mv "$TARGET.tmp" "$TARGET"
-    echo "[patch-vision-camera-text-recognition] Fixed VisionCameraProxy import."
+    echo "[patch-vision-camera-text-recognition] Dropped dead VisionCameraProxy.h import."
   fi
 fi
 
