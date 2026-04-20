@@ -17,6 +17,7 @@ import { supabase } from '@/lib/supabase';
 import { identifyCigar } from '@/src/features/identify/identifyService';
 import { track } from '@/src/lib/observability/analytics';
 import { EVENTS } from '@/src/lib/observability/events';
+import { SuggestCigarSheet } from '@/src/components/identify/SuggestCigarSheet';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
 import { Meter } from '@/src/components/ui/Meter';
@@ -138,6 +139,12 @@ export default function IdentifyResultScreen() {
 
   // Correction modal state
   const [showCorrection, setShowCorrection] = useState(false);
+  const [showSuggest, setShowSuggest] = useState(false);
+  const openSuggest = () => {
+    track(EVENTS.SCAN_SUGGEST_CIGAR_OPENED);
+    setShowCorrection(false);
+    setShowSuggest(true);
+  };
   const [correcting, setCorrecting] = useState(false);
   const [correctionStep, setCorrectionStep] = useState<'brand' | 'line'>('brand');
   const [selectedBrand, setSelectedBrand] = useState<string | null>(null);
@@ -459,18 +466,32 @@ export default function IdentifyResultScreen() {
           )}
 
           {!correcting && (
-            <Pressable
-              style={[styles.scannerLink, { marginBottom: insets.bottom + SPACING.md }]}
-              onPress={() => {
-                setShowCorrection(false);
-                router.replace('/identify/camera');
-              }}
-            >
-              <Text style={styles.scannerLinkText}>Back to Scanner</Text>
-            </Pressable>
+            <View style={[styles.correctionFooter, { paddingBottom: insets.bottom + SPACING.md }]}>
+              <Pressable onPress={openSuggest} style={styles.suggestLink}>
+                <Text style={styles.suggestLinkText}>Can't find it? Suggest a cigar</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  setShowCorrection(false);
+                  router.replace('/identify/camera');
+                }}
+              >
+                <Text style={styles.scannerLinkText}>Back to Scanner</Text>
+              </Pressable>
+            </View>
           )}
         </View>
       </Modal>
+
+      <SuggestCigarSheet
+        visible={showSuggest}
+        scanId={scanId}
+        onClose={() => setShowSuggest(false)}
+        onSubmitted={() => {
+          // After successful submit, land the user back on home — they've done all they can.
+          router.replace('/(tabs)');
+        }}
+      />
     </>
   );
 
@@ -524,9 +545,13 @@ export default function IdentifyResultScreen() {
           <View style={[styles.center, { flex: 1 }]}>
             <Text style={styles.errorTitle}>Couldn't identify this cigar</Text>
             <Text style={styles.errorSubtitle}>{error ?? 'No match found in our database'}</Text>
+            <Text style={styles.tips}>
+              Tip: hold the band centered with good light. Glare and motion blur make it tough.
+            </Text>
             <Button title="Find It Manually" onPress={handleCorrect} style={{ marginTop: SPACING.md }} />
             <Button title="Try Again" variant="secondary" onPress={() => router.replace('/identify/camera')} style={{ marginTop: SPACING.sm }} />
-            <Button title="Go Home" variant="ghost" onPress={() => router.replace('/(tabs)')} style={{ marginTop: SPACING.sm }} />
+            <Button title="Suggest a Cigar" variant="ghost" onPress={openSuggest} style={{ marginTop: SPACING.sm }} />
+            <Button title="Go Home" variant="ghost" onPress={() => router.replace('/(tabs)')} style={{ marginTop: SPACING.xs }} />
           </View>
         </View>
         {correctionModal}
@@ -931,6 +956,37 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: COLORS.accent,
+  },
+  correctionFooter: {
+    position: 'absolute',
+    bottom: 0,
+    left: SPACING.md,
+    right: SPACING.md,
+    alignItems: 'center',
+    gap: 8,
+    paddingTop: 12,
+    backgroundColor: COLORS.bg,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  suggestLink: {
+    paddingVertical: 4,
+  },
+  suggestLinkText: {
+    fontFamily: 'Cormorant',
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.muted,
+    textDecorationLine: 'underline',
+  },
+  tips: {
+    fontFamily: 'Cormorant',
+    fontSize: 13,
+    fontStyle: 'italic',
+    color: COLORS.muted,
+    textAlign: 'center',
+    marginTop: SPACING.sm,
+    paddingHorizontal: SPACING.md,
   },
   toast: {
     position: 'absolute',
