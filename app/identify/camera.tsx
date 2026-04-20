@@ -16,6 +16,7 @@ import {
   useCameraDevice,
   useCameraPermission,
   useFrameProcessor,
+  runAtTargetFps,
 } from 'react-native-vision-camera';
 import {
   GestureHandlerRootView,
@@ -61,6 +62,12 @@ type OcrBlock = {
 };
 
 type FrameDims = { width: number; height: number };
+
+function normalizeFileUri(path: string): string {
+  if (!path) return '';
+  if (path.startsWith('file://')) return path;
+  return `file://${path.startsWith('/') ? '' : '/'}${path}`;
+}
 
 function extractBlocks(data: unknown): OcrBlock[] {
   if (!data || typeof data !== 'object') return [];
@@ -237,8 +244,13 @@ export default function CameraScreen() {
   const frameProcessor = useFrameProcessor(
     (frame) => {
       'worklet';
-      const data = scanText(frame);
-      pushFromWorklet(data, frame.width, frame.height);
+      // Throttle MLKit at the worklet level to ~5 Hz. The 30 FPS default burned
+      // battery/thermal with no accuracy gain since we rate-limit JS updates anyway.
+      runAtTargetFps(5, () => {
+        'worklet';
+        const data = scanText(frame);
+        pushFromWorklet(data, frame.width, frame.height);
+      });
     },
     [scanText, pushFromWorklet]
   );
@@ -376,7 +388,7 @@ export default function CameraScreen() {
         const { data: { user } } = await supabase.auth.getUser();
         let imageUrl: string | null = null;
         if (path && user) {
-          const fileUri = path.startsWith('file://') ? path : `file://${path}`;
+          const fileUri = normalizeFileUri(path);
           const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
           const filePath = `${user.id}/${fileName}`;
           const imgRes = await fetch(fileUri);
@@ -428,7 +440,7 @@ export default function CameraScreen() {
       Alert.alert('Capture Error', 'Failed to capture photo. Please try again.');
       return;
     }
-    const uri = path.startsWith('file://') ? path : `file://${path}`;
+    const uri = normalizeFileUri(path);
     router.replace({
       pathname: '/identify/result',
       params: { imageUris: JSON.stringify([uri]) },
@@ -558,6 +570,18 @@ export default function CameraScreen() {
     return 'Aim at the cigar band';
   })();
 
+  // Debounce the displayed caption to prevent flicker when OCR candidates thrash.
+  const [displayedCaption, setDisplayedCaption] = useState(caption);
+  useEffect(() => {
+    // Skip debounce when we hit confident — users want that update instantly.
+    if (status === 'confident') {
+      setDisplayedCaption(caption);
+      return;
+    }
+    const t = setTimeout(() => setDisplayedCaption(caption), CAPTION_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [caption, status]);
+
   const bracketColor = (() => {
     switch (status) {
       case 'confident': return COLORS.success ?? '#4CAF50';
@@ -631,7 +655,7 @@ export default function CameraScreen() {
       {/* Caption */}
       <View style={[styles.captionWrap, { top: insets.top + 70 }]} pointerEvents="none">
         <Text style={[styles.caption, status === 'confident' && styles.captionConfident]}>
-          {caption}
+          {displayedCaption}
         </Text>
       </View>
 
@@ -653,15 +677,15 @@ export default function CameraScreen() {
                 </>
               )}
             </Pressable>
-            <Pressable onPress={handleRejectMatch} style={styles.secondaryBtn}>
-              <Text style={styles.secondaryText}>Not this one</Text>
+            <Pressable onPress={handleRejectMatch} style={styles.keepLookingBtn}>
+              <Text style={styles.keepLookingText}>Keep Looking</Text>
             </Pressable>
           </>
         )}
 
         {status !== 'confident' && showFallback && (
           <Pressable onPress={handleAskAI} style={styles.conciergeBtn}>
-            <Ionicons name="sparkles" size={18} color={COLORS.bg} />
+            <Ionicons name="sparkles" size={18} color={COLORS.accent} />
             <View>
               <Text style={styles.conciergeTitle}>Cigar Concierge</Text>
               <Text style={styles.conciergeSubtitle}>Let AI help ID this label</Text>
@@ -815,44 +839,44 @@ const styles = StyleSheet.create({
     color: COLORS.bg,
     letterSpacing: 0.3,
   },
-  secondaryBtn: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
+  keepLookingBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 22,
+    borderRadius: RADIUS.full,
+    borderWidth: 1.5,
+    borderColor: 'rgba(255,255,255,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
   },
-  secondaryText: {
+  keepLookingText: {
     fontFamily: 'Cormorant',
     fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
-    textDecorationLine: 'underline',
+    letterSpacing: 0.2,
   },
   conciergeBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: COLORS.accent,
-    paddingVertical: 12,
+    backgroundColor: 'rgba(0,0,0,0.55)',
+    paddingVertical: 11,
     paddingHorizontal: 22,
     borderRadius: RADIUS.full,
-    shadowColor: '#000',
-    shadowOpacity: 0.35,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 5,
+    borderWidth: 1.5,
+    borderColor: COLORS.accent,
   },
   conciergeTitle: {
     fontFamily: 'Cormorant',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '800',
-    color: COLORS.bg,
+    color: COLORS.accent,
     letterSpacing: 0.3,
   },
   conciergeSubtitle: {
     fontFamily: 'Cormorant',
-    fontSize: 12,
+    fontSize: 11,
     fontStyle: 'italic',
-    color: COLORS.bg,
-    opacity: 0.85,
+    color: COLORS.accentSoft ?? '#E8CC6A',
     marginTop: 1,
   },
 });

@@ -5,9 +5,20 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { InteractionManager } from 'react-native';
 import { supabase } from '@/lib/supabase';
 import { buildIndex, type CigarIndexEntry } from '@/src/features/identify/bandMatcher';
 import type { Cigar } from '@/src/types/cigar';
+
+// Run a CPU-bound rebuild after interactions so it doesn't jank the camera's
+// first paint. Returns a promise that resolves with the new index.
+function rebuildAfterInteractions(cigars: Cigar[]): Promise<CigarIndexEntry[]> {
+  return new Promise((resolve) => {
+    InteractionManager.runAfterInteractions(() => {
+      resolve(buildIndex(cigars));
+    });
+  });
+}
 
 interface CorpusState {
   // Persisted raw cigars — rebuilt into a runtime index after hydration.
@@ -34,7 +45,7 @@ export const useCigarCorpus = create<CorpusState>()(
       rebuildIndex: () => {
         const { cigars, index } = get();
         if (cigars.length > 0 && index.length === 0) {
-          set({ index: buildIndex(cigars) });
+          rebuildAfterInteractions(cigars).then((idx) => set({ index: idx }));
         }
       },
       load: async (opts) => {
@@ -42,9 +53,11 @@ export const useCigarCorpus = create<CorpusState>()(
         if (loading) return;
 
         // If we have persisted cigars but haven't rebuilt the runtime index yet
-        // (fresh launch after persist-hydration), rebuild before deciding to refetch.
+        // (fresh launch after persist-hydration), rebuild post-interaction so the
+        // first camera frame doesn't jank on a 500-row trigram build.
         if (cigars.length > 0 && index.length === 0) {
-          set({ index: buildIndex(cigars) });
+          const idx = await rebuildAfterInteractions(cigars);
+          set({ index: idx });
         }
 
         if (
@@ -69,8 +82,8 @@ export const useCigarCorpus = create<CorpusState>()(
             all.push(...rows);
             if (rows.length < pageSize) break;
           }
-          const index = buildIndex(all);
-          set({ cigars: all, index, loading: false, loadedAt: Date.now(), error: null });
+          const freshIndex = await rebuildAfterInteractions(all);
+          set({ cigars: all, index: freshIndex, loading: false, loadedAt: Date.now(), error: null });
         } catch (e: any) {
           // If the fetch failed but we have a persisted corpus, keep using it.
           const have = get().index.length > 0;
