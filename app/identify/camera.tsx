@@ -17,6 +17,12 @@ import {
   useCameraPermission,
   useFrameProcessor,
 } from 'react-native-vision-camera';
+import {
+  GestureHandlerRootView,
+  GestureDetector,
+  Gesture,
+} from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import { useTextRecognition } from 'react-native-vision-camera-v3-text-recognition';
 import { useRunOnJS } from 'react-native-worklets-core';
 import * as Haptics from 'expo-haptics';
@@ -142,6 +148,10 @@ export default function CameraScreen() {
       return () => setIsActive(false);
     }, [])
   );
+
+  const [torchOn, setTorchOn] = useState(false);
+  const [zoom, setZoom] = useState(1);
+  const zoomStartRef = useRef(1);
 
   // Rolling OCR observation window for consensus matching.
   const windowRef = useRef<string[][]>([]);
@@ -292,6 +302,46 @@ export default function CameraScreen() {
       );
     }
   }, [requestPermission]);
+
+  const handleFocus = useCallback(async (x: number, y: number) => {
+    if (!cameraRef.current) return;
+    try {
+      await cameraRef.current.focus({ x, y });
+    } catch {
+      // Some devices throw on rapid re-focus — safe to ignore, next frame will focus anyway.
+    }
+  }, []);
+
+  const tapGesture = useMemo(
+    () =>
+      Gesture.Tap()
+        .onEnd((e) => {
+          runOnJS(handleFocus)(e.x, e.y);
+        }),
+    [handleFocus]
+  );
+
+  const snapshotZoomStart = useCallback(() => {
+    zoomStartRef.current = zoom;
+  }, [zoom]);
+
+  const pinchGesture = useMemo(() => {
+    const minZoom = device?.minZoom ?? 1;
+    const maxZoom = Math.min(device?.maxZoom ?? 10, 10); // cap at 10x — anything higher is useless for bands
+    return Gesture.Pinch()
+      .onStart(() => {
+        runOnJS(snapshotZoomStart)();
+      })
+      .onUpdate((e) => {
+        const next = Math.max(minZoom, Math.min(maxZoom, zoomStartRef.current * e.scale));
+        runOnJS(setZoom)(next);
+      });
+  }, [device?.minZoom, device?.maxZoom, snapshotZoomStart]);
+
+  const composedGesture = useMemo(
+    () => Gesture.Simultaneous(pinchGesture, tapGesture),
+    [pinchGesture, tapGesture]
+  );
 
   const takeSnapshotFile = useCallback(async (): Promise<string | null> => {
     if (!cameraRef.current) return null;
@@ -518,6 +568,8 @@ export default function CameraScreen() {
   })();
 
   return (
+    <GestureHandlerRootView style={styles.screen}>
+    <GestureDetector gesture={composedGesture}>
     <View style={styles.screen}>
       <Camera
         ref={cameraRef}
@@ -527,6 +579,8 @@ export default function CameraScreen() {
         photo={true}
         frameProcessor={frameProcessor}
         pixelFormat="yuv"
+        torch={torchOn ? 'on' : 'off'}
+        zoom={zoom}
       />
 
       {/* Back button */}
@@ -535,6 +589,22 @@ export default function CameraScreen() {
         style={[styles.topBtn, { top: insets.top + 10, left: 16 }]}
       >
         <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+      </Pressable>
+
+      {/* Torch toggle */}
+      <Pressable
+        onPress={() => {
+          Haptics.selectionAsync();
+          setTorchOn((v) => !v);
+        }}
+        style={[styles.topBtn, { top: insets.top + 10, right: 68 }]}
+        hitSlop={8}
+      >
+        <Ionicons
+          name={torchOn ? 'flash' : 'flash-off-outline'}
+          size={22}
+          color={torchOn ? COLORS.accent : COLORS.text}
+        />
       </Pressable>
 
       {/* Gallery picker — scan a photo from the library via Concierge */}
@@ -600,6 +670,8 @@ export default function CameraScreen() {
         )}
       </View>
     </View>
+    </GestureDetector>
+    </GestureHandlerRootView>
   );
 }
 
