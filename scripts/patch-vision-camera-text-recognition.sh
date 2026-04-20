@@ -32,8 +32,8 @@ if [ -n "$TARGET" ]; then
   # ProxyHolder in an initWithProxy: signature), so delete the dead import.
   # Also rewrite historical bare-<> forms to the namespaced pod form, in case
   # a future plugin release pre-namespaces some imports but keeps this one.
-  if grep -qE "^#import <VisionCamera(/)?VisionCameraProxy\.h>" "$TARGET"; then
-    sed -E '/^#import <VisionCamera(\/)?VisionCameraProxy\.h>/d' \
+  if grep -qE "^#import <(VisionCamera/)?VisionCameraProxy\.h>" "$TARGET"; then
+    sed -E '/^#import <(VisionCamera\/)?VisionCameraProxy\.h>/d' \
       "$TARGET" > "$TARGET.tmp" && mv "$TARGET.tmp" "$TARGET"
     echo "[patch-vision-camera-text-recognition] Dropped dead VisionCameraProxy.h import."
   fi
