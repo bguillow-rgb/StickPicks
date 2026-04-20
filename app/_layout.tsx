@@ -1,5 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, LogBox } from 'react-native';
+
+// RevenueCat can't fetch offerings until the products are live in App Store
+// Connect, which only happens for release builds. In dev, the expected failure
+// surfaces as a red LogBox toast that obscures the UI we're trying to test —
+// silence it here.
+if (__DEV__) {
+  LogBox.ignoreLogs([
+    /\[RevenueCat\]/,
+    /Error fetching offerings/,
+  ]);
+}
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
