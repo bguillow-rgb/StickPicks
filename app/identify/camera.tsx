@@ -26,6 +26,8 @@ import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
 import { supabase } from '@/lib/supabase';
 import { useCigarCorpus } from '@/src/stores/useCigarCorpus';
 import { match, consensus, type MatchCandidate } from '@/src/features/identify/bandMatcher';
+import { useScanCount } from '@/src/hooks/useScanCount';
+import { getDeviceId } from '@/lib/deviceId';
 
 // How often we push OCR data from the frame-processor worklet back to React.
 const UPDATE_THROTTLE_MS = 200;
@@ -115,6 +117,8 @@ export default function CameraScreen() {
   const corpusLoading = useCigarCorpus((s) => s.loading);
   const corpusError = useCigarCorpus((s) => s.error);
   const loadCorpus = useCigarCorpus((s) => s.load);
+
+  const scans = useScanCount();
 
   // Lazy load the corpus on focus.
   useFocusEffect(
@@ -275,7 +279,10 @@ export default function CameraScreen() {
   }, []);
 
   const handleConfirm = useCallback(async () => {
-    if (!consensusMatch || confirming) return;
+    if (!consensusMatch) return;
+    // Mutex — prevent double-fire under slow navigation.
+    if (confirmLockRef.current) return;
+    confirmLockRef.current = true;
     setConfirming(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
@@ -285,7 +292,7 @@ export default function CameraScreen() {
     // Training snapshot — best-effort, never blocks navigation.
     (async () => {
       try {
-        const path = await takeSnapshotFile();
+        const [path, deviceId] = await Promise.all([takeSnapshotFile(), getDeviceId()]);
         const { data: { user } } = await supabase.auth.getUser();
         let imageUrl: string | null = null;
         if (path && user) {
@@ -302,6 +309,8 @@ export default function CameraScreen() {
         }
         await supabase.from('scan_images').insert({
           user_id: user?.id ?? null,
+          device_id: deviceId,
+          scan_method: 'ocr',
           image_url: imageUrl,
           identified_cigar_id: cigar.id,
           confidence,
@@ -354,6 +363,35 @@ export default function CameraScreen() {
     setStatus('aiming');
     setOverlayRect(null);
   }, []);
+
+  // Scan-limit gates — hard gate before the camera opens.
+  if (scans.limitReached) {
+    return (
+      <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
+        <Ionicons name="lock-closed-outline" size={48} color={COLORS.muted} style={{ marginBottom: SPACING.md }} />
+        <Text style={styles.permTitle}>You've used your {scans.limit} free scans</Text>
+        <Text style={styles.permText}>
+          Upgrade to Pro for unlimited identifications, wishlists, and smoking history.
+        </Text>
+        <Button title="Go Pro" onPress={() => router.replace('/paywall')} style={{ marginTop: SPACING.md }} />
+        <Button title="Go Back" variant="ghost" onPress={() => router.back()} style={{ marginTop: SPACING.sm }} />
+      </View>
+    );
+  }
+
+  if (scans.guestLimitReached) {
+    return (
+      <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
+        <Ionicons name="person-add-outline" size={48} color={COLORS.accent} style={{ marginBottom: SPACING.md }} />
+        <Text style={styles.permTitle}>Sign in for 5 more scans</Text>
+        <Text style={styles.permText}>
+          Guests get {scans.limit} free scans. Sign in to unlock 5 more — your scans so far will stick with you.
+        </Text>
+        <Button title="Sign In" onPress={() => router.replace('/auth/login')} style={{ marginTop: SPACING.md }} />
+        <Button title="Go Back" variant="ghost" onPress={() => router.back()} style={{ marginTop: SPACING.sm }} />
+      </View>
+    );
+  }
 
   if (!hasPermission) {
     return (

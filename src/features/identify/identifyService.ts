@@ -1,5 +1,6 @@
 import { File } from 'expo-file-system/next';
 import { supabase } from '@/lib/supabase';
+import { getDeviceId } from '@/lib/deviceId';
 import type { Cigar } from '@/src/types/cigar';
 
 interface IdentifyResult {
@@ -86,11 +87,13 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
     })),
   );
 
+  const deviceId = await getDeviceId();
+
   // Call our Supabase Edge Function — keeps Anthropic key server-side.
   // supabase.functions.invoke automatically attaches the user's JWT.
   const { data: apiResult, error: invokeError } = await supabase.functions.invoke(
     'identify-cigar',
-    { body: { images } },
+    { body: { images, device_id: deviceId } },
   );
 
   if (invokeError) {
@@ -98,6 +101,9 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
     const status = (invokeError as any).context?.status;
     if (status === 401) {
       throw new Error('Please sign in again and try scanning.');
+    }
+    if (status === 429) {
+      throw new Error('You\'ve hit the scan limit. Upgrade to Pro for unlimited scans.');
     }
     throw new Error('Cigar scanning is temporarily unavailable. Please try again later.');
   }
@@ -195,6 +201,8 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
 
     const { data: scanRow } = await supabase.from('scan_images').insert({
       user_id: user?.id ?? null,
+      device_id: deviceId,
+      scan_method: 'concierge',
       image_url: urlData.publicUrl,
       identified_cigar_id: matchedCigar?.id ?? null,
       confidence: parsed.confidence ?? null,
