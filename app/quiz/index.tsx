@@ -114,9 +114,11 @@ export default function QuizScreen() {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      {/* Hero image */}
+      {/* Hero image — bundled local asset. Remote Unsplash URLs have caused
+          random image flashes during navigation when the CDN serves a different
+          photo for a cached ID. Local asset loads instantly and is stable. */}
       <Image
-        source={{ uri: 'https://images.unsplash.com/photo-1694716438178-c6f34bddd64d?w=800&q=80' }}
+        source={require('../../assets/images/splash-icon.png')}
         style={styles.heroImage}
         resizeMode="cover"
       />
