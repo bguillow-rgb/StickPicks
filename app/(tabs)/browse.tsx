@@ -1,7 +1,7 @@
 import { View, Text, TextInput, StyleSheet, FlatList, ActivityIndicator, Image, Pressable, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
@@ -27,8 +27,24 @@ export default function BrowseScreen() {
   const [activeBrand, setActiveBrand] = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
   const cigarCount = useCigarCount();
-  const ratingsMap = useCommunityRatings(cigars.map((c) => c.id));
-  const humidorMap = useHumidorStatuses(cigars.map((c) => c.id));
+  // Dedupe by (brand, line) so multiple vitolas of the same line collapse into
+  // one card — users see "Padron 1964 Anniversary" once, not four times.
+  // Tapping the card still routes to a specific SKU so detail works normally;
+  // we just hide the redundant list entries.
+  const displayedCigars = useMemo(() => {
+    const seen = new Set<string>();
+    const out: Cigar[] = [];
+    for (const c of cigars) {
+      const key = `${c.brand}::${c.line ?? c.name}`.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(c);
+    }
+    return out;
+  }, [cigars]);
+
+  const ratingsMap = useCommunityRatings(displayedCigars.map((c) => c.id));
+  const humidorMap = useHumidorStatuses(displayedCigars.map((c) => c.id));
 
   const fetchByBrand = useCallback(async (brand: string) => {
     setLoading(true);
@@ -205,7 +221,7 @@ export default function BrowseScreen() {
       ) : (
         <FlatList
           ref={listRef}
-          data={cigars}
+          data={displayedCigars}
           keyExtractor={(c) => c.id}
           renderItem={renderCigar}
           extraData={[ratingsMap, humidorMap]}

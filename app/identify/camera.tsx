@@ -46,7 +46,9 @@ const WINDOW_SIZE = 6;
 // A candidate has to appear in at least this many frames of the window to lock.
 const MIN_CONSENSUS_FRAMES = 3;
 // Minimum normalized consensus score before we consider the match "confident".
-const CONFIDENT_SCORE = 0.35;
+// Lowered from 0.35 — short-token brands (Oliva, Padron) and partial band
+// readings score lower than initially assumed.
+const CONFIDENT_SCORE = 0.22;
 // How long with text visible but no lock before the Concierge button appears.
 const FALLBACK_PROMPT_MS = 4500;
 // How long on the camera with NO text ever detected before Concierge is offered
@@ -166,6 +168,7 @@ export default function CameraScreen() {
   const [overlayRect, setOverlayRect] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
   const [status, setStatus] = useState<ScannerStatus>('aiming');
   const [consensusMatch, setConsensusMatch] = useState<MatchCandidate | null>(null);
+  const [latestOcrText, setLatestOcrText] = useState<string>('');
   const [showFallback, setShowFallback] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const confirmLockRef = useRef(false);
@@ -191,6 +194,9 @@ export default function CameraScreen() {
         windowRef.current.push(texts);
         const frameMatches = corpusIndex.length > 0 ? match(texts, corpusIndex) : [];
         matchHistoryRef.current.push(frameMatches);
+        // Show user what OCR actually read — helps diagnose when text is being
+        // detected but no catalog match is landing.
+        setLatestOcrText(texts.join(' · ').slice(0, 80));
       }
       if (windowRef.current.length > WINDOW_SIZE) windowRef.current.shift();
       if (matchHistoryRef.current.length > WINDOW_SIZE) matchHistoryRef.current.shift();
@@ -505,6 +511,36 @@ export default function CameraScreen() {
     }
   }, [scans.limitReached, scans.guestLimitReached]);
 
+  // Caption computation + debounced display state. Declared with the rest of
+  // the hooks, BEFORE any early return, so React sees the same hook count on
+  // every render regardless of permission / scan-limit / device state.
+  const caption = (() => {
+    if (corpusError) return 'Catalog failed to load — try Cigar Concierge';
+    if (corpusLoading && corpusIndex.length === 0) return 'Loading cigar catalog…';
+    if (status === 'confident' && consensusMatch) {
+      const c = consensusMatch.cigar;
+      return `${c.brand} · ${c.line ?? c.name}`;
+    }
+    if (status === 'locking' && consensusMatch) {
+      const c = consensusMatch.cigar;
+      return `${c.brand}?  ${c.line ?? c.name}`;
+    }
+    if (status === 'reading') {
+      return latestOcrText ? `Reading: ${latestOcrText}` : 'Reading band…';
+    }
+    return 'Aim at the cigar band';
+  })();
+
+  const [displayedCaption, setDisplayedCaption] = useState(caption);
+  useEffect(() => {
+    if (status === 'confident') {
+      setDisplayedCaption(caption);
+      return;
+    }
+    const t = setTimeout(() => setDisplayedCaption(caption), CAPTION_DEBOUNCE_MS);
+    return () => clearTimeout(t);
+  }, [caption, status]);
+
   // Scan-limit gates — hard gate before the camera opens.
   if (scans.limitReached) {
     return (
@@ -554,33 +590,6 @@ export default function CameraScreen() {
       </View>
     );
   }
-
-  const caption = (() => {
-    if (corpusError) return 'Catalog failed to load — try Cigar Concierge';
-    if (corpusLoading && corpusIndex.length === 0) return 'Loading cigar catalog…';
-    if (status === 'confident' && consensusMatch) {
-      const c = consensusMatch.cigar;
-      return `${c.brand} · ${c.line ?? c.name}`;
-    }
-    if (status === 'locking' && consensusMatch) {
-      const c = consensusMatch.cigar;
-      return `${c.brand}?  ${c.line ?? c.name}`;
-    }
-    if (status === 'reading') return 'Reading band…';
-    return 'Aim at the cigar band';
-  })();
-
-  // Debounce the displayed caption to prevent flicker when OCR candidates thrash.
-  const [displayedCaption, setDisplayedCaption] = useState(caption);
-  useEffect(() => {
-    // Skip debounce when we hit confident — users want that update instantly.
-    if (status === 'confident') {
-      setDisplayedCaption(caption);
-      return;
-    }
-    const t = setTimeout(() => setDisplayedCaption(caption), CAPTION_DEBOUNCE_MS);
-    return () => clearTimeout(t);
-  }, [caption, status]);
 
   const bracketColor = (() => {
     switch (status) {

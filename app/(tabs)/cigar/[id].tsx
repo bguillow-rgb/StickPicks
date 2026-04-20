@@ -56,6 +56,12 @@ export default function CigarDetailScreen() {
   const [reviewText, setReviewText] = useState('');
   const [savingReview, setSavingReview] = useState(false);
 
+  // Undo snackbar state — declared with the other hooks, BEFORE any early
+  // return, so the hook-order invariant holds across renders.
+  const [undoVisible, setUndoVisible] = useState(false);
+  const undoOpacity = useRef(new Animated.Value(0)).current;
+  const undoUsedRef = useRef(false);
+
   // Community rating
   const communityRating = useCommunityRating(id);
 
@@ -145,6 +151,22 @@ export default function CigarDetailScreen() {
       }
     })();
   }, [id]);
+
+  // Undo snackbar animation — shows only when we arrived via ?from=scan and
+  // the cigar has loaded. Placed here (not after the loading/!cigar early
+  // returns) so the React hook order stays stable across renders.
+  useEffect(() => {
+    if (from !== 'scan' || !cigar) return;
+    setUndoVisible(true);
+    Animated.sequence([
+      Animated.delay(300),
+      Animated.timing(undoOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
+      Animated.delay(4500),
+      Animated.timing(undoOpacity, { toValue: 0, duration: 400, useNativeDriver: true }),
+    ]).start(({ finished }) => {
+      if (finished) setUndoVisible(false);
+    });
+  }, [from, cigar?.id]);
 
   const handleSaveNotes = async () => {
     if (!primaryItem) return;
@@ -329,25 +351,6 @@ export default function CigarDetailScreen() {
   const showReviewDisplay = isSmoked && myReview && !editingReview;
 
   const fromScan = from === 'scan';
-
-  // Undo snackbar — only shows when we arrived via scan-confirm. Fades in ~300ms
-  // after mount, auto-dismisses at 4.5s. Tapping Undo removes the humidor row
-  // the scan flow just inserted and routes back to the scanner.
-  const [undoVisible, setUndoVisible] = useState(false);
-  const undoOpacity = useRef(new Animated.Value(0)).current;
-  const undoUsedRef = useRef(false);
-  useEffect(() => {
-    if (!fromScan || !cigar) return;
-    setUndoVisible(true);
-    Animated.sequence([
-      Animated.delay(300),
-      Animated.timing(undoOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
-      Animated.delay(4500),
-      Animated.timing(undoOpacity, { toValue: 0, duration: 400, useNativeDriver: true }),
-    ]).start(({ finished }) => {
-      if (finished) setUndoVisible(false);
-    });
-  }, [fromScan, cigar?.id]);
 
   const handleUndo = async () => {
     if (undoUsedRef.current || !cigar) return;

@@ -1,6 +1,6 @@
 import {
   View, Text, StyleSheet, Image, ScrollView, ActivityIndicator, Alert,
-  Modal, TextInput, FlatList, Pressable, Keyboard, Animated,
+  Modal, TextInput, FlatList, Pressable, Keyboard, Animated, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -361,6 +361,10 @@ export default function IdentifyResultScreen() {
         presentationStyle="pageSheet"
         onRequestClose={() => setShowCorrection(false)}
       >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          style={{ flex: 1 }}
+        >
         <View style={[styles.modalContainer, { paddingTop: insets.top + SPACING.md }]}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Find the Right Cigar</Text>
@@ -481,6 +485,7 @@ export default function IdentifyResultScreen() {
             </View>
           )}
         </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <SuggestCigarSheet

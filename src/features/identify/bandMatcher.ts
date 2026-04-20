@@ -24,15 +24,11 @@ export interface MatchCandidate {
   score: number; // 0..1
 }
 
-const ACCENT_MAP: Record<string, string> = {
-  ñ: 'n', á: 'a', é: 'e', í: 'i', ó: 'o', ú: 'u', Ñ: 'N',
-  Á: 'A', É: 'E', Í: 'I', Ó: 'O', Ú: 'U',
-};
-
+// Unicode-safe accent stripping via NFD decomposition + combining-mark removal.
+// Handles both precomposed (Padrón → Padron) and decomposed (Padro\u0301n) forms —
+// MLKit's output can arrive in either, especially on iOS.
 function stripAccents(s: string): string {
-  let out = '';
-  for (const ch of s) out += ACCENT_MAP[ch] ?? ch;
-  return out;
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 }
 
 export function normalize(s: string): string {
