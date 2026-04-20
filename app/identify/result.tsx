@@ -15,6 +15,8 @@ import ReanimatedLib, {
 } from 'react-native-reanimated';
 import { supabase } from '@/lib/supabase';
 import { identifyCigar } from '@/src/features/identify/identifyService';
+import { track } from '@/src/lib/observability/analytics';
+import { EVENTS } from '@/src/lib/observability/events';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
 import { Meter } from '@/src/components/ui/Meter';
@@ -234,6 +236,9 @@ export default function IdentifyResultScreen() {
   }, [selectedBrand]);
 
   const handleConfirm = async () => {
+    if (cigar) {
+      track(EVENTS.SCAN_RESULT_CONFIRMED, { method: 'concierge', cigar_id: cigar.id });
+    }
     // Mark scan as confirmed
     if (scanId) {
       try {
@@ -300,6 +305,11 @@ export default function IdentifyResultScreen() {
     : allBrandLines;
 
   const handleSelectCorrection = async (correctedCigar: Cigar) => {
+    track(EVENTS.SCAN_RESULT_CORRECTED, {
+      method: 'concierge',
+      original_cigar_id: cigar?.id ?? null,
+      corrected_cigar_id: correctedCigar.id,
+    });
     setCorrecting(true);
     // Update scan_images with the correction
     if (scanId) {

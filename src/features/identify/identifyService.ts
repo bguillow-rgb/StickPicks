@@ -1,6 +1,8 @@
 import { File } from 'expo-file-system/next';
 import { supabase } from '@/lib/supabase';
 import { getDeviceId } from '@/lib/deviceId';
+import { track } from '@/src/lib/observability/analytics';
+import { EVENTS } from '@/src/lib/observability/events';
 import type { Cigar } from '@/src/types/cigar';
 
 interface IdentifyResult {
@@ -165,6 +167,15 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
       }
     }
   }
+
+  track(EVENTS.SCAN_RESULT_RECEIVED, {
+    method: 'concierge',
+    frame_count: uris.length,
+    cigar_id: matchedCigar?.id ?? null,
+    raw_brand: parsed.brand ?? null,
+    raw_line: parsedLine,
+    confidence: parsed.confidence ?? 0,
+  });
 
   // Compute display fields using the new `line` column (preferred) with name fallback
   let displayName = parsedLine ?? 'Unknown';

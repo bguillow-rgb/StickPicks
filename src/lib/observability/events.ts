@@ -19,7 +19,14 @@ export const EVENTS = {
   SCAN_RESULT_RECEIVED: 'scan_result_received',
   SCAN_RESULT_CONFIRMED: 'scan_result_confirmed',
   SCAN_RESULT_CORRECTED: 'scan_result_corrected',
+  SCAN_RESULT_REJECTED: 'scan_result_rejected',
   SCAN_LIMIT_REACHED: 'scan_limit_reached',
+  SCAN_CONCIERGE_OFFERED: 'scan_concierge_offered',
+  SCAN_CONCIERGE_TAPPED: 'scan_concierge_tapped',
+  SCAN_GALLERY_TAPPED: 'scan_gallery_tapped',
+  SCAN_SUGGEST_CIGAR_OPENED: 'scan_suggest_cigar_opened',
+  SCAN_SUGGEST_CIGAR_SUBMITTED: 'scan_suggest_cigar_submitted',
+  SCAN_UNDO_TAPPED: 'scan_undo_tapped',
 
   // Humidor & Journal
   HUMIDOR_ITEM_ADDED: 'humidor_item_added',

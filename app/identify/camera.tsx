@@ -28,6 +28,8 @@ import { useCigarCorpus } from '@/src/stores/useCigarCorpus';
 import { match, consensus, type MatchCandidate } from '@/src/features/identify/bandMatcher';
 import { useScanCount } from '@/src/hooks/useScanCount';
 import { getDeviceId } from '@/lib/deviceId';
+import { track } from '@/src/lib/observability/analytics';
+import { EVENTS } from '@/src/lib/observability/events';
 
 // How often we push OCR data from the frame-processor worklet back to React.
 const UPDATE_THROTTLE_MS = 200;
@@ -119,6 +121,11 @@ export default function CameraScreen() {
   const loadCorpus = useCigarCorpus((s) => s.load);
 
   const scans = useScanCount();
+
+  // SCAN_STARTED fires once per camera-open session.
+  useEffect(() => {
+    track(EVENTS.SCAN_STARTED, { source: 'camera_tab' });
+  }, []);
 
   // Lazy load the corpus on focus.
   useFocusEffect(
@@ -225,15 +232,32 @@ export default function CameraScreen() {
     [scanText, pushFromWorklet]
   );
 
-  // Haptic tick when we first go confident.
+  // Haptic tick + telemetry when we first go confident.
   const wasConfidentRef = useRef(false);
   useEffect(() => {
     const isConfident = status === 'confident';
-    if (isConfident && !wasConfidentRef.current) {
+    if (isConfident && !wasConfidentRef.current && consensusMatch) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      track(EVENTS.SCAN_RESULT_RECEIVED, {
+        method: 'ocr',
+        cigar_id: consensusMatch.cigar.id,
+        score: Number(consensusMatch.score.toFixed(3)),
+      });
     }
     wasConfidentRef.current = isConfident;
-  }, [status]);
+  }, [status, consensusMatch]);
+
+  // SCAN_CONCIERGE_OFFERED fires the first time we reveal the fallback.
+  const conciergeOfferedRef = useRef(false);
+  useEffect(() => {
+    if (showFallback && !conciergeOfferedRef.current) {
+      conciergeOfferedRef.current = true;
+      track(EVENTS.SCAN_CONCIERGE_OFFERED, {
+        had_text: firstTextAtRef.current !== null,
+      });
+      Haptics.selectionAsync();
+    }
+  }, [showFallback]);
 
   // Reveal the Concierge fallback after either:
   //   - FALLBACK_PROMPT_MS of reading text but not locking, OR
@@ -288,6 +312,11 @@ export default function CameraScreen() {
 
     const cigar = consensusMatch.cigar;
     const confidence = consensusMatch.score;
+    track(EVENTS.SCAN_RESULT_CONFIRMED, {
+      method: 'ocr',
+      cigar_id: cigar.id,
+      score: Number(confidence.toFixed(3)),
+    });
 
     // Training snapshot — best-effort, never blocks navigation.
     (async () => {
@@ -342,6 +371,7 @@ export default function CameraScreen() {
 
   const handleAskAI = useCallback(async () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    track(EVENTS.SCAN_CONCIERGE_TAPPED, { source: 'fallback' });
     const path = await takeSnapshotFile();
     if (!path) {
       Alert.alert('Capture Error', 'Failed to capture photo. Please try again.');
@@ -355,14 +385,30 @@ export default function CameraScreen() {
   }, [router, takeSnapshotFile]);
 
   const handleRejectMatch = useCallback(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.selectionAsync();
+    track(EVENTS.SCAN_RESULT_REJECTED, {
+      method: 'ocr',
+      cigar_id: consensusMatch?.cigar.id,
+    });
     // Blow away consensus and keep scanning.
     windowRef.current = [];
     matchHistoryRef.current = [];
     setConsensusMatch(null);
     setStatus('aiming');
     setOverlayRect(null);
-  }, []);
+  }, [consensusMatch]);
+
+  // Emit SCAN_LIMIT_REACHED once per gate hit, not on every render.
+  const limitFiredRef = useRef(false);
+  useEffect(() => {
+    if ((scans.limitReached || scans.guestLimitReached) && !limitFiredRef.current) {
+      limitFiredRef.current = true;
+      track(EVENTS.SCAN_LIMIT_REACHED, {
+        guest: scans.guestLimitReached,
+        total: scans.limitReached,
+      });
+    }
+  }, [scans.limitReached, scans.guestLimitReached]);
 
   // Scan-limit gates — hard gate before the camera opens.
   if (scans.limitReached) {
