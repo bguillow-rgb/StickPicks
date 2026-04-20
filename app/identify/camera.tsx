@@ -1,266 +1,538 @@
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+// Live band scanner — VisionCamera + MLKit text recognition frame processor.
+// Runs OCR on every frame, matches text against the preloaded cigar corpus,
+// and lets the user confirm as soon as the match is stable. No shutter,
+// no multi-frame capture ceremony.
+//
+// Fallback path: when OCR can't lock a match within FALLBACK_PROMPT_MS, we
+// reveal the "Ask AI" button which routes to the existing identifyService
+// flow. Manual search remains available from the result screen after that.
+
+import { View, Text, StyleSheet, Pressable, Linking, Alert, ActivityIndicator } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useRef, useEffect } from 'react';
-import { CameraView, useCameraPermissions } from 'expo-camera';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  Camera,
+  useCameraDevice,
+  useCameraPermission,
+  useFrameProcessor,
+} from 'react-native-vision-camera';
+import { useTextRecognition } from 'react-native-vision-camera-v3-text-recognition';
+import { useRunOnJS } from 'react-native-worklets-core';
 import * as Haptics from 'expo-haptics';
 import { Ionicons } from '@expo/vector-icons';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withRepeat,
-  withSequence,
-  Easing,
-  interpolateColor,
-} from 'react-native-reanimated';
 import { Button } from '@/src/components/ui/Button';
 import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
+import { supabase } from '@/lib/supabase';
+import { useCigarCorpus } from '@/src/stores/useCigarCorpus';
+import { match, consensus, type MatchCandidate } from '@/src/features/identify/bandMatcher';
 
-const FRAME_COUNT = 4;
-const CAPTURE_INTERVAL_MS = 750;
-const SWEEP_DURATION_MS = CAPTURE_INTERVAL_MS * FRAME_COUNT;
+// How often we push OCR data from the frame-processor worklet back to React.
+const UPDATE_THROTTLE_MS = 200;
+// Size of the sliding observation window used for consensus matching.
+const WINDOW_SIZE = 6;
+// A candidate has to appear in at least this many frames of the window to lock.
+const MIN_CONSENSUS_FRAMES = 3;
+// Minimum normalized consensus score before we consider the match "confident".
+const CONFIDENT_SCORE = 0.35;
+// How long with text visible but no lock before the Concierge button appears.
+const FALLBACK_PROMPT_MS = 4500;
+// How long on the camera with NO text ever detected before Concierge is offered
+// anyway. Covers text-less / decorative-only bands.
+const NO_TEXT_FALLBACK_MS = 9000;
+// Debounce caption updates so it doesn't thrash between candidates.
+const CAPTION_DEBOUNCE_MS = 400;
+
+type OcrBlock = {
+  text: string;
+  // Raw bbox in frame (sensor) coords.
+  bbox: { top: number; left: number; right: number; bottom: number };
+};
+
+type FrameDims = { width: number; height: number };
+
+function extractBlocks(data: unknown): OcrBlock[] {
+  if (!data || typeof data !== 'object') return [];
+  const out: OcrBlock[] = [];
+  for (const key of Object.keys(data as Record<string, unknown>)) {
+    const v = (data as Record<string, any>)[key];
+    if (!v || typeof v !== 'object') continue;
+    const text = typeof v.blockText === 'string' ? v.blockText : '';
+    if (!text) continue;
+    out.push({
+      text,
+      bbox: {
+        top: Number(v.blockFrameTop ?? 0),
+        left: Number(v.blockFrameLeft ?? 0),
+        right: Number(v.blockFrameRight ?? 0),
+        bottom: Number(v.blockFrameBottom ?? 0),
+      },
+    });
+  }
+  return out;
+}
+
+// Transform an MLKit sensor-coord bbox into normalized [0..1] portrait screen
+// coords (x=left, y=top, w, h). Assumes iOS back camera held portrait —
+// the sensor frame is landscape-oriented, so we rotate 90° CCW.
+// Imperfect on all device/orientation combos; sufficient for a coaching overlay.
+function toScreenRect(
+  bbox: OcrBlock['bbox'],
+  frame: FrameDims
+): { x: number; y: number; w: number; h: number } | null {
+  if (!frame.width || !frame.height) return null;
+  // In landscape frame: long side = width, short side = height.
+  // Rotate 90° CCW: (x_frame, y_frame) → (y_frame, frameWidth - x_frame)
+  // New axes after rotation: x' ∈ [0..frame.height], y' ∈ [0..frame.width]
+  const x1 = bbox.top / frame.height;
+  const x2 = bbox.bottom / frame.height;
+  const y1 = (frame.width - bbox.right) / frame.width;
+  const y2 = (frame.width - bbox.left) / frame.width;
+  const x = Math.min(x1, x2);
+  const y = Math.min(y1, y2);
+  const w = Math.abs(x2 - x1);
+  const h = Math.abs(y2 - y1);
+  if (w <= 0 || h <= 0) return null;
+  return { x, y, w, h };
+}
+
+type ScannerStatus =
+  | 'aiming'           // camera up, no text yet
+  | 'reading'          // text visible but no corpus match
+  | 'locking'          // unstable candidates
+  | 'confident'        // locked
+  | 'dead-end';        // long timeout, offer AI
 
 export default function CameraScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const cameraRef = useRef<CameraView>(null);
-  const [permission, requestPermission] = useCameraPermissions();
-  const [facing, setFacing] = useState<'front' | 'back'>('back');
-  const [capturing, setCapturing] = useState(false);
-  const [framesDone, setFramesDone] = useState(0);
+  const cameraRef = useRef<Camera>(null);
 
-  // Animations
-  const sweepY = useSharedValue(0);       // 0..1 vertical position inside frame guide
-  const cornerPulse = useSharedValue(0);  // 0..1 pulsing corner brackets
-  const shutterFlash = useSharedValue(0); // 0..1 white flash on each capture
-  const overlayOpacity = useSharedValue(0);
+  const { hasPermission, requestPermission } = useCameraPermission();
+  const device = useCameraDevice('back');
 
-  // Idle corner pulse (before capture starts)
+  const corpusIndex = useCigarCorpus((s) => s.index);
+  const corpusLoading = useCigarCorpus((s) => s.loading);
+  const corpusError = useCigarCorpus((s) => s.error);
+  const loadCorpus = useCigarCorpus((s) => s.load);
+
+  // Lazy load the corpus on focus.
+  useFocusEffect(
+    useCallback(() => {
+      loadCorpus();
+    }, [loadCorpus])
+  );
+
+  const [isActive, setIsActive] = useState(true);
+  useFocusEffect(
+    useCallback(() => {
+      setIsActive(true);
+      return () => setIsActive(false);
+    }, [])
+  );
+
+  // Rolling OCR observation window for consensus matching.
+  const windowRef = useRef<string[][]>([]);
+  const matchHistoryRef = useRef<MatchCandidate[][]>([]);
+  const [overlayRect, setOverlayRect] = useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  const [status, setStatus] = useState<ScannerStatus>('aiming');
+  const [consensusMatch, setConsensusMatch] = useState<MatchCandidate | null>(null);
+  const [showFallback, setShowFallback] = useState(false);
+  const [confirming, setConfirming] = useState(false);
+  const confirmLockRef = useRef(false);
+  const lastPushRef = useRef(0);
+  const firstTextAtRef = useRef<number | null>(null);
+  const mountedAtRef = useRef<number>(Date.now());
+  const lastCaptionChangeRef = useRef<number>(0);
+
+  const { scanText } = useTextRecognition({ language: 'latin' });
+
+  const pushFromWorklet = useRunOnJS(
+    (data: unknown, frameWidth: number, frameHeight: number) => {
+      const now = Date.now();
+      if (now - lastPushRef.current < UPDATE_THROTTLE_MS) return;
+      lastPushRef.current = now;
+
+      const blocks = extractBlocks(data);
+      if (blocks.length === 0) {
+        windowRef.current.push([]);
+        matchHistoryRef.current.push([]);
+      } else {
+        const texts = blocks.map((b) => b.text);
+        windowRef.current.push(texts);
+        const frameMatches = corpusIndex.length > 0 ? match(texts, corpusIndex) : [];
+        matchHistoryRef.current.push(frameMatches);
+      }
+      if (windowRef.current.length > WINDOW_SIZE) windowRef.current.shift();
+      if (matchHistoryRef.current.length > WINDOW_SIZE) matchHistoryRef.current.shift();
+
+      if (blocks.length > 0 && firstTextAtRef.current == null) {
+        firstTextAtRef.current = now;
+      }
+
+      const best = consensus(matchHistoryRef.current, MIN_CONSENSUS_FRAMES);
+      setConsensusMatch(best);
+
+      // Overlay: pick the widest block that's near the vertical middle of the
+      // frame — that's almost always the band. Stray text at the edges (other
+      // cigars, packaging) gets de-prioritized.
+      if (blocks.length > 0) {
+        // In landscape frame coords, vertical middle of the band = frameHeight/2.
+        // Penalize blocks whose center is far from that.
+        const frameCenterY = frameHeight / 2;
+        const scored = blocks.map((b) => {
+          const width = b.bbox.right - b.bbox.left;
+          const centerY = (b.bbox.top + b.bbox.bottom) / 2;
+          const distanceFromCenter = Math.abs(centerY - frameCenterY) / Math.max(1, frameCenterY);
+          return { block: b, score: width * (1 - Math.min(distanceFromCenter, 0.9)) };
+        });
+        scored.sort((a, b) => b.score - a.score);
+        const winner = scored[0].block;
+        const rect = toScreenRect(winner.bbox, { width: frameWidth, height: frameHeight });
+        setOverlayRect(rect);
+      } else {
+        setOverlayRect(null);
+      }
+
+      // Update status machine.
+      if (best && best.score >= CONFIDENT_SCORE) {
+        setStatus('confident');
+        return;
+      }
+      if (best) {
+        setStatus('locking');
+        return;
+      }
+      if (blocks.length > 0) {
+        setStatus('reading');
+        return;
+      }
+      setStatus('aiming');
+    },
+    [corpusIndex]
+  );
+
+  const frameProcessor = useFrameProcessor(
+    (frame) => {
+      'worklet';
+      const data = scanText(frame);
+      pushFromWorklet(data, frame.width, frame.height);
+    },
+    [scanText, pushFromWorklet]
+  );
+
+  // Haptic tick when we first go confident.
+  const wasConfidentRef = useRef(false);
   useEffect(() => {
-    cornerPulse.value = withRepeat(
-      withSequence(
-        withTiming(1, { duration: 900, easing: Easing.inOut(Easing.sin) }),
-        withTiming(0, { duration: 900, easing: Easing.inOut(Easing.sin) }),
-      ),
-      -1,
-      false,
-    );
+    const isConfident = status === 'confident';
+    if (isConfident && !wasConfidentRef.current) {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
+    wasConfidentRef.current = isConfident;
+  }, [status]);
+
+  // Reveal the Concierge fallback after either:
+  //   - FALLBACK_PROMPT_MS of reading text but not locking, OR
+  //   - NO_TEXT_FALLBACK_MS since mount with no text ever detected
+  // (decorative-only bands with no readable text still get an escape hatch).
+  useEffect(() => {
+    if (showFallback) return;
+    if (status === 'confident') return;
+
+    const noTextDeadline = mountedAtRef.current + NO_TEXT_FALLBACK_MS;
+    const textDeadline =
+      firstTextAtRef.current !== null
+        ? firstTextAtRef.current + FALLBACK_PROMPT_MS
+        : Infinity;
+    const deadline = Math.min(noTextDeadline, textDeadline);
+    const wait = Math.max(0, deadline - Date.now());
+    const t = setTimeout(() => setShowFallback(true), wait);
+    return () => clearTimeout(t);
+  }, [status, showFallback]);
+
+  const handlePermission = useCallback(async () => {
+    const granted = await requestPermission();
+    if (!granted) {
+      Alert.alert(
+        'Camera access needed',
+        'Enable camera access in Settings to scan cigars.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Open Settings', onPress: () => Linking.openSettings() },
+        ]
+      );
+    }
+  }, [requestPermission]);
+
+  const takeSnapshotFile = useCallback(async (): Promise<string | null> => {
+    if (!cameraRef.current) return null;
+    try {
+      const photo = await cameraRef.current.takeSnapshot({ quality: 70 });
+      return photo?.path ?? null;
+    } catch {
+      return null;
+    }
   }, []);
 
-  // ALL hooks must be declared unconditionally BEFORE any early return,
-  // otherwise React crashes with "Rendered more hooks than previous render".
-  const sweepStyle = useAnimatedStyle(() => ({
-    top: `${sweepY.value * 100}%`,
-    opacity: overlayOpacity.value,
-  }));
+  const handleConfirm = useCallback(async () => {
+    if (!consensusMatch || confirming) return;
+    setConfirming(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
-  const cornerStyle = useAnimatedStyle(() => ({
-    opacity: 0.55 + cornerPulse.value * 0.45,
-  }));
+    const cigar = consensusMatch.cigar;
+    const confidence = consensusMatch.score;
 
-  const flashStyle = useAnimatedStyle(() => ({
-    opacity: shutterFlash.value * 0.6,
-  }));
+    // Training snapshot — best-effort, never blocks navigation.
+    (async () => {
+      try {
+        const path = await takeSnapshotFile();
+        const { data: { user } } = await supabase.auth.getUser();
+        let imageUrl: string | null = null;
+        if (path && user) {
+          const fileUri = path.startsWith('file://') ? path : `file://${path}`;
+          const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+          const filePath = `${user.id}/${fileName}`;
+          const imgRes = await fetch(fileUri);
+          const blob = await imgRes.blob();
+          await supabase.storage.from('scan-uploads').upload(filePath, blob, {
+            contentType: 'image/jpeg',
+          });
+          const { data: urlData } = supabase.storage.from('scan-uploads').getPublicUrl(filePath);
+          imageUrl = urlData.publicUrl;
+        }
+        await supabase.from('scan_images').insert({
+          user_id: user?.id ?? null,
+          image_url: imageUrl,
+          identified_cigar_id: cigar.id,
+          confidence,
+          user_confirmed: true,
+          raw_llm_response: { method: 'ocr', score: confidence },
+        });
+      } catch {
+        // Non-blocking
+      }
+    })();
 
-  const overlayTintStyle = useAnimatedStyle(() => ({
-    opacity: overlayOpacity.value * 0.25,
-  }));
+    // Add to humidor as owned.
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('humidor_items')
+          .upsert(
+            { user_id: user.id, cigar_id: cigar.id, status: 'owned' },
+            { onConflict: 'user_id,cigar_id,status' }
+          );
+      }
+    } catch {
+      // Non-blocking
+    }
 
-  if (!permission) {
-    return <View style={styles.screen} />;
-  }
+    router.replace(`/(tabs)/cigar/${cigar.id}?from=scan`);
+  }, [consensusMatch, confirming, router, takeSnapshotFile]);
 
-  if (!permission.granted) {
+  const handleAskAI = useCallback(async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const path = await takeSnapshotFile();
+    if (!path) {
+      Alert.alert('Capture Error', 'Failed to capture photo. Please try again.');
+      return;
+    }
+    const uri = path.startsWith('file://') ? path : `file://${path}`;
+    router.replace({
+      pathname: '/identify/result',
+      params: { imageUris: JSON.stringify([uri]) },
+    });
+  }, [router, takeSnapshotFile]);
+
+  const handleRejectMatch = useCallback(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    // Blow away consensus and keep scanning.
+    windowRef.current = [];
+    matchHistoryRef.current = [];
+    setConsensusMatch(null);
+    setStatus('aiming');
+    setOverlayRect(null);
+  }, []);
+
+  if (!hasPermission) {
     return (
-      <View style={[styles.screen, styles.center]}>
-        <Text style={styles.permText}>Camera access is required to scan cigars</Text>
-        <Button title="Grant Permission" onPress={requestPermission} style={{ marginTop: SPACING.md }} />
+      <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
+        <Ionicons name="camera-outline" size={48} color={COLORS.muted} style={{ marginBottom: SPACING.md }} />
+        <Text style={styles.permTitle}>Camera access needed</Text>
+        <Text style={styles.permText}>Stick Picks uses the camera to read cigar bands.</Text>
+        <Button title="Grant Permission" onPress={handlePermission} style={{ marginTop: SPACING.md }} />
         <Button title="Go Back" variant="ghost" onPress={() => router.back()} style={{ marginTop: SPACING.sm }} />
       </View>
     );
   }
 
-  const triggerFlash = () => {
-    shutterFlash.value = withSequence(
-      withTiming(1, { duration: 50 }),
-      withTiming(0, { duration: 200 }),
+  if (!device) {
+    return (
+      <View style={[styles.screen, styles.center]}>
+        <ActivityIndicator color={COLORS.accent} />
+        <Text style={[styles.permText, { marginTop: SPACING.md }]}>Preparing camera…</Text>
+      </View>
     );
-  };
+  }
 
-  const captureFrame = async (): Promise<string | null> => {
-    if (!cameraRef.current) return null;
-    try {
-      const photo = await cameraRef.current.takePictureAsync({
-        quality: 0.75,
-        base64: false,
-        shutterSound: false,
-      });
-      return photo?.uri ?? null;
-    } catch {
-      return null;
+  const caption = (() => {
+    if (corpusError) return 'Catalog failed to load — try Cigar Concierge';
+    if (corpusLoading && corpusIndex.length === 0) return 'Loading cigar catalog…';
+    if (status === 'confident' && consensusMatch) {
+      const c = consensusMatch.cigar;
+      return `${c.brand} · ${c.line ?? c.name}`;
     }
-  };
-
-  const handleStartCapture = async () => {
-    if (capturing) return;
-
-    setCapturing(true);
-    setFramesDone(0);
-
-    // Haptic: strong "start" impact
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-
-    // Fade in the scanning overlay
-    overlayOpacity.value = withTiming(1, { duration: 180 });
-
-    // Start the sweeping laser line — takes the full capture window
-    sweepY.value = 0;
-    sweepY.value = withTiming(1, { duration: SWEEP_DURATION_MS, easing: Easing.inOut(Easing.ease) });
-
-    // Capture N frames at fixed intervals
-    const uris: string[] = [];
-    for (let i = 0; i < FRAME_COUNT; i++) {
-      const uri = await captureFrame();
-      if (uri) uris.push(uri);
-      triggerFlash();
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      setFramesDone(i + 1);
-      if (i < FRAME_COUNT - 1) {
-        await new Promise((r) => setTimeout(r, CAPTURE_INTERVAL_MS));
-      }
+    if (status === 'locking' && consensusMatch) {
+      const c = consensusMatch.cigar;
+      return `${c.brand}?  ${c.line ?? c.name}`;
     }
+    if (status === 'reading') return 'Reading band…';
+    return 'Aim at the cigar band';
+  })();
 
-    // Success haptic + dismiss
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-
-    // Small pause so the user sees 4/4 dots filled
-    await new Promise((r) => setTimeout(r, 250));
-
-    if (uris.length === 0) {
-      setCapturing(false);
-      setFramesDone(0);
-      overlayOpacity.value = withTiming(0, { duration: 150 });
-      Alert.alert('Capture Error', 'Failed to capture photos. Please try again.');
-      return;
+  const bracketColor = (() => {
+    switch (status) {
+      case 'confident': return COLORS.success ?? '#4CAF50';
+      case 'locking': return COLORS.accent;
+      case 'reading': return 'rgba(255,255,255,0.7)';
+      default: return 'rgba(255,255,255,0.35)';
     }
-
-    // Navigate to result with all captured URIs
-    router.replace({
-      pathname: '/identify/result',
-      params: { imageUris: JSON.stringify(uris) },
-    });
-  };
+  })();
 
   return (
     <View style={styles.screen}>
-      <CameraView
+      <Camera
         ref={cameraRef}
-        style={styles.camera}
-        facing={facing}
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive={isActive}
+        photo={true}
+        frameProcessor={frameProcessor}
+        pixelFormat="yuv"
+      />
+
+      {/* Back button */}
+      <Pressable
+        onPress={() => router.back()}
+        style={[styles.topBtn, { top: insets.top + 10, left: 16 }]}
       >
-        {/* Vignette tint during capture */}
-        <Animated.View style={[StyleSheet.absoluteFill, styles.vignette, overlayTintStyle]} pointerEvents="none" />
+        <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+      </Pressable>
 
-        {/* Back button */}
-        <Pressable
-          onPress={() => router.back()}
-          style={[styles.topBtn, { top: insets.top + 10, left: 16 }]}
-          disabled={capturing}
-        >
-          <Ionicons name="arrow-back" size={24} color={COLORS.text} />
-        </Pressable>
-
-        {/* Flip camera */}
-        <Pressable
-          onPress={() => setFacing((f) => f === 'back' ? 'front' : 'back')}
-          style={[styles.topBtn, { top: insets.top + 10, right: 16 }]}
-          disabled={capturing}
-        >
-          <Ionicons name="camera-reverse-outline" size={24} color={COLORS.text} />
-        </Pressable>
-
-        {/* Frame guide with pulsing corners */}
+      {/* Dynamic brackets — when we have a bbox, we render it; else a centered guide */}
+      {overlayRect ? (
+        <BandBrackets rect={overlayRect} color={bracketColor} />
+      ) : (
         <View style={styles.frameGuide} pointerEvents="none">
-          <Animated.View style={[styles.frameCornerTL, cornerStyle]} />
-          <Animated.View style={[styles.frameCornerTR, cornerStyle]} />
-          <Animated.View style={[styles.frameCornerBL, cornerStyle]} />
-          <Animated.View style={[styles.frameCornerBR, cornerStyle]} />
-
-          {/* Sweeping laser line — only visible during capture */}
-          <Animated.View style={[styles.sweepLine, sweepStyle]} pointerEvents="none" />
+          <View style={[styles.frameCornerTL, { borderColor: bracketColor }]} />
+          <View style={[styles.frameCornerTR, { borderColor: bracketColor }]} />
+          <View style={[styles.frameCornerBL, { borderColor: bracketColor }]} />
+          <View style={[styles.frameCornerBR, { borderColor: bracketColor }]} />
         </View>
+      )}
 
-        {/* Hint / progress indicator */}
-        {!capturing ? (
-          <Text style={styles.hint}>Take a clear picture of the band</Text>
-        ) : (
-          <View style={styles.progressPill}>
-            <Text style={styles.progressText}>Rotate slowly</Text>
-            <View style={styles.progressDots}>
-              {Array.from({ length: FRAME_COUNT }).map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.dot,
-                    i < framesDone && styles.dotFilled,
-                  ]}
-                />
-              ))}
-            </View>
-          </View>
+      {/* Caption */}
+      <View style={[styles.captionWrap, { top: insets.top + 70 }]} pointerEvents="none">
+        <Text style={[styles.caption, status === 'confident' && styles.captionConfident]}>
+          {caption}
+        </Text>
+      </View>
+
+      {/* Action pad */}
+      <View style={[styles.actionBar, { paddingBottom: insets.bottom + 24 }]}>
+        {status === 'confident' && consensusMatch && (
+          <>
+            <Pressable
+              onPress={handleConfirm}
+              disabled={confirming}
+              style={[styles.confirmBtn, confirming && { opacity: 0.6 }]}
+            >
+              {confirming ? (
+                <ActivityIndicator color={COLORS.bg} />
+              ) : (
+                <>
+                  <Ionicons name="checkmark" size={20} color={COLORS.bg} />
+                  <Text style={styles.confirmText}>Confirm</Text>
+                </>
+              )}
+            </Pressable>
+            <Pressable onPress={handleRejectMatch} style={styles.secondaryBtn}>
+              <Text style={styles.secondaryText}>Not this one</Text>
+            </Pressable>
+          </>
         )}
 
-        {/* Capture button */}
-        <View style={[styles.captureRow, { bottom: insets.bottom + 30 }]}>
-          <Pressable
-            onPress={handleStartCapture}
-            disabled={capturing}
-            style={[styles.captureBtn, capturing && styles.captureBtnActive]}
-          >
-            {capturing ? (
-              <Ionicons name="scan" size={32} color={COLORS.bg} />
-            ) : (
-              <View style={styles.captureInner} />
-            )}
+        {status !== 'confident' && showFallback && (
+          <Pressable onPress={handleAskAI} style={styles.conciergeBtn}>
+            <Ionicons name="sparkles" size={18} color={COLORS.bg} />
+            <View>
+              <Text style={styles.conciergeTitle}>Cigar Concierge</Text>
+              <Text style={styles.conciergeSubtitle}>Let AI help ID this label</Text>
+            </View>
           </Pressable>
-        </View>
-
-        {/* White shutter flash overlay */}
-        <Animated.View style={[StyleSheet.absoluteFill, styles.shutterFlash, flashStyle]} pointerEvents="none" />
-      </CameraView>
+        )}
+      </View>
     </View>
   );
 }
 
-const CORNER = {
-  width: 34,
-  height: 34,
-  borderColor: COLORS.accent,
-  position: 'absolute' as const,
-};
+function BandBrackets({
+  rect,
+  color,
+}: {
+  rect: { x: number; y: number; w: number; h: number };
+  color: string;
+}) {
+  // Pad the bbox a little so the rectangle frames the band rather than clamping to text.
+  const PAD_X = 0.03;
+  const PAD_Y = 0.04;
+  const left = `${Math.max(0, (rect.x - PAD_X) * 100)}%` as const;
+  const top = `${Math.max(0, (rect.y - PAD_Y) * 100)}%` as const;
+  const width = `${Math.min(100, (rect.w + PAD_X * 2) * 100)}%` as const;
+  const height = `${Math.min(100, (rect.h + PAD_Y * 2) * 100)}%` as const;
+
+  return (
+    <View
+      pointerEvents="none"
+      style={{
+        position: 'absolute',
+        left,
+        top,
+        width,
+        height,
+        borderRadius: 10,
+        borderWidth: 2,
+        borderColor: color,
+        shadowColor: color,
+        shadowOpacity: 0.55,
+        shadowRadius: 12,
+      }}
+    />
+  );
+}
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: COLORS.bg,
-  },
+  screen: { flex: 1, backgroundColor: '#000' },
   center: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: SPACING.lg,
+    backgroundColor: COLORS.bg,
+  },
+  permTitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 20,
+    fontWeight: '800',
+    color: COLORS.text,
+    marginBottom: SPACING.xs,
+    textAlign: 'center',
   },
   permText: {
     fontFamily: 'Cormorant',
-    fontSize: 16,
-    color: COLORS.text,
+    fontSize: 15,
+    color: COLORS.muted,
     textAlign: 'center',
-  },
-  camera: {
-    flex: 1,
-  },
-  vignette: {
-    backgroundColor: '#000',
   },
   topBtn: {
     position: 'absolute',
@@ -274,101 +546,115 @@ const styles = StyleSheet.create({
   },
   frameGuide: {
     position: 'absolute',
-    top: '25%',
-    left: '12%',
-    right: '12%',
-    bottom: '35%',
-    overflow: 'hidden',
+    top: '30%',
+    left: '10%',
+    right: '10%',
+    bottom: '40%',
   },
-  frameCornerTL: { ...CORNER, top: 0, left: 0, borderTopWidth: 3, borderLeftWidth: 3 },
-  frameCornerTR: { ...CORNER, top: 0, right: 0, borderTopWidth: 3, borderRightWidth: 3 },
-  frameCornerBL: { ...CORNER, bottom: 0, left: 0, borderBottomWidth: 3, borderLeftWidth: 3 },
-  frameCornerBR: { ...CORNER, bottom: 0, right: 0, borderBottomWidth: 3, borderRightWidth: 3 },
-  sweepLine: {
+  frameCornerTL: {
+    position: 'absolute', top: 0, left: 0,
+    width: 34, height: 34, borderTopWidth: 3, borderLeftWidth: 3,
+  },
+  frameCornerTR: {
+    position: 'absolute', top: 0, right: 0,
+    width: 34, height: 34, borderTopWidth: 3, borderRightWidth: 3,
+  },
+  frameCornerBL: {
+    position: 'absolute', bottom: 0, left: 0,
+    width: 34, height: 34, borderBottomWidth: 3, borderLeftWidth: 3,
+  },
+  frameCornerBR: {
+    position: 'absolute', bottom: 0, right: 0,
+    width: 34, height: 34, borderBottomWidth: 3, borderRightWidth: 3,
+  },
+  captionWrap: {
     position: 'absolute',
     left: 0,
     right: 0,
-    height: 2,
-    backgroundColor: COLORS.accent,
-    shadowColor: COLORS.accent,
-    shadowOpacity: 0.9,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 0 },
-  },
-  hint: {
-    fontFamily: 'Cormorant',
-    position: 'absolute',
-    bottom: '38%',
-    alignSelf: 'center',
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    paddingVertical: 6,
-    paddingHorizontal: 14,
-    borderRadius: RADIUS.full,
-    overflow: 'hidden',
-  },
-  progressPill: {
-    position: 'absolute',
-    bottom: '38%',
-    alignSelf: 'center',
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    backgroundColor: 'rgba(0,0,0,0.75)',
-    borderWidth: 1,
-    borderColor: COLORS.accent,
+  },
+  caption: {
+    fontFamily: 'Cormorant',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     paddingVertical: 8,
     paddingHorizontal: 16,
     borderRadius: RADIUS.full,
+    overflow: 'hidden',
   },
-  progressText: {
-    fontFamily: 'Cormorant',
-    fontSize: 14,
-    fontWeight: '700',
-    color: COLORS.text,
+  captionConfident: {
+    backgroundColor: 'rgba(0,0,0,0.82)',
+    color: '#FFFFFF',
   },
-  progressDots: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: COLORS.accent,
-    backgroundColor: 'transparent',
-  },
-  dotFilled: {
-    backgroundColor: COLORS.accent,
-  },
-  captureRow: {
+  actionBar: {
     position: 'absolute',
     left: 0,
     right: 0,
+    bottom: 0,
     alignItems: 'center',
+    gap: 10,
   },
-  captureBtn: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
-    borderWidth: 4,
-    borderColor: COLORS.accent,
+  confirmBtn: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-  },
-  captureBtnActive: {
+    gap: 8,
     backgroundColor: COLORS.accent,
+    paddingVertical: 16,
+    paddingHorizontal: 40,
+    borderRadius: RADIUS.full,
+    shadowColor: '#000',
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
   },
-  captureInner: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
+  confirmText: {
+    fontFamily: 'Cormorant',
+    fontSize: 17,
+    fontWeight: '800',
+    color: COLORS.bg,
+    letterSpacing: 0.3,
+  },
+  secondaryBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+  },
+  secondaryText: {
+    fontFamily: 'Cormorant',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    textDecorationLine: 'underline',
+  },
+  conciergeBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
     backgroundColor: COLORS.accent,
+    paddingVertical: 12,
+    paddingHorizontal: 22,
+    borderRadius: RADIUS.full,
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
   },
-  shutterFlash: {
-    backgroundColor: '#FFFFFF',
+  conciergeTitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 16,
+    fontWeight: '800',
+    color: COLORS.bg,
+    letterSpacing: 0.3,
+  },
+  conciergeSubtitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 12,
+    fontStyle: 'italic',
+    color: COLORS.bg,
+    opacity: 0.85,
+    marginTop: 1,
   },
 });

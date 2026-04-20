@@ -50,7 +50,6 @@
     },
     "plugins": [
       "expo-router",
-      "expo-camera",
       "expo-image-picker",
       "expo-secure-store",
       "expo-apple-authentication",
@@ -64,7 +63,15 @@
         }
       ],
       "@react-native-google-signin/google-signin",
-      "@sentry/react-native"
+      "@sentry/react-native",
+      [
+        "react-native-vision-camera",
+        {
+          "cameraPermissionText": "Stick Picks uses your camera to identify cigars by scanning the band.",
+          "enableLocation": false,
+          "enableCodeScanner": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
