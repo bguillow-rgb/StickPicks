@@ -203,7 +203,6 @@ export default function HumidorScreen() {
       <Text style={styles.title}>
         <Text style={{ fontStyle: 'italic' }}>my</Text>
         Humidor
-        <Text style={{ fontSize: 12, lineHeight: 22 }}>{'\u2122'}</Text>
       </Text>
 
       <ScrollView
