@@ -375,6 +375,16 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Scanner: the function validates auth internally via supabase.auth.getUser(token).
+# Platform-level verify_jwt rejects ES256 user tokens from projects on asymmetric
+# JWT signing keys, so disable it here — the function's own check still runs.
+[functions.identify-cigar]
+verify_jwt = false
+
+# Same reasoning — called with user JWT; function verifies internally.
+[functions.delete-account]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327

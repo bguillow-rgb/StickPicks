@@ -99,7 +99,13 @@ function useProtectedRoute(
   }, [session, segments, isLoading, ageState]);
 }
 
-function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
+function AnimatedSplash({
+  onReady,
+  onFinish,
+}: {
+  onReady?: () => void;
+  onFinish: () => void;
+}) {
   const scale = useSharedValue(0.6);
   const opacity = useSharedValue(0);
   const textOpacity = useSharedValue(0);
@@ -148,7 +154,14 @@ function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
   }));
 
   return (
-    <View style={splashStyles.container}>
+    <View
+      style={splashStyles.container}
+      // Fires once the splash view has been measured — a reliable signal that
+      // the first frame is about to be painted. Used to hide the native launch
+      // screen only AFTER this view is ready, eliminating the gap where the
+      // (tabs) screen could flash through.
+      onLayout={() => onReady?.()}
+    >
       <Animated.View style={[splashStyles.topLine, smokeStyle]} />
 
       <Animated.View style={iconStyle}>
@@ -234,6 +247,7 @@ export default function RootLayout() {
     'Cormorant-Italic': require('../assets/fonts/Cormorant-Italic-Variable.ttf'),
   });
   const [showSplash, setShowSplash] = useState(true);
+  const [animatedSplashReady, setAnimatedSplashReady] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const ageState = useAgeGateStore((s) => s.status);
@@ -295,11 +309,15 @@ export default function RootLayout() {
     if (error) throw error;
   }, [error]);
 
+  // Hide the iOS native launch screen only once BOTH fonts are loaded AND the
+  // JS AnimatedSplash has measured its first layout. Hiding earlier causes a
+  // visible flash of whatever screen is underneath (usually (tabs)/index) before
+  // the branded splash paints.
   useEffect(() => {
-    if (loaded) {
+    if (loaded && animatedSplashReady) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, animatedSplashReady]);
 
   const handleSplashFinish = useCallback(() => {
     setShowSplash(false);
@@ -327,7 +345,12 @@ export default function RootLayout() {
         <Stack.Screen name="legal/privacy" options={{ presentation: 'modal' }} />
         <Stack.Screen name="legal/terms" options={{ presentation: 'modal' }} />
       </Stack>
-      {showSplash && <AnimatedSplash onFinish={handleSplashFinish} />}
+      {showSplash && (
+        <AnimatedSplash
+          onReady={() => setAnimatedSplashReady(true)}
+          onFinish={handleSplashFinish}
+        />
+      )}
     </ThemeProvider>
   );
 }

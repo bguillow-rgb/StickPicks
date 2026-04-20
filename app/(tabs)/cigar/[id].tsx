@@ -1,8 +1,11 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, Image, TextInput, Pressable } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, Image, TextInput, Pressable, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
+import { track } from '@/src/lib/observability/analytics';
+import { EVENTS } from '@/src/lib/observability/events';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
@@ -119,8 +122,18 @@ export default function CigarDetailScreen() {
             .select('*')
             .neq('id', id)
             .or(`brand.eq.${c.brand},strength.eq.${c.strength}`)
-            .limit(6);
-          setSimilar((simData as Cigar[]) ?? []);
+            .limit(30);
+          // Dedupe by (brand, line) so different vitolas of the same line collapse to one card.
+          const seen = new Set<string>();
+          const deduped: Cigar[] = [];
+          for (const row of (simData as Cigar[]) ?? []) {
+            const key = `${row.brand}::${row.line ?? row.name}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            deduped.push(row);
+            if (deduped.length >= 4) break;
+          }
+          setSimilar(deduped);
         }
 
         await fetchHumidorItems();
@@ -315,10 +328,59 @@ export default function CigarDetailScreen() {
   const showReviewForm = isSmoked && (editingReview || !myReview);
   const showReviewDisplay = isSmoked && myReview && !editingReview;
 
+  const fromScan = from === 'scan';
+
+  // Undo snackbar — only shows when we arrived via scan-confirm. Fades in ~300ms
+  // after mount, auto-dismisses at 4.5s. Tapping Undo removes the humidor row
+  // the scan flow just inserted and routes back to the scanner.
+  const [undoVisible, setUndoVisible] = useState(false);
+  const undoOpacity = useRef(new Animated.Value(0)).current;
+  const undoUsedRef = useRef(false);
+  useEffect(() => {
+    if (!fromScan || !cigar) return;
+    setUndoVisible(true);
+    Animated.sequence([
+      Animated.delay(300),
+      Animated.timing(undoOpacity, { toValue: 1, duration: 250, useNativeDriver: true }),
+      Animated.delay(4500),
+      Animated.timing(undoOpacity, { toValue: 0, duration: 400, useNativeDriver: true }),
+    ]).start(({ finished }) => {
+      if (finished) setUndoVisible(false);
+    });
+  }, [fromScan, cigar?.id]);
+
+  const handleUndo = async () => {
+    if (undoUsedRef.current || !cigar) return;
+    undoUsedRef.current = true;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    track(EVENTS.SCAN_UNDO_TAPPED, { cigar_id: cigar.id });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Remove the 'owned' row the scan flow just inserted. Leave other
+        // statuses (wishlist/smoked) alone — user may have set those manually.
+        await supabase
+          .from('humidor_items')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('cigar_id', cigar.id)
+          .eq('status', 'owned');
+      }
+    } catch {
+      // Non-blocking
+    }
+    setUndoVisible(false);
+    router.replace('/identify/camera');
+  };
+
   return (
+    <>
     <ScrollView
       style={[styles.screen]}
-      contentContainerStyle={{ paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + 40 }}
+      contentContainerStyle={{
+        paddingTop: insets.top + SPACING.md,
+        paddingBottom: insets.bottom + (fromScan ? 110 : 40),
+      }}
       showsVerticalScrollIndicator={true}
       indicatorStyle="white"
       bounces={true}
@@ -686,6 +748,35 @@ export default function CigarDetailScreen() {
         </View>
       )}
     </ScrollView>
+
+    {/* Undo snackbar — only after scan-confirm, only while the window is open */}
+    {fromScan && undoVisible && (
+      <Animated.View
+        style={[
+          styles.undoSnackbar,
+          { opacity: undoOpacity, bottom: insets.bottom + 92 },
+        ]}
+      >
+        <Text style={styles.undoText}>Wrong cigar?</Text>
+        <Pressable onPress={handleUndo} hitSlop={12} style={styles.undoAction}>
+          <Ionicons name="arrow-undo" size={16} color={COLORS.accent} />
+          <Text style={styles.undoActionText}>Undo</Text>
+        </Pressable>
+      </Animated.View>
+    )}
+
+    {/* Scan-another FAB — only after a scan-confirm, so humidor scanning feels continuous */}
+    {fromScan && (
+      <Pressable
+        onPress={() => router.replace('/identify/camera')}
+        style={[styles.scanFab, { bottom: insets.bottom + 24 }]}
+        hitSlop={8}
+      >
+        <Ionicons name="scan" size={20} color={COLORS.bg} />
+        <Text style={styles.scanFabText}>Scan Another</Text>
+      </Pressable>
+    )}
+    </>
   );
 }
 
@@ -708,6 +799,65 @@ const styles = StyleSheet.create({
   backBtn: {
     alignSelf: 'flex-start',
     marginBottom: SPACING.sm,
+  },
+  scanFab: {
+    position: 'absolute',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: COLORS.accent,
+    borderRadius: RADIUS.full,
+    paddingVertical: 14,
+    paddingHorizontal: 22,
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+  scanFabText: {
+    fontFamily: 'Cormorant',
+    fontSize: 15,
+    fontWeight: '800',
+    color: COLORS.bg,
+    letterSpacing: 0.3,
+  },
+  undoSnackbar: {
+    position: 'absolute',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    backgroundColor: 'rgba(10, 26, 15, 0.95)',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    borderRadius: RADIUS.full,
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 5,
+  },
+  undoText: {
+    fontFamily: 'Cormorant',
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  undoAction: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  undoActionText: {
+    fontFamily: 'Cormorant',
+    fontSize: 14,
+    fontWeight: '800',
+    color: COLORS.accent,
+    letterSpacing: 0.3,
   },
   hero: {
     alignItems: 'center',
