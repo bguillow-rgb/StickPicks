@@ -20,6 +20,7 @@ import {
 import { useTextRecognition } from 'react-native-vision-camera-v3-text-recognition';
 import { useRunOnJS } from 'react-native-worklets-core';
 import * as Haptics from 'expo-haptics';
+import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/src/components/ui/Button';
 import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
@@ -384,6 +385,38 @@ export default function CameraScreen() {
     });
   }, [router, takeSnapshotFile]);
 
+  const handleGalleryPick = useCallback(async () => {
+    Haptics.selectionAsync();
+    track(EVENTS.SCAN_GALLERY_TAPPED);
+    try {
+      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert(
+          'Photo library access needed',
+          'Enable photos access in Settings to pick a cigar photo from your library.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ]
+        );
+        return;
+      }
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 0.85,
+        selectionLimit: 1,
+      });
+      if (result.canceled || !result.assets?.[0]?.uri) return;
+      router.replace({
+        pathname: '/identify/result',
+        params: { imageUris: JSON.stringify([result.assets[0].uri]) },
+      });
+    } catch (e: any) {
+      Alert.alert('Picker error', e?.message ?? 'Could not open the photo library.');
+    }
+  }, [router]);
+
   const handleRejectMatch = useCallback(() => {
     Haptics.selectionAsync();
     track(EVENTS.SCAN_RESULT_REJECTED, {
@@ -502,6 +535,15 @@ export default function CameraScreen() {
         style={[styles.topBtn, { top: insets.top + 10, left: 16 }]}
       >
         <Ionicons name="arrow-back" size={24} color={COLORS.text} />
+      </Pressable>
+
+      {/* Gallery picker — scan a photo from the library via Concierge */}
+      <Pressable
+        onPress={handleGalleryPick}
+        style={[styles.topBtn, { top: insets.top + 10, right: 16 }]}
+        hitSlop={8}
+      >
+        <Ionicons name="images-outline" size={22} color={COLORS.text} />
       </Pressable>
 
       {/* Dynamic brackets — when we have a bbox, we render it; else a centered guide */}
