@@ -325,10 +325,16 @@ export default function CigarDetailScreen() {
   const showReviewForm = isSmoked && (editingReview || !myReview);
   const showReviewDisplay = isSmoked && myReview && !editingReview;
 
+  const fromScan = from === 'scan';
+
   return (
+    <>
     <ScrollView
       style={[styles.screen]}
-      contentContainerStyle={{ paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + 40 }}
+      contentContainerStyle={{
+        paddingTop: insets.top + SPACING.md,
+        paddingBottom: insets.bottom + (fromScan ? 110 : 40),
+      }}
       showsVerticalScrollIndicator={true}
       indicatorStyle="white"
       bounces={true}
@@ -696,6 +702,19 @@ export default function CigarDetailScreen() {
         </View>
       )}
     </ScrollView>
+
+    {/* Scan-another FAB — only after a scan-confirm, so humidor scanning feels continuous */}
+    {fromScan && (
+      <Pressable
+        onPress={() => router.replace('/identify/camera')}
+        style={[styles.scanFab, { bottom: insets.bottom + 24 }]}
+        hitSlop={8}
+      >
+        <Ionicons name="scan" size={20} color={COLORS.bg} />
+        <Text style={styles.scanFabText}>Scan Another</Text>
+      </Pressable>
+    )}
+    </>
   );
 }
 
@@ -718,6 +737,29 @@ const styles = StyleSheet.create({
   backBtn: {
     alignSelf: 'flex-start',
     marginBottom: SPACING.sm,
+  },
+  scanFab: {
+    position: 'absolute',
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: COLORS.accent,
+    borderRadius: RADIUS.full,
+    paddingVertical: 14,
+    paddingHorizontal: 22,
+    shadowColor: '#000',
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 6,
+  },
+  scanFabText: {
+    fontFamily: 'Cormorant',
+    fontSize: 15,
+    fontWeight: '800',
+    color: COLORS.bg,
+    letterSpacing: 0.3,
   },
   hero: {
     alignItems: 'center',
