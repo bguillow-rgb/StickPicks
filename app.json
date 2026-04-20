@@ -70,6 +70,14 @@
           "enableLocation": false,
           "enableCodeScanner": false
         }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.5"
+          }
+        }
       ]
     ],
     "experiments": {
