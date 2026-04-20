@@ -600,7 +600,11 @@ export default function IdentifyResultScreen() {
 
       {/* Toast */}
       {toastMessage ? (
-        <Animated.View style={[styles.toast, { opacity: toastOpacity, bottom: insets.bottom + 24 }]}>
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.toast, { opacity: toastOpacity, bottom: insets.bottom + 24 }]}
+        >
+          <Ionicons name="checkmark-circle" size={18} color={COLORS.accent} />
           <Text style={styles.toastText}>{toastMessage}</Text>
         </Animated.View>
       ) : null}
@@ -920,18 +924,19 @@ const styles = StyleSheet.create({
   },
   toast: {
     position: 'absolute',
-    left: SPACING.lg,
-    right: SPACING.lg,
-    backgroundColor: COLORS.accent,
-    borderRadius: RADIUS.md,
-    paddingVertical: 12,
-    paddingHorizontal: SPACING.md,
+    alignSelf: 'center',
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(0,0,0,0.82)',
+    borderRadius: RADIUS.full,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
   },
   toastText: {
     fontFamily: 'Cormorant',
-    fontSize: 15,
-    fontWeight: '700',
-    color: COLORS.bg,
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });

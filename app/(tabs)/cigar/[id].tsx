@@ -119,8 +119,18 @@ export default function CigarDetailScreen() {
             .select('*')
             .neq('id', id)
             .or(`brand.eq.${c.brand},strength.eq.${c.strength}`)
-            .limit(6);
-          setSimilar((simData as Cigar[]) ?? []);
+            .limit(30);
+          // Dedupe by (brand, line) so different vitolas of the same line collapse to one card.
+          const seen = new Set<string>();
+          const deduped: Cigar[] = [];
+          for (const row of (simData as Cigar[]) ?? []) {
+            const key = `${row.brand}::${row.line ?? row.name}`;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            deduped.push(row);
+            if (deduped.length >= 4) break;
+          }
+          setSimilar(deduped);
         }
 
         await fetchHumidorItems();
