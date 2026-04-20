@@ -37,6 +37,15 @@ if [ -n "$TARGET" ]; then
       "$TARGET" > "$TARGET.tmp" && mv "$TARGET.tmp" "$TARGET"
     echo "[patch-vision-camera-text-recognition] Dropped dead VisionCameraProxy.h import."
   fi
+
+  # After rename to .mm, @import module syntax requires -fcxx-modules which
+  # isn't set by the plugin's podspec. Rewrite @import to the equivalent
+  # classical #import which works in Objective-C++ without extra flags.
+  if grep -q "^@import MLKitVision;" "$TARGET"; then
+    sed 's|^@import MLKitVision;|#import <MLKitVision/MLKitVision.h>|' \
+      "$TARGET" > "$TARGET.tmp" && mv "$TARGET.tmp" "$TARGET"
+    echo "[patch-vision-camera-text-recognition] Converted @import MLKitVision to #import."
+  fi
 fi
 
 # Step 2: rename .m → .mm if still needed.
