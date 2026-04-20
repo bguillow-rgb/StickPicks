@@ -19,7 +19,6 @@
       "bundleIdentifier": "com.bobguillow.stickpicks",
       "appleTeamId": "ZNS5TNLB2D",
       "infoPlist": {
-        "NSCameraUsageDescription": "Stick Picks uses your camera to identify cigars by scanning the band or wrapper.",
         "NSPhotoLibraryUsageDescription": "Stick Picks needs access to your photo library so you can attach photos to journal entries and your profile.",
         "NSPhotoLibraryAddUsageDescription": "Stick Picks saves cigar scan photos to your library when you choose to keep them.",
         "CFBundleURLTypes": [
