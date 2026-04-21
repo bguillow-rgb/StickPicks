@@ -13,40 +13,38 @@ import { useRevenueCat } from '@/src/hooks/useRevenueCat';
 
 type Plan = 'monthly' | 'yearly';
 
-// Pitch copy — leaned hard into the AI + pairings differentiators. Each bullet
-// is framed around what Pro unlocks that other apps can't do. Order matters:
-// pairings first (biggest "only app that does this" moment), then AI scans,
-// then the quiz depth, then the practical stuff.
+// Copy is tight on purpose. Users scan, not read. Each bullet earns its spot
+// by naming the one thing that distinguishes Pro from free and from other apps.
 const FEATURES = [
   {
     icon: 'wine-outline' as const,
-    title: 'Thoughtful Drink Pairings — On Every Cigar',
-    desc: "Three hand-curated pours per cigar: a crowd-pleaser, a category twist, and one deep cut you won't find anywhere else. Mezcal with a peppery Padrón. Pedro Ximénez with a creamy Connecticut. No other cigar app does this.",
+    title: 'Expert Drink Pairings',
+    desc: 'Three curated pours per cigar — including one deep cut no other app surfaces.',
   },
   {
     icon: 'sparkles-outline' as const,
-    title: 'Unlimited AI Cigar Identification',
-    desc: "Snap a photo of any band — our AI Concierge tells you exactly what you're smoking, even for boutique sticks other apps have never heard of. Free accounts get 5; Pro gets unlimited.",
+    title: 'Unlimited AI Scans',
+    desc: 'Snap any band, know the cigar. Free gets 5; Pro is unlimited.',
   },
   {
     icon: 'flask-outline' as const,
-    title: 'The 9-Question Precision Quiz',
-    desc: 'Free gets you 3 questions. Pro opens the full taste profile — wrapper preference, origin, strength curve, flavor depth — and returns the top 10 cigars that actually match you, not the 3 most popular picks.',
+    title: '9-Question Precision Quiz',
+    desc: 'Top 10 matches, scored to your palate. Free is 3 questions, 3 picks.',
   },
   {
     icon: 'archive-outline' as const,
-    title: 'Your Complete Humidor',
-    desc: 'Wishlist, owned, and smoked — all in one place, with resting days, per-vitola pricing, and community ratings. Free is limited to owned only.',
+    title: 'Full Humidor',
+    desc: 'Wishlist, owned, smoked — with pricing and resting days.',
   },
   {
     icon: 'star-outline' as const,
-    title: 'Personal Tasting Reviews',
-    desc: 'Rate draw, burn, and flavor on every cigar you smoke. Build a private journal that gets smarter about your palate over time.',
+    title: 'Tasting Reviews',
+    desc: 'Rate draw, burn, and flavor. Build a personal journal.',
   },
   {
     icon: 'trending-up-outline' as const,
-    title: 'Early Access to New Features',
-    desc: 'Pro members get every new feature first — and your subscription directly funds the next one.',
+    title: 'New Features First',
+    desc: 'Pro funds the roadmap — you get it before anyone else.',
   },
 ];
 
@@ -154,15 +152,12 @@ export default function PaywallScreen() {
       <Text style={styles.header}>Stick Picks Pro</Text>
       <Text style={styles.subheader}>Your personal cigar sommelier</Text>
 
-      {/* Pitch — the two-sentence sell. Written to stop the scroll: lead with
-          the unique AI angle and the pairings hook, then validate the promise
-          with the features below. */}
+      {/* Pitch — one sentence, named differentiators only. Users scan paywalls
+          rather than read them; we frontload the two claims no competitor can
+          make and let the bullets do the rest. */}
       <View style={styles.pitchCard}>
         <Text style={styles.pitchHeadline}>
-          The only cigar app with AI-powered identification and expert-curated drink pairings.
-        </Text>
-        <Text style={styles.pitchBody}>
-          Point your camera at any band and know what you're smoking. Get three thoughtfully-paired pours for every cigar — from bourbon classics to deep cuts like mezcal, PX sherry, and Madeira. Built for the serious enthusiast, not the casual smoker.
+          The only cigar app with AI band ID and expert drink pairings.
         </Text>
       </View>
 
@@ -290,13 +285,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: COLORS.text,
     lineHeight: 24,
-    marginBottom: SPACING.sm,
-  },
-  pitchBody: {
-    fontFamily: 'Cormorant',
-    fontSize: 14,
-    color: COLORS.muted,
-    lineHeight: 21,
   },
   features: {
     gap: SPACING.md,
