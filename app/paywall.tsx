@@ -70,9 +70,12 @@ export default function PaywallScreen() {
     })();
   }, []);
 
-  // Use real prices from RevenueCat when available, fall back to hardcoded
-  const yearlyPrice = yearlyPackage?.product.priceString ?? '$24.99';
-  const monthlyPrice = monthlyPackage?.product.priceString ?? '$2.99';
+  // Use real prices from RevenueCat when available. Fallbacks match the
+  // intended App Store Connect prices ($4.99/mo, $39.99/yr = 33% off) and
+  // are only shown if RevenueCat offerings are still loading or unavailable.
+  // Update the fallbacks whenever App Store Connect prices change.
+  const yearlyPrice = yearlyPackage?.product.priceString ?? '$39.99';
+  const monthlyPrice = monthlyPackage?.product.priceString ?? '$4.99';
 
   async function handlePurchase() {
     if (isGuest) {
@@ -192,7 +195,7 @@ export default function PaywallScreen() {
               <Text style={styles.planSavings}>
                 {yearlyPackage && monthlyPackage
                   ? `Save ${Math.round((1 - yearlyPackage.product.price / (monthlyPackage.product.price * 12)) * 100)}%`
-                  : 'Save 30%'}
+                  : 'Save 33%'}
               </Text>
             </Pressable>
 
