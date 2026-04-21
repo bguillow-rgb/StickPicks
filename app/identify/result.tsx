@@ -22,7 +22,7 @@ import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
 import { Meter } from '@/src/components/ui/Meter';
 import { Button } from '@/src/components/ui/Button';
-import { COLORS, SPACING, FONTS, RADIUS } from '@/src/constants/theme';
+import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
 import { useHumidorStatuses } from '@/src/hooks/useHumidorStatuses';
 import { StatusChips } from '@/src/components/ui/StatusChip';
 import type { Cigar } from '@/src/types/cigar';

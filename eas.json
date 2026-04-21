@@ -36,7 +36,8 @@
         "EXPO_PUBLIC_COMPED_EMAILS": "bguillow@gmail.com",
         "EXPO_PUBLIC_SENTRY_DSN": "https://3be10b81d15f7538b9b12b8ab9c089d8@o4511230420582400.ingest.us.sentry.io/4511230453350400",
         "EXPO_PUBLIC_POSTHOG_API_KEY": "phc_yax7dr8wzfTkfAvPFM9m2AZjZcCtkvHDDA2BbvqFvmR9",
-        "EXPO_PUBLIC_POSTHOG_HOST": "https://us.i.posthog.com"
+        "EXPO_PUBLIC_POSTHOG_HOST": "https://us.i.posthog.com",
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
       }
     },
     "production": {

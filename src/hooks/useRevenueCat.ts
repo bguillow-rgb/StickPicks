@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Alert, Platform } from 'react-native';
+import { Platform } from 'react-native';
+import { Alert } from '@/src/components/ui/StyledAlert';
 import type { PurchasesPackage, PurchasesOffering } from 'react-native-purchases';
 import {
   initRevenueCat,

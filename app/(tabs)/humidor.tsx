@@ -8,7 +8,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
-import { Button } from '@/src/components/ui/Button';
 import { EmptyState } from '@/src/components/ui/EmptyState';
 import { StarRating } from '@/src/components/ui/StarRating';
 import { CommunityRating } from '@/src/components/cigar/CommunityRating';
