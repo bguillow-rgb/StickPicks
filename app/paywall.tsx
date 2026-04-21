@@ -13,13 +13,41 @@ import { useRevenueCat } from '@/src/hooks/useRevenueCat';
 
 type Plan = 'monthly' | 'yearly';
 
+// Pitch copy — leaned hard into the AI + pairings differentiators. Each bullet
+// is framed around what Pro unlocks that other apps can't do. Order matters:
+// pairings first (biggest "only app that does this" moment), then AI scans,
+// then the quiz depth, then the practical stuff.
 const FEATURES = [
-  { icon: 'camera-outline' as const, title: 'Unlimited Cigar Scans', desc: 'Scan any cigar band with no limits — free accounts get 5' },
-  { icon: 'archive-outline' as const, title: 'Full Humidor Access', desc: 'Track wishlist, owned, and smoked cigars all in one place' },
-  { icon: 'star-outline' as const, title: 'Rate & Review', desc: 'Rate your smokes and share reviews with the community' },
-  { icon: 'wine-outline' as const, title: 'Drink Pairings', desc: 'Three thoughtful pours for every cigar — a crowd-pleaser, a category twist, and one deep cut you won\'t see on other apps' },
-  { icon: 'flask-outline' as const, title: 'Advanced Quiz', desc: '9 questions for precision cigar recommendations' },
-  { icon: 'list-outline' as const, title: 'Top 10 Results', desc: 'See all 10 best matches with detailed scoring' },
+  {
+    icon: 'wine-outline' as const,
+    title: 'Thoughtful Drink Pairings — On Every Cigar',
+    desc: "Three hand-curated pours per cigar: a crowd-pleaser, a category twist, and one deep cut you won't find anywhere else. Mezcal with a peppery Padrón. Pedro Ximénez with a creamy Connecticut. No other cigar app does this.",
+  },
+  {
+    icon: 'sparkles-outline' as const,
+    title: 'Unlimited AI Cigar Identification',
+    desc: "Snap a photo of any band — our AI Concierge tells you exactly what you're smoking, even for boutique sticks other apps have never heard of. Free accounts get 5; Pro gets unlimited.",
+  },
+  {
+    icon: 'flask-outline' as const,
+    title: 'The 9-Question Precision Quiz',
+    desc: 'Free gets you 3 questions. Pro opens the full taste profile — wrapper preference, origin, strength curve, flavor depth — and returns the top 10 cigars that actually match you, not the 3 most popular picks.',
+  },
+  {
+    icon: 'archive-outline' as const,
+    title: 'Your Complete Humidor',
+    desc: 'Wishlist, owned, and smoked — all in one place, with resting days, per-vitola pricing, and community ratings. Free is limited to owned only.',
+  },
+  {
+    icon: 'star-outline' as const,
+    title: 'Personal Tasting Reviews',
+    desc: 'Rate draw, burn, and flavor on every cigar you smoke. Build a private journal that gets smarter about your palate over time.',
+  },
+  {
+    icon: 'trending-up-outline' as const,
+    title: 'Early Access to New Features',
+    desc: 'Pro members get every new feature first — and your subscription directly funds the next one.',
+  },
 ];
 
 export default function PaywallScreen() {
@@ -125,6 +153,18 @@ export default function PaywallScreen() {
       {/* Header */}
       <Text style={styles.header}>Stick Picks Pro</Text>
       <Text style={styles.subheader}>Your personal cigar sommelier</Text>
+
+      {/* Pitch — the two-sentence sell. Written to stop the scroll: lead with
+          the unique AI angle and the pairings hook, then validate the promise
+          with the features below. */}
+      <View style={styles.pitchCard}>
+        <Text style={styles.pitchHeadline}>
+          The only cigar app with AI-powered identification and expert-curated drink pairings.
+        </Text>
+        <Text style={styles.pitchBody}>
+          Point your camera at any band and know what you're smoking. Get three thoughtfully-paired pours for every cigar — from bourbon classics to deep cuts like mezcal, PX sherry, and Madeira. Built for the serious enthusiast, not the casual smoker.
+        </Text>
+      </View>
 
       {/* Features */}
       <View style={styles.features}>
@@ -232,6 +272,31 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: SPACING.xs,
     marginBottom: SPACING.lg,
+  },
+  // Pitch card frames the two-sentence sell above the features grid. Gold
+  // border on dark-green card echoes the section-title treatment from the
+  // cigar detail page — reads as editorial, not marketing.
+  pitchCard: {
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  pitchHeadline: {
+    fontFamily: 'Cormorant',
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.text,
+    lineHeight: 24,
+    marginBottom: SPACING.sm,
+  },
+  pitchBody: {
+    fontFamily: 'Cormorant',
+    fontSize: 14,
+    color: COLORS.muted,
+    lineHeight: 21,
   },
   features: {
     gap: SPACING.md,
