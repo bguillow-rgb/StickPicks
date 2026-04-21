@@ -64,7 +64,10 @@ export default function TermsScreen() {
           You retain ownership of content you create (reviews, notes, photos). By submitting reviews and ratings, you grant Stick Picks a non-exclusive, royalty-free license to display that content to other users within the app. You may delete your content at any time.
         </Text>
         <Text style={styles.body}>
-          You agree not to submit content that is unlawful, defamatory, obscene, or infringes on the rights of others. We reserve the right to remove content that violates these Terms.
+          You agree not to submit content that is unlawful, defamatory, obscene, harassing, abusive, objectionable, or infringes on the intellectual-property rights of others. We have zero tolerance for objectionable content or abusive behavior.
+        </Text>
+        <Text style={styles.body}>
+          Any user can report content through the in-app "Report" button. We review reports within 24 hours and will remove violating content and, where appropriate, restrict or terminate the offending account. We reserve the right to remove content at our discretion.
         </Text>
 
         <Text style={styles.h2}>7. Intellectual Property</Text>

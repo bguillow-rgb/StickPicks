@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { Alert } from '@/src/components/ui/StyledAlert';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
@@ -16,10 +17,9 @@ const FEATURES = [
   { icon: 'camera-outline' as const, title: 'Unlimited Cigar Scans', desc: 'Scan any cigar band with no limits — free accounts get 5' },
   { icon: 'archive-outline' as const, title: 'Full Humidor Access', desc: 'Track wishlist, owned, and smoked cigars all in one place' },
   { icon: 'star-outline' as const, title: 'Rate & Review', desc: 'Rate your smokes and share reviews with the community' },
-  { icon: 'wine-outline' as const, title: 'Drink Pairings', desc: 'Get curated drink pairings for every cigar' },
+  { icon: 'wine-outline' as const, title: 'Drink Pairings', desc: 'Three thoughtful pours for every cigar — a crowd-pleaser, a category twist, and one deep cut you won\'t see on other apps' },
   { icon: 'flask-outline' as const, title: 'Advanced Quiz', desc: '9 questions for precision cigar recommendations' },
   { icon: 'list-outline' as const, title: 'Top 10 Results', desc: 'See all 10 best matches with detailed scoring' },
-  { icon: 'create-outline' as const, title: 'Cigar Notes', desc: 'Add personal tasting notes to any cigar' },
 ];
 
 export default function PaywallScreen() {
@@ -101,8 +101,12 @@ export default function PaywallScreen() {
   return (
     <ScrollView
       style={[styles.screen]}
-      // Modals are already inset from the top — don't add insets.top again.
-      contentContainerStyle={{ paddingTop: SPACING.md, paddingBottom: insets.bottom + 40 }}
+      // Regular stack push (not a modal) — add insets.top so the close X and
+      // header clear the status bar / notch.
+      contentContainerStyle={{
+        paddingTop: insets.top + SPACING.md,
+        paddingBottom: insets.bottom + 40,
+      }}
     >
       {/* Close */}
       <Pressable onPress={() => router.back()} hitSlop={12} style={styles.closeBtn}>

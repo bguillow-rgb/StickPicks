@@ -6,11 +6,11 @@ import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
 import { CommunityRating } from '@/src/components/cigar/CommunityRating';
+import { CigarImage } from '@/src/components/cigar/CigarImage';
 import { useCommunityRatings } from '@/src/hooks/useCommunityRating';
 import { useHumidorStatuses } from '@/src/hooks/useHumidorStatuses';
 import { StatusChips } from '@/src/components/ui/StatusChip';
 import { COLORS, SPACING, RADIUS, FONTS } from '@/src/constants/theme';
-import { useCigarCount } from '@/src/hooks/useCigarCount';
 import type { Cigar } from '@/src/types/cigar';
 
 const POPULAR_BRANDS = [
@@ -26,7 +26,6 @@ export default function BrowseScreen() {
   const [hasSearched, setHasSearched] = useState(false);
   const [activeBrand, setActiveBrand] = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
-  const cigarCount = useCigarCount();
   // Dedupe by (brand, line) so multiple vitolas of the same line collapse into
   // one card — users see "Padron 1964 Anniversary" once, not four times.
   // Tapping the card still routes to a specific SKU so detail works normally;
@@ -140,13 +139,7 @@ export default function BrowseScreen() {
     return (
       <Card style={styles.cigarCard} onPress={() => router.push(`/(tabs)/cigar/${item.id}`)}>
         <View style={styles.cardRow}>
-          {item.image_url ? (
-            <Image source={{ uri: item.image_url }} style={styles.thumb} resizeMode="cover" />
-          ) : (
-            <View style={[styles.thumb, styles.thumbPlaceholder]}>
-              <Text style={styles.thumbText}>{item.brand.charAt(0)}</Text>
-            </View>
-          )}
+          <CigarImage cigar={item} style={styles.thumb} />
           <View style={styles.cardContent}>
             <Text style={styles.cigarName} numberOfLines={1}>{item.line ?? item.name}</Text>
             <Text style={styles.cigarBrand}>{item.brand}</Text>
@@ -170,7 +163,7 @@ export default function BrowseScreen() {
       <Text style={styles.title}>Browse Cigars</Text>
       <TextInput
         style={styles.search}
-        placeholder={cigarCount ? `Search ${cigarCount} cigars by brand or name...` : 'Search cigars by brand or name...'}
+        placeholder="Search cigars by brand or name..."
         placeholderTextColor={COLORS.subtle}
         value={query}
         onChangeText={handleQueryChange}

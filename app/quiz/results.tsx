@@ -11,9 +11,11 @@ import { COLORS, SPACING, FONTS } from '@/src/constants/theme';
 import { scoreQuiz } from '@/src/features/quiz/scoring';
 import { getDrinkPairings, type DrinkPairing } from '@/src/features/quiz/pairings';
 import { CommunityRating } from '@/src/components/cigar/CommunityRating';
+import { CigarImage } from '@/src/components/cigar/CigarImage';
 import { useCommunityRatings } from '@/src/hooks/useCommunityRating';
 import { useHumidorStatuses } from '@/src/hooks/useHumidorStatuses';
 import { StatusChips } from '@/src/components/ui/StatusChip';
+import { useProStore } from '@/src/stores/useProStore';
 import type { Cigar, QuizAnswers } from '@/src/types/cigar';
 
 interface ScoredCigar {
@@ -31,6 +33,9 @@ export default function QuizResultsScreen() {
   const [loading, setLoading] = useState(true);
 
   const isAdvanced = params.mode === 'advanced';
+  const isPro = useProStore((s) => s.isPro);
+  const hasHydrated = useProStore((s) => s.hasHydrated);
+  const treatAsPro = !hasHydrated || isPro;
   const ratingsMap = useCommunityRatings(results.map((r) => r.cigar.id));
   const humidorMap = useHumidorStatuses(results.map((r) => r.cigar.id));
   let answers: QuizAnswers;
@@ -61,9 +66,24 @@ export default function QuizResultsScreen() {
     ? results
     : results.filter((r) => !r.cigar.origin?.toLowerCase().includes('cuba'));
 
-  const top = filtered[0];
+  // Dedupe by (brand, line) so different vitola SKUs of the same line don't
+  // flood the list. Matches the fix already applied to browse + similar-cigars.
+  // Keep the highest-scoring entry per line (results are already score-sorted).
+  const deduped = (() => {
+    const seen = new Set<string>();
+    const out: typeof filtered = [];
+    for (const r of filtered) {
+      const key = `${r.cigar.brand}::${r.cigar.line ?? r.cigar.name}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(r);
+    }
+    return out;
+  })();
+
+  const top = deduped[0];
   const maxAlts = isAdvanced ? 9 : 2; // basic: top 3 total, advanced: top 10
-  const alts = filtered.slice(1, maxAlts + 1);
+  const alts = deduped.slice(1, maxAlts + 1);
 
   return (
     <ScrollView
@@ -111,9 +131,7 @@ export default function QuizResultsScreen() {
 
       {top && (
         <Card style={styles.heroCard} onPress={() => router.push(`/(tabs)/cigar/${top.cigar.id}`)}>
-          {top.cigar.image_url && (
-            <Image source={{ uri: top.cigar.image_url }} style={styles.heroImg} resizeMode="cover" />
-          )}
+          <CigarImage cigar={top.cigar} style={styles.heroImg} />
           <Text style={styles.kicker}>BEST MATCH</Text>
           <Text style={styles.heroName}>{top.cigar.line ?? top.cigar.name}</Text>
           <Text style={styles.heroBrand}>{top.cigar.brand}</Text>
@@ -142,7 +160,10 @@ export default function QuizResultsScreen() {
               ))}
             </View>
           )}
-          {isAdvanced && (
+          {/* Pairings are a Pro feature — show to advanced-quiz takers AND
+              to Pro users who took the basic quiz. treatAsPro covers the
+              pre-hydration window so we don't flash "locked" on every render. */}
+          {(isAdvanced || treatAsPro) && (
             <View style={styles.pairings}>
               <Text style={styles.pairingsTitle}>Pair it with</Text>
               {getDrinkPairings(top.cigar).map((p, i) => (
@@ -166,9 +187,7 @@ export default function QuizResultsScreen() {
               onPress={() => router.push(`/(tabs)/cigar/${item.cigar.id}`)}
             >
               <View style={styles.altHeader}>
-                {item.cigar.image_url && (
-                  <Image source={{ uri: item.cigar.image_url }} style={styles.altThumb} resizeMode="cover" />
-                )}
+                <CigarImage cigar={item.cigar} style={styles.altThumb} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.altName}>{item.cigar.line ?? item.cigar.name}</Text>
                   <Text style={styles.altBrand}>{item.cigar.brand}</Text>
@@ -192,8 +211,8 @@ export default function QuizResultsScreen() {
         </>
       )}
 
-      {/* Pro upsell for basic quiz users */}
-      {!isAdvanced && (
+      {/* Pro upsell for basic quiz users — hide if user is already Pro */}
+      {!isAdvanced && !treatAsPro && (
         <Card style={styles.proCard}>
           <Text style={styles.proTitle}>Want better matches?</Text>
           <Text style={styles.proSub}>
@@ -330,10 +349,14 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
   },
+  // Matches the uppercase-gold section-header treatment used elsewhere, so
+  // "Pair it with" visually outranks the bold drink names inside the list.
   pairingsTitle: {
     fontFamily: 'Cormorant',
-    fontSize: 14,
-    fontWeight: '700',
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase',
     color: COLORS.accent,
     marginBottom: SPACING.sm,
   },

@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, Alert, Platform, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Platform, Pressable } from 'react-native';
+import { Alert } from '@/src/components/ui/StyledAlert';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
