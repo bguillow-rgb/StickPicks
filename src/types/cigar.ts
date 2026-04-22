@@ -21,6 +21,10 @@ export interface Cigar {
   // Holds the previous image_url when a user-submitted replacement is
   // auto-promoted, so admins can swap the original back in.
   image_url_previous: string | null;
+  // Migration 012: how well-known the cigar is, 1=obscure/deep-cut, 5=iconic.
+  // Used by the quiz scorer's "adventure" mode to prefer classics vs deep cuts.
+  // Null is treated as tier 3 (neutral) by the scorer.
+  popularity_tier: number | null;
   price_usd_cents: number | null;
   created_at: string;
 }

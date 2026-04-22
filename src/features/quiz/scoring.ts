@@ -146,13 +146,48 @@ export function scoreQuiz(answers: QuizAnswers, cigars: Cigar[]): ScoredCigar[] 
       }
     }
 
-    // Adventure level adjustment (bonus)
-    if (answers.adventure === 'surprise') {
-      score += Math.random() * 5;
-    }
-
     return { cigar, score, reasons };
   });
 
-  return scored.sort((a, b) => b.score - a.score).slice(0, 10);
+  // Adventure-level reranking. Uses popularity_tier (1=deep cut, 5=iconic)
+  // to bias which cigars float to the top after the quality-match scoring.
+  // This is where "Stick to Classics", "Open to Suggestions", and "Surprise
+  // Me" become meaningfully different result sets.
+  //
+  // classic   → heavily favor high popularity (known names the user can find)
+  // middle    → no bias, quality match only
+  // surprise  → invert popularity, BUT enforce a quality floor so we never
+  //             recommend a poor-match cigar just because it's obscure
+  const adventure = answers.adventure;
+  const QUALITY_FLOOR_FOR_SURPRISE = 40;   // out of ~110 max raw score
+  const POPULARITY_WEIGHT = 8;              // per-tier bump/hit; ±16 total across the 5-tier range
+
+  const adjusted = scored
+    .map(({ cigar, score, reasons }) => {
+      // Null popularity → treat as tier 3 (neutral). Never punishes a cigar
+      // for missing enrichment data; just means no adventure-mode influence.
+      const pop = cigar.popularity_tier ?? 3;
+
+      let finalScore = score;
+      const finalReasons = [...reasons];
+
+      if (adventure === 'classic') {
+        // +16 for iconic (pop=5), -16 for deep cut (pop=1)
+        finalScore += (pop - 3) * POPULARITY_WEIGHT;
+        if (pop >= 4) finalReasons.push('A recognized classic');
+      } else if (adventure === 'surprise') {
+        // Surprise mode: only surface cigars that still match reasonably
+        // well. Below the quality floor, drop them entirely — a "surprise"
+        // that doesn't match the palate destroys trust.
+        if (score < QUALITY_FLOOR_FOR_SURPRISE) return null;
+        finalScore += (3 - pop) * POPULARITY_WEIGHT;
+        if (pop <= 2) finalReasons.push('Off the beaten path');
+      }
+      // 'middle' and undefined: no adjustment
+
+      return { cigar, score: finalScore, reasons: finalReasons };
+    })
+    .filter((x): x is ScoredCigar => x !== null);
+
+  return adjusted.sort((a, b) => b.score - a.score).slice(0, 10);
 }
