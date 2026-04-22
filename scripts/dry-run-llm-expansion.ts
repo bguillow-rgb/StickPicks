@@ -33,7 +33,14 @@ const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 const IN_PATH = path.join(__dirname, 'data', 'llm-expansion.json');
 
 function norm(s: string | null | undefined): string {
-  return (s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+  // Match merge-scraped-sources.ts:norm exactly — diacritic strip, & → and,
+  // then all non-alphanumerics (incl. spaces) removed. "Room 101" ≡ "Room101".
+  return (s ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/&/g, ' and ')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
 }
 function keyOf(b: string | null, l: string | null, v: string | null): string {
   return `${norm(b)}|${norm(l)}|${norm(v)}`;
@@ -146,7 +153,9 @@ async function main() {
 
     const bl = `${norm(r.brand)}|${norm(r.line)}`;
     const siblings = existingByBL.get(bl) ?? [];
-    const fuzzy = siblings.find((s) => s.vitola && r.vitola && lev(norm(s.vitola), norm(r.vitola)) <= 2);
+    // L<=1: plural/singular + minor spelling nits only. L<=2 incorrectly
+    // fused Gordo↔Toro and Gordo↔Gordito (different sizes).
+    const fuzzy = siblings.find((s) => s.vitola && r.vitola && lev(norm(s.vitola), norm(r.vitola)) <= 1);
     if (fuzzy) { buckets.fuzzyDupe.push({ row: r, matched: fuzzy.vitola }); continue; }
 
     buckets.toInsert.push(r);
@@ -155,6 +164,24 @@ async function main() {
   const newBrands = new Set(
     buckets.toInsert.map((r) => norm(r.brand)).filter((b) => !existingBrands.has(b)),
   );
+
+  // Brand-level fuzzy suspicion check. For each truly "new" brand, find the
+  // closest existing brand at Levenshtein <= 2. If there's a hit, it's
+  // probably a misspelling or canonicalization mismatch (e.g. "Cornelius and
+  // Anthony" vs "Cornelius & Anthony" pre-fix) that should be reviewed
+  // manually before insert. These rows are still counted in toInsert so we
+  // don't silently drop data — we just flag them for human eyes.
+  const existingBrandsList = Array.from(existingBrands);
+  const suspiciousBrands: Array<{ newBrand: string; closestExisting: string; distance: number }> = [];
+  for (const nb of newBrands) {
+    let best: { brand: string; d: number } | null = null;
+    for (const eb of existingBrandsList) {
+      const d = lev(nb, eb);
+      if (d === 0) continue;
+      if (d <= 2 && (!best || d < best.d)) best = { brand: eb, d };
+    }
+    if (best) suspiciousBrands.push({ newBrand: nb, closestExisting: best.brand, distance: best.d });
+  }
 
   const reasons: Record<string, number> = {};
   for (const q of buckets.qualityFailed) reasons[q.reason] = (reasons[q.reason] ?? 0) + 1;
@@ -167,6 +194,7 @@ async function main() {
   console.log('');
   console.log(`Would INSERT (net-new):                  ${buckets.toInsert.length}`);
   console.log(`  of which new brands (no rows today):   ${newBrands.size}`);
+  console.log(`  brands w/ close existing match (L<=2): ${suspiciousBrands.length}  ← review before insert`);
   console.log(`Would SKIP — exact dupe:                 ${buckets.exactDupe.length}`);
   console.log(`Would SKIP — fuzzy dupe (vitola L<=2):   ${buckets.fuzzyDupe.length}`);
   console.log(`Would SKIP — quality gate failed:        ${buckets.qualityFailed.length}`);
@@ -183,6 +211,8 @@ async function main() {
   sample('FUZZY DUPE', buckets.fuzzyDupe, (x) => `${x.row.brand} | ${x.row.line} | ${x.row.vitola}  (matched existing vitola: ${x.matched})`);
   sample('QUALITY FAIL', buckets.qualityFailed, (x) => `${x.reason}  —  ${x.row.brand} | ${x.row.line} | ${x.row.vitola}`);
   sample('NEW BRANDS', Array.from(newBrands), (b) => b);
+  sample('SUSPICIOUS NEW BRANDS (maybe already exist)', suspiciousBrands,
+    (x) => `"${x.newBrand}"  ≈  "${x.closestExisting}"  (L=${x.distance})`);
 
   console.log('No database writes were performed. No files were modified.');
 }

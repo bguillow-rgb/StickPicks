@@ -89,7 +89,21 @@ interface CandidateRow {
 }
 
 function norm(s: string | null | undefined): string {
-  return (s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim().replace(/\s+/g, ' ');
+  // Normalize for dedupe:
+  //   - strip diacritics (Ñ→N, á→a)           "Casa Fernández" ≡ "Casa Fernandez"
+  //   - canonicalize & → "and"                "Cornelius & Anthony" ≡ "Cornelius and Anthony"
+  //   - strip ALL non-alphanumerics (incl. spaces)
+  //       "Room 101" ≡ "Room101"
+  //       "E.P. Carrillo" ≡ "EP Carrillo"
+  //       "My Father" ≡ "myfather"
+  // Removing spaces is safe for cigar brand/line/vitola strings — spacing
+  // varies across sources but semantic identity doesn't depend on it.
+  return (s ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/&/g, ' and ')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '');
 }
 
 function keyOf(brand: string | null, line: string | null, vitola: string | null): string {
@@ -235,12 +249,15 @@ async function main() {
       dropped.push({ row: c, reason: 'exact-dupe' });
       continue;
     }
-    // Fuzzy check: same brand+line, any existing vitola within Levenshtein 2?
+    // Fuzzy check: same brand+line, any existing vitola within Levenshtein 1?
+    // L=1 catches plural/singular ("Toro" ↔ "Toros") and minor spelling nits
+    // but refuses to merge genuinely different sizes like "Gordo" (6×60) with
+    // "Toro" (6×52) or "Gordo" with "Gordito" (petit corona), which L≤2 did.
     const bl = `${norm(c.brand)}|${norm(c.line)}`;
     const fuzzy = existing.find((r) => {
       if (`${norm(r.brand)}|${norm(r.line)}` !== bl) return false;
       if (!c.vitola || !r.vitola) return false;
-      return levenshtein(norm(c.vitola), norm(r.vitola)) <= 2;
+      return levenshtein(norm(c.vitola), norm(r.vitola)) <= 1;
     });
     if (fuzzy) {
       dropped.push({ row: c, reason: 'fuzzy-dupe' });
