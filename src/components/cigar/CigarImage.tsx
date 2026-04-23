@@ -13,10 +13,26 @@ import { getBrandLogo } from '@/src/lib/brandLogos';
 //   - image_url missing + brand logo available → render brand logo as fallback
 //     (seeded by scripts/seed-brand-logos.ts; covers brands where we can't
 //     find a per-vitola product shot)
+//   - image_url missing + no brand logo + brand known → render brand-initials
+//     card (e.g. "AF" for Arturo Fuente, "P" for Padron) so the UI always
+//     shows something brand-identifying instead of a generic placeholder
 //   - nothing matches                          → placeholder
 //
 // On the detail page showAddAction={true} exposes the "Add a photo" button
 // when the moderation placeholder is showing.
+
+// Derive brand initials: first letter of each of the first 2 words.
+// "Arturo Fuente" → "AF", "Padron" → "P", "5 Vegas" → "5V",
+// "EP Carrillo" → "EC", "Drew Estate" → "DE".
+function brandInitials(brand: string): string {
+  const words = brand
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 0 && !/^(de|la|y|&|the|of)$/i.test(w));
+  if (words.length === 0) return '—';
+  if (words.length === 1) return words[0][0].toUpperCase();
+  return (words[0][0] + words[1][0]).toUpperCase();
+}
 
 interface CigarImageProps {
   cigar: Pick<Cigar, 'image_url' | 'image_status' | 'brand' | 'line' | 'name'> | null | undefined;
@@ -63,6 +79,31 @@ export function CigarImage({
     if (brandLogo) {
       return <Image source={{ uri: brandLogo }} style={style} resizeMode={resizeMode} />;
     }
+  }
+
+  // Brand-initials fallback — last resort before the bare placeholder. Any
+  // cigar with a brand we recognise gets a monogram card so the UI never
+  // shows "No image available" for something we know the brand of. Still
+  // suppressed in moderation (takedown/banned) because that state is an
+  // explicit admin pull — see note above.
+  if (!takenDown && cigar?.brand) {
+    return (
+      <View style={[styles.initialsCard, style]}>
+        <Text style={styles.initialsText}>{brandInitials(cigar.brand)}</Text>
+        {showAddAction && (
+          <Pressable onPress={onAddPress} disabled={uploading} style={styles.addBtnOnInitials} hitSlop={6}>
+            {uploading ? (
+              <ActivityIndicator size="small" color={COLORS.accent} />
+            ) : (
+              <>
+                <Ionicons name="add" size={12} color={COLORS.accent} />
+                <Text style={styles.addText}>Add a photo</Text>
+              </>
+            )}
+          </Pressable>
+        )}
+      </View>
+    );
   }
 
   return (
@@ -122,5 +163,37 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '700',
     color: COLORS.accent,
+  },
+  // Monogram card — styled to echo the SP splash aesthetic so the initials
+  // feel intentional/branded rather than a "something's missing" fill.
+  initialsCard: {
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.accentDim,
+    borderRadius: RADIUS.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    gap: 6,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
+  },
+  initialsText: {
+    fontFamily: FONTS.display,
+    fontSize: 44,
+    fontWeight: '800',
+    color: COLORS.accent,
+    letterSpacing: 2,
+    textAlign: 'center',
+  },
+  addBtnOnInitials: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
   },
 });
