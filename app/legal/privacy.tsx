@@ -26,7 +26,7 @@ export default function PrivacyScreen() {
         <Text style={styles.effective}>Effective Date: April 14, 2026</Text>
 
         <Text style={styles.body}>
-          Stick Picks ("we", "our", or "the app") is a cigar recommendation and identification app published by Bob Guillow. This policy explains how we collect, use, and protect your information.
+          Stick Picks ("we", "our", or "the app") is a cigar recommendation and identification app published by the Stick Picks team. This policy explains how we collect, use, and protect your information.
         </Text>
 
         <Text style={styles.h2}>1. Information We Collect</Text>

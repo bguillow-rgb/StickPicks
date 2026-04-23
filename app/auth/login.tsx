@@ -14,11 +14,6 @@ import { Button } from '@/src/components/ui/Button';
 import { COLORS, SPACING, FONTS } from '@/src/constants/theme';
 import { useProStore } from '@/src/stores/useProStore';
 
-// Accounts that get Pro comped automatically (owner / demo accounts)
-const COMPED_EMAILS = new Set(
-  (process.env.EXPO_PUBLIC_COMPED_EMAILS ?? '').split(',').filter(Boolean).map((e) => e.trim().toLowerCase())
-);
-
 GoogleSignin.configure({
   iosClientId: process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID,
   webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID,
@@ -30,12 +25,18 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const activatePro = useProStore((s) => s.activate);
 
-  // Comp Pro for owner/demo accounts after a successful sign-in
+  // Comp Pro for owner/demo accounts after a successful sign-in. The allowlist
+  // lives in the comped_users table (migration 013) and is opaque to the
+  // client — the is_current_user_comped() RPC returns only a boolean so no PII
+  // ships in the bundle.
   const maybeCompPro = async () => {
-    const { data } = await supabase.auth.getUser();
-    const email = data.user?.email?.toLowerCase();
-    if (email && COMPED_EMAILS.has(email)) {
-      activatePro();
+    try {
+      const { data, error } = await supabase.rpc('is_current_user_comped');
+      if (error) return;
+      if (data === true) activatePro();
+    } catch {
+      // Network or transient error — skip comp silently rather than
+      // blocking the user from reaching the home screen.
     }
   };
 

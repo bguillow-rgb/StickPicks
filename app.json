@@ -16,7 +16,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.bobguillow.stickpicks",
+      "bundleIdentifier": "com.stickpicks.app",
       "appleTeamId": "ZNS5TNLB2D",
       "infoPlist": {
         "NSPhotoLibraryUsageDescription": "Stick Picks needs access to your photo library so you can attach photos to journal entries and your profile.",
@@ -37,7 +37,7 @@
         "backgroundColor": "#0A1A0F"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.bobguillow.stickpicks",
+      "package": "com.stickpicks.app",
       "permissions": [
         "android.permission.CAMERA"
       ]

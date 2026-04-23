@@ -7,7 +7,7 @@ set -e
 SUPABASE_URL="https://nwxnympcfwydxzjkmmas.supabase.co"
 SERVICE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53eG55bXBjZnd5ZHh6amttbWFzIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NTUxOTk1MywiZXhwIjoyMDkxMDk1OTUzfQ.itHksNzwzKrKv0nnbaJwnhFR1XoVp8uov8N1MsbDQLI"
 BUCKET="cigar-images"
-SRC_DIR="/Users/bobguillow/StickPicks/scripts/data/dropbox-images"
+SRC_DIR="${SRC_DIR:-$(cd "$(dirname "$0")/.." && pwd)/scripts/data/dropbox-images}"
 RESIZED_DIR="/tmp/dtt-resized"
 mkdir -p "$RESIZED_DIR"
 
