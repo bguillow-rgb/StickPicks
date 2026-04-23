@@ -70,12 +70,18 @@ export default function PaywallScreen() {
     })();
   }, []);
 
-  // Use real prices from RevenueCat when available. Fallbacks match the
-  // intended App Store Connect prices ($4.99/mo, $39.99/yr = 33% off) and
-  // are only shown if RevenueCat offerings are still loading or unavailable.
-  // Update the fallbacks whenever App Store Connect prices change.
-  const yearlyPrice = yearlyPackage?.product.priceString ?? '$39.99';
-  const monthlyPrice = monthlyPackage?.product.priceString ?? '$4.99';
+  // Use real prices from RevenueCat when available. Fallbacks must match the
+  // live App Store Connect prices so users never see a different number in
+  // the paywall vs. the Apple purchase sheet — only shown if RevenueCat
+  // offerings are still loading or unavailable.
+  //
+  // Current ASC prices (TestFlight-era): $2.99/mo, $24.99/yr. Plan is to bump
+  // to $4.99/$39.99 before public launch via Apple's Plan Subscription Price
+  // Change flow (only available once a subscription has been submitted for
+  // review at least once). Update the fallbacks in the same commit as the
+  // ASC price change so they stay in lockstep.
+  const yearlyPrice = yearlyPackage?.product.priceString ?? '$24.99';
+  const monthlyPrice = monthlyPackage?.product.priceString ?? '$2.99';
 
   async function handlePurchase() {
     if (isGuest) {
