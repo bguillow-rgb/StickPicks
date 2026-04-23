@@ -5,8 +5,8 @@
  * 1. Create a project at https://app.revenuecat.com
  * 2. Add an Apple App Store app with your bundle ID (com.stickpicks.app)
  * 3. Create Products:
- *    - sp_pro_monthly  → $2.99/month auto-renewing subscription
- *    - sp_pro_yearly   → $24.99/year auto-renewing subscription
+ *    - sp_pro_monthly  → $4.99/month auto-renewing subscription
+ *    - sp_pro_yearly   → $39.99/year auto-renewing subscription
  * 4. Create an Entitlement called "pro"
  * 5. Attach both products to the "pro" entitlement
  * 6. Create an Offering called "default" with both products
