@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -5,13 +6,42 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAgeGateStore } from '@/src/stores/useAgeGateStore';
 import { COLORS, SPACING, FONTS } from '@/src/constants/theme';
 
+function formatRemaining(ms: number): string {
+  const totalMinutes = Math.ceil(ms / 60_000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  return `${Math.max(minutes, 1)}m`;
+}
+
 export default function AgeGateBlockedScreen() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const reset = useAgeGateStore((s) => s.reset);
+  const blockedUntil = useAgeGateStore((s) => s.blockedUntil);
 
-  const handleGoBack = () => {
-    reset();
+  const [remaining, setRemaining] = useState<number>(
+    Math.max(0, (blockedUntil ?? 0) - Date.now()),
+  );
+
+  useEffect(() => {
+    if (!blockedUntil) {
+      setRemaining(0);
+      return;
+    }
+    setRemaining(Math.max(0, blockedUntil - Date.now()));
+    const id = setInterval(() => {
+      const r = Math.max(0, blockedUntil - Date.now());
+      setRemaining(r);
+      if (r === 0) clearInterval(id);
+    }, 30_000);
+    return () => clearInterval(id);
+  }, [blockedUntil]);
+
+  const canRetry = remaining === 0;
+
+  const handleTryAgain = async () => {
+    await reset();
     router.replace('/age-gate');
   };
 
@@ -26,11 +56,20 @@ export default function AgeGateBlockedScreen() {
         <Text style={styles.sub}>
           You must be 21 years of age or older to use Stick Picks.
         </Text>
+        {!canRetry && (
+          <Text style={styles.cooldown}>
+            You can try again in {formatRemaining(remaining)}.
+          </Text>
+        )}
       </View>
 
-      <Pressable onPress={handleGoBack} style={styles.goBackBtn} hitSlop={12}>
-        <Text style={styles.goBackText}>Tapped this by mistake? Go back</Text>
-      </Pressable>
+      {canRetry ? (
+        <Pressable onPress={handleTryAgain} style={styles.goBackBtn} hitSlop={12}>
+          <Text style={styles.goBackText}>Try again</Text>
+        </Pressable>
+      ) : (
+        <View style={styles.goBackBtn} />
+      )}
     </View>
   );
 }
@@ -78,6 +117,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 22,
     paddingHorizontal: SPACING.md,
+  },
+  cooldown: {
+    fontFamily: 'Cormorant',
+    fontSize: 13,
+    color: COLORS.subtle,
+    textAlign: 'center',
+    marginTop: SPACING.xs,
   },
   goBackBtn: {
     alignItems: 'center',

@@ -186,10 +186,10 @@ export default function ProfileScreen() {
               await supabase.auth.signOut();
               router.replace('/auth/login');
             } catch {
-              // Don't leak transport details — point the user at our support email.
+              // Keep the retry path in-app — Apple 5.1.1(v) requires self-service deletion.
               Alert.alert(
                 'Deletion Failed',
-                'We could not delete your account right now. Please email support@stickpicks.app and we will remove your account within 7 days.',
+                'We could not delete your account right now. Please check your connection and try again.',
               );
             }
           },

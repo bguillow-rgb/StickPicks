@@ -109,8 +109,13 @@ export default function QuizResultsScreen() {
 
       <Text style={styles.header}>Your Match</Text>
       {loading ? (
-        <View style={{ alignItems: 'center', paddingTop: SPACING.xxl }}>
-          <ActivityIndicator color={COLORS.accent} size="large" />
+        <View style={{ alignItems: 'center', paddingTop: SPACING.lg }}>
+          <Image
+            source={require('../../assets/images/splash-icon.png')}
+            style={styles.loadingHero}
+            resizeMode="contain"
+          />
+          <ActivityIndicator color={COLORS.accent} size="large" style={{ marginTop: SPACING.md }} />
           <Text style={[styles.subheader, { marginTop: SPACING.md }]}>Finding your perfect cigar...</Text>
         </View>
       ) : (
@@ -297,6 +302,12 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 12,
     marginBottom: SPACING.sm,
+  },
+  loadingHero: {
+    width: '100%',
+    height: 140,
+    borderRadius: 12,
+    backgroundColor: COLORS.card,
   },
   kicker: {
     fontFamily: 'Cormorant',
