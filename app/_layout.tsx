@@ -32,6 +32,7 @@ import { StyledAlertHost } from '@/src/components/ui/StyledAlert';
 import { supabase } from '@/lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { initRevenueCat, identifyUser, getCustomerInfo, isProActive } from '@/src/lib/revenuecat';
+import { loadBrandLogos } from '@/src/lib/brandLogos';
 import { useProStore } from '@/src/stores/useProStore';
 import { useAgeGateStore, useHydrateAgeGate } from '@/src/stores/useAgeGateStore';
 import {
@@ -278,6 +279,9 @@ export default function RootLayout() {
     initRevenueCat().catch((e) => {
       if (__DEV__) console.warn('[RevenueCat] Init failed:', e);
     });
+    // Warm the brand-logo cache so CigarImage can fall back synchronously.
+    // Never blocks boot — fire-and-forget, swallows its own errors.
+    loadBrandLogos();
   }, []);
 
   // Listen for auth state changes + sync RevenueCat user
