@@ -8,7 +8,9 @@ import { Alert } from '@/src/components/ui/StyledAlert';
 // Hook that powers the "Add a photo" affordance on cigars missing an image.
 //
 // Flow:
-//   1. Ask for media-library permission, open picker, let user crop.
+//   1. Prompt the user to take a new photo with the camera OR pick one from
+//      their photo library. Ask for the matching permission lazily (only the
+//      permission for the chosen path).
 //   2. Upload to the existing `cigar-images` Supabase Storage bucket.
 //   3. Insert a row in `cigar_image_submissions`. The DB trigger
 //      `promote_cigar_image_if_takedown` auto-promotes the submission to the
@@ -22,32 +24,72 @@ export interface UseCigarImageUpload {
   pickAndSubmit: (cigarId: string) => Promise<{ submitted: boolean }>;
 }
 
+type Source = 'camera' | 'library';
+
+// Present the Camera / Photo Library / Cancel choice and resolve with the
+// user's pick. Returns null on cancel.
+function chooseSource(): Promise<Source | null> {
+  return new Promise((resolve) => {
+    Alert.alert('Add a photo', 'Where should we grab it from?', [
+      { text: 'Take a photo', onPress: () => resolve('camera') },
+      { text: 'Choose from library', onPress: () => resolve('library') },
+      { text: 'Cancel', style: 'cancel', onPress: () => resolve(null) },
+    ]);
+  });
+}
+
 export function useCigarImageUpload(): UseCigarImageUpload {
   const [uploading, setUploading] = useState(false);
 
   const pickAndSubmit = useCallback(async (cigarId: string) => {
     try {
-      const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (!perm.granted) {
-        Alert.alert(
-          'Photo library access needed',
-          'Enable photos access in Settings so you can submit an image.',
-          [
-            { text: 'Cancel', style: 'cancel' },
-            { text: 'Open Settings', onPress: () => Linking.openSettings() },
-          ]
-        );
-        return { submitted: false };
-      }
+      const source = await chooseSource();
+      if (!source) return { submitted: false };
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        // Square crop matches the display aspect everywhere we render cigar art.
-        aspect: [1, 1],
-        quality: 0.85,
-        selectionLimit: 1,
-      });
+      // Ask for permission and launch the picker for the chosen source. Crop
+      // is 1:1 to match every CigarImage render site in the app.
+      let result: ImagePicker.ImagePickerResult;
+      if (source === 'camera') {
+        const perm = await ImagePicker.requestCameraPermissionsAsync();
+        if (!perm.granted) {
+          Alert.alert(
+            'Camera access needed',
+            'Enable camera access in Settings so you can snap a new photo of this cigar.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Open Settings', onPress: () => Linking.openSettings() },
+            ],
+          );
+          return { submitted: false };
+        }
+        result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.85,
+          cameraType: ImagePicker.CameraType.back,
+        });
+      } else {
+        const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!perm.granted) {
+          Alert.alert(
+            'Photo library access needed',
+            'Enable photos access in Settings so you can submit an image.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Open Settings', onPress: () => Linking.openSettings() },
+            ],
+          );
+          return { submitted: false };
+        }
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.85,
+          selectionLimit: 1,
+        });
+      }
       if (result.canceled || !result.assets?.[0]?.uri) return { submitted: false };
       const uri = result.assets[0].uri;
 

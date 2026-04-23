@@ -111,9 +111,9 @@ export default function QuizResultsScreen() {
       {loading ? (
         <View style={{ alignItems: 'center', paddingTop: SPACING.lg }}>
           <Image
-            source={require('../../assets/images/splash-icon.png')}
+            source={require('../../assets/images/quiz-hero.jpg')}
             style={styles.loadingHero}
-            resizeMode="contain"
+            resizeMode="cover"
           />
           <ActivityIndicator color={COLORS.accent} size="large" style={{ marginTop: SPACING.md }} />
           <Text style={[styles.subheader, { marginTop: SPACING.md }]}>Finding your perfect cigar...</Text>
@@ -307,7 +307,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 140,
     borderRadius: 12,
-    backgroundColor: COLORS.card,
   },
   kicker: {
     fontFamily: 'Cormorant',
