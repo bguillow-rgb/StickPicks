@@ -3,7 +3,7 @@
  *
  * Setup checklist (do once in RevenueCat dashboard):
  * 1. Create a project at https://app.revenuecat.com
- * 2. Add an Apple App Store app with your bundle ID (com.stickpicks.app)
+ * 2. Add an Apple App Store app with your bundle ID (com.bobguillow.stickpicks)
  * 3. Create Products:
  *    - sp_pro_monthly  → $4.99/month auto-renewing subscription
  *    - sp_pro_yearly   → $39.99/year auto-renewing subscription
