@@ -1,21 +1,23 @@
-import { View, Text, StyleSheet, FlatList, Pressable, Alert, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Pressable, ScrollView, TextInput } from 'react-native';
+import { Alert } from '@/src/components/ui/StyledAlert';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
-import { Button } from '@/src/components/ui/Button';
 import { EmptyState } from '@/src/components/ui/EmptyState';
 import { StarRating } from '@/src/components/ui/StarRating';
 import { CommunityRating } from '@/src/components/cigar/CommunityRating';
 import { useCommunityRatings } from '@/src/hooks/useCommunityRating';
 import { StatusChips } from '@/src/components/ui/StatusChip';
+import { DateEntryModal } from '@/src/components/humidor/DateEntryModal';
+import { VitolaPickerModal } from '@/src/components/humidor/VitolaPickerModal';
 import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
 import { useProStore } from '@/src/stores/useProStore';
-import type { HumidorItem, CigarReview } from '@/src/types/cigar';
+import type { HumidorItem, CigarReview, Cigar } from '@/src/types/cigar';
 
 type GroupedHumidorItem = {
   cigar_id: string;
@@ -135,8 +137,10 @@ export default function HumidorScreen() {
 
   const ratingsMap = useCommunityRatings(items.map((i) => i.cigar_id));
 
-  // Per-stick effective price (cents): user's purchase price overrides the seeded MSRP
+  // Per-stick effective price (cents): custom_price_cents (from inline edit) wins
+  // over purchase_price_cents (legacy), which in turn wins over the seeded MSRP.
   const effectivePriceCents = (item: HumidorItem): number => {
+    if (item.custom_price_cents != null) return item.custom_price_cents;
     if (item.purchase_price_cents != null) return item.purchase_price_cents;
     return item.cigar?.price_usd_cents ?? 0;
   };
@@ -195,6 +199,167 @@ export default function HumidorScreen() {
       (a, b) => b.latest_updated_at.localeCompare(a.latest_updated_at)
     );
   })();
+
+  // Owned-card redesign: group by brand+line so "Padrón 1964 Torpedo" and
+  // "Padrón 1964 Exclusivo" collapse into a single card with a sub-row per vitola.
+  type OwnedGroup = {
+    key: string;
+    brand: string;
+    line: string;
+    items: HumidorItem[];
+    latest_updated_at: string;
+  };
+  const ownedGroups: OwnedGroup[] = useMemo(() => {
+    if (filter !== 'owned') return [];
+    const map = new Map<string, OwnedGroup>();
+    for (const item of items) {
+      if (item.status !== 'owned') continue;
+      const brand = item.cigar?.brand ?? 'Unknown';
+      const line = item.cigar?.line ?? item.cigar?.name ?? 'Unknown';
+      const key = `${brand}::${line}`;
+      const existing = map.get(key);
+      if (existing) {
+        existing.items.push(item);
+        if (item.updated_at > existing.latest_updated_at) {
+          existing.latest_updated_at = item.updated_at;
+        }
+      } else {
+        map.set(key, {
+          key,
+          brand,
+          line,
+          items: [item],
+          latest_updated_at: item.updated_at,
+        });
+      }
+    }
+    return Array.from(map.values()).sort((a, b) =>
+      b.latest_updated_at.localeCompare(a.latest_updated_at)
+    );
+  }, [filter, items]);
+
+  // Inline-edit / modal state for owned rows.
+  const [editingPriceItemId, setEditingPriceItemId] = useState<string | null>(null);
+  const [priceDraft, setPriceDraft] = useState('');
+  const [dateModal, setDateModal] = useState<{ item: HumidorItem } | null>(null);
+  // Swap-vitola picker target. The user taps a vitola label in a group to swap
+  // it for a different size from the same brand+line. Changing the size clears
+  // the per-item price override so the new vitola's seeded price takes over.
+  const [vitolaSwap, setVitolaSwap] = useState<{ item: HumidorItem; group: OwnedGroup } | null>(null);
+  // How many catalog vitolas exist for each brand+line currently owned. Used
+  // to decide whether a vitola row should show an "editable" chevron.
+  const [vitolaCounts, setVitolaCounts] = useState<Map<string, number>>(new Map());
+
+  const openPriceEdit = (item: HumidorItem) => {
+    const cents = effectivePriceCents(item);
+    setPriceDraft(cents > 0 ? (cents / 100).toFixed(2) : '');
+    setEditingPriceItemId(item.id);
+  };
+
+  const commitPriceEdit = async (item: HumidorItem) => {
+    const raw = priceDraft.trim();
+    setEditingPriceItemId(null);
+    // Empty → clear override (falls back to legacy or seeded MSRP).
+    const next: number | null = raw === '' ? null : Math.round(Number(raw) * 100);
+    if (next !== null && (!Number.isFinite(next) || next < 0)) return;
+    if (next === item.custom_price_cents) return;
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, custom_price_cents: next } : i))
+    );
+    try {
+      await supabase
+        .from('humidor_items')
+        .update({ custom_price_cents: next })
+        .eq('id', item.id);
+    } catch {
+      setItems((prev) =>
+        prev.map((i) =>
+          i.id === item.id ? { ...i, custom_price_cents: item.custom_price_cents } : i
+        )
+      );
+    }
+  };
+
+  const saveAcquiredAt = async (item: HumidorItem, iso: string | null) => {
+    setItems((prev) =>
+      prev.map((i) => (i.id === item.id ? { ...i, acquired_at: iso } : i))
+    );
+    try {
+      await supabase
+        .from('humidor_items')
+        .update({ acquired_at: iso })
+        .eq('id', item.id);
+    } catch {
+      setItems((prev) =>
+        prev.map((i) => (i.id === item.id ? { ...i, acquired_at: item.acquired_at } : i))
+      );
+    }
+  };
+
+  // Swap a single humidor row to a different vitola in the same brand+line.
+  // We also null out price_override_cents so the effective price falls back to
+  // the new vitola's seeded MSRP — the old override was tied to the old size.
+  const swapItemVitola = async (item: HumidorItem, toCigar: Cigar) => {
+    try {
+      const { data, error } = await supabase
+        .from('humidor_items')
+        .update({ cigar_id: toCigar.id, custom_price_cents: null })
+        .eq('id', item.id)
+        .select('*, cigar:cigars(*)')
+        .single();
+      if (error) throw error;
+      if (data) {
+        setItems((prev) => prev.map((i) => (i.id === item.id ? (data as HumidorItem) : i)));
+      } else {
+        fetchItems();
+      }
+    } catch {
+      Alert.alert('Error', 'Failed to change size. Try again.');
+    } finally {
+      setVitolaSwap(null);
+    }
+  };
+
+  // Count how many catalog vitolas exist for each brand+line currently owned.
+  // A single paged query per (brand IN ...) covers them all; we filter the
+  // line locally so we don't need supabase's weaker multi-column .in() support.
+  useEffect(() => {
+    if (ownedGroups.length === 0) {
+      if (vitolaCounts.size > 0) setVitolaCounts(new Map());
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const brands = Array.from(new Set(ownedGroups.map((g) => g.brand)));
+      const lines = new Set(ownedGroups.map((g) => g.line));
+      const { data } = await supabase
+        .from('cigars')
+        .select('brand,line')
+        .in('brand', brands);
+      if (cancelled) return;
+      const counts = new Map<string, number>();
+      for (const row of (data as { brand: string; line: string }[]) ?? []) {
+        if (!lines.has(row.line)) continue;
+        const k = `${row.brand}::${row.line}`;
+        counts.set(k, (counts.get(k) ?? 0) + 1);
+      }
+      setVitolaCounts(counts);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ownedGroups.map((g) => g.key).join('|')]);
+
+  // Resting indicator: whole days since acquired_at. Shown as "Xd resting"
+  // once >= 1 day; "Acquired today" on day zero; "Set acquired date" if null.
+  const restingDays = (item: HumidorItem): number | null => {
+    if (!item.acquired_at) return null;
+    const start = new Date(item.acquired_at).getTime();
+    if (!Number.isFinite(start)) return null;
+    const days = Math.floor((Date.now() - start) / (1000 * 60 * 60 * 24));
+    return days >= 0 ? days : null;
+  };
 
   const filtered = items;
 
@@ -327,6 +492,191 @@ export default function HumidorScreen() {
             );
           }}
         />
+      ) : filter === 'owned' ? (
+        <FlatList
+          ref={listRef}
+          data={ownedGroups}
+          keyExtractor={(g) => g.key}
+          style={{ flex: 1 }}
+          showsVerticalScrollIndicator={true}
+          indicatorStyle="white"
+          bounces={true}
+          alwaysBounceVertical={true}
+          onContentSizeChange={() => listRef.current?.flashScrollIndicators()}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 80, flexGrow: 1 }}
+          ListEmptyComponent={
+            <EmptyState
+              title="No cigars owned yet"
+              subtitle="Mark cigars you have on hand as owned."
+              actionLabel="Browse Cigars"
+              onAction={() => router.push('/(tabs)/browse')}
+            />
+          }
+          renderItem={({ item: group }) => {
+            const firstCigarId = group.items[0]?.cigar_id;
+            const groupRating = firstCigarId ? ratingsMap.get(firstCigarId) : null;
+
+            return (
+              <Card style={styles.itemCard}>
+                <Pressable
+                  onPress={() =>
+                    firstCigarId &&
+                    router.push(`/(tabs)/cigar/${firstCigarId}?from=humidor&status=owned`)
+                  }
+                >
+                  <View style={styles.itemHeader}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.itemName}>{group.line}</Text>
+                      <Text style={styles.itemBrand}>{group.brand}</Text>
+                      {groupRating && groupRating.count > 0 ? (
+                        <CommunityRating
+                          average={groupRating.average}
+                          count={groupRating.count}
+                          variant="compact"
+                        />
+                      ) : null}
+                    </View>
+                    <Badge label="owned" color={COLORS.success} />
+                  </View>
+                </Pressable>
+
+                {(() => {
+                  const catalogCount = vitolaCounts.get(group.key) ?? 0;
+                  // Alternatives exist if the catalog has more vitolas in this
+                  // brand+line than the user currently owns in the group.
+                  const hasAlternatives = catalogCount > group.items.length;
+                  return group.items.map((item: HumidorItem) => {
+                    const qty = item.quantity ?? 1;
+                    const perStickCents = effectivePriceCents(item);
+                    const lineTotalCents = itemValueCents(item);
+                    const isEditing = editingPriceItemId === item.id;
+                    const days = restingDays(item);
+                    const vitolaLabel =
+                      item.cigar?.vitola ?? item.cigar?.name ?? 'Vitola';
+
+                    return (
+                      <View key={item.id} style={styles.vitolaRow}>
+                        <View style={styles.vitolaTopRow}>
+                          <Pressable
+                            onPress={
+                              hasAlternatives
+                                ? () => setVitolaSwap({ item, group })
+                                : undefined
+                            }
+                            disabled={!hasAlternatives}
+                            hitSlop={4}
+                            style={styles.vitolaLabelPressable}
+                          >
+                            <Text style={styles.vitolaLabel} numberOfLines={1}>
+                              {vitolaLabel}
+                            </Text>
+                            {hasAlternatives && (
+                              <Ionicons
+                                name="chevron-down"
+                                size={14}
+                                color={COLORS.accent}
+                                style={styles.vitolaChevron}
+                              />
+                            )}
+                          </Pressable>
+                          <Pressable
+                            onPress={() => handleDelete(item)}
+                            hitSlop={8}
+                            style={styles.vitolaDelete}
+                          >
+                            <Ionicons
+                              name="close-circle-outline"
+                              size={18}
+                              color={COLORS.muted}
+                            />
+                          </Pressable>
+                        </View>
+
+                      <View style={styles.vitolaControls}>
+                        <View style={styles.qtyStepper}>
+                          <Pressable
+                            onPress={() => updateQuantity(item, -1)}
+                            hitSlop={8}
+                            style={[styles.qtyBtn, qty <= 1 && styles.qtyBtnDisabled]}
+                            disabled={qty <= 1}
+                          >
+                            <Ionicons
+                              name="remove"
+                              size={16}
+                              color={qty <= 1 ? COLORS.subtle : COLORS.text}
+                            />
+                          </Pressable>
+                          <Text style={styles.qtyValue}>{qty}</Text>
+                          <Pressable
+                            onPress={() => updateQuantity(item, 1)}
+                            hitSlop={8}
+                            style={styles.qtyBtn}
+                          >
+                            <Ionicons name="add" size={16} color={COLORS.text} />
+                          </Pressable>
+                        </View>
+
+                        <View style={styles.valueCol}>
+                          {isEditing ? (
+                            <View style={styles.priceEditRow}>
+                              <Text style={styles.priceDollar}>$</Text>
+                              <TextInput
+                                autoFocus
+                                value={priceDraft}
+                                onChangeText={(t) =>
+                                  setPriceDraft(t.replace(/[^0-9.]/g, '').slice(0, 7))
+                                }
+                                onBlur={() => commitPriceEdit(item)}
+                                onSubmitEditing={() => commitPriceEdit(item)}
+                                keyboardType="decimal-pad"
+                                returnKeyType="done"
+                                selectionColor={COLORS.accent}
+                                style={styles.priceInput}
+                                placeholder="0.00"
+                                placeholderTextColor={COLORS.subtle}
+                              />
+                            </View>
+                          ) : (
+                            <Pressable onPress={() => openPriceEdit(item)} hitSlop={6}>
+                              <Text style={styles.perStickText}>
+                                {perStickCents > 0
+                                  ? `${fmtUSD(perStickCents)} ea`
+                                  : 'Set price'}
+                              </Text>
+                            </Pressable>
+                          )}
+                          <Text style={styles.lineTotalText}>
+                            {lineTotalCents > 0 ? fmtUSD(lineTotalCents) : ''}
+                          </Text>
+                        </View>
+                      </View>
+
+                      <Pressable
+                        onPress={() => setDateModal({ item })}
+                        hitSlop={6}
+                        style={styles.restingRow}
+                      >
+                        <Ionicons
+                          name="time-outline"
+                          size={12}
+                          color={COLORS.muted}
+                        />
+                        <Text style={styles.restingText}>
+                          {days === null
+                            ? 'Set acquired date'
+                            : days === 0
+                            ? 'Acquired today'
+                            : `${days}d resting`}
+                        </Text>
+                      </Pressable>
+                    </View>
+                  );
+                  });
+                })()}
+              </Card>
+            );
+          }}
+        />
       ) : (
         <FlatList
           ref={listRef}
@@ -341,15 +691,11 @@ export default function HumidorScreen() {
           contentContainerStyle={{ paddingBottom: insets.bottom + 80, flexGrow: 1 }}
           ListEmptyComponent={
             <EmptyState
-              title={
-                filter === 'wishlist' ? 'Your wishlist is empty' :
-                filter === 'owned' ? 'No cigars owned yet' :
-                'No smokes logged yet'
-              }
+              title={filter === 'wishlist' ? 'Your wishlist is empty' : 'No smokes logged yet'}
               subtitle={
-                filter === 'wishlist' ? 'Browse cigars and add ones you want to try.' :
-                filter === 'owned' ? 'Mark cigars you have on hand as owned.' :
-                'After you smoke a cigar, log it here.'
+                filter === 'wishlist'
+                  ? 'Browse cigars and add ones you want to try.'
+                  : 'Mark cigars here after you\u2019ve smoked them.'
               }
               actionLabel="Browse Cigars"
               onAction={() => router.push('/(tabs)/browse')}
@@ -358,10 +704,6 @@ export default function HumidorScreen() {
           renderItem={({ item }) => {
             const review = item.status === 'smoked' ? myReviews.get(item.cigar_id) : null;
             const isSmoked = item.status === 'smoked';
-            const isOwned = item.status === 'owned';
-            const qty = item.quantity ?? 1;
-            const perStickCents = effectivePriceCents(item);
-            const lineTotalCents = itemValueCents(item);
 
             return (
               <Card
@@ -382,7 +724,6 @@ export default function HumidorScreen() {
                   <Badge
                     label={item.status}
                     color={
-                      item.status === 'owned' ? COLORS.success :
                       item.status === 'smoked' ? COLORS.accent :
                       COLORS.info
                     }
@@ -395,37 +736,6 @@ export default function HumidorScreen() {
                     <Ionicons name="close-circle-outline" size={20} color={COLORS.muted} />
                   </Pressable>
                 </View>
-
-                {isOwned && (
-                  <View style={styles.ownedFooter}>
-                    <View style={styles.qtyStepper}>
-                      <Pressable
-                        onPress={() => updateQuantity(item, -1)}
-                        hitSlop={8}
-                        style={[styles.qtyBtn, qty <= 1 && styles.qtyBtnDisabled]}
-                        disabled={qty <= 1}
-                      >
-                        <Ionicons name="remove" size={16} color={qty <= 1 ? COLORS.subtle : COLORS.text} />
-                      </Pressable>
-                      <Text style={styles.qtyValue}>{qty}</Text>
-                      <Pressable
-                        onPress={() => updateQuantity(item, 1)}
-                        hitSlop={8}
-                        style={styles.qtyBtn}
-                      >
-                        <Ionicons name="add" size={16} color={COLORS.text} />
-                      </Pressable>
-                    </View>
-                    <View style={styles.valueCol}>
-                      <Text style={styles.perStickText}>
-                        {perStickCents > 0 ? `${fmtUSD(perStickCents)} ea` : '—'}
-                      </Text>
-                      <Text style={styles.lineTotalText}>
-                        {lineTotalCents > 0 ? fmtUSD(lineTotalCents) : ''}
-                      </Text>
-                    </View>
-                  </View>
-                )}
 
                 {isSmoked && (
                   <View style={styles.reviewSection}>
@@ -454,6 +764,29 @@ export default function HumidorScreen() {
               </Card>
             );
           }}
+        />
+      )}
+
+      <DateEntryModal
+        visible={dateModal !== null}
+        title="Acquired on"
+        value={dateModal?.item.acquired_at ?? null}
+        onClose={() => setDateModal(null)}
+        onSave={(iso) => {
+          if (dateModal) saveAcquiredAt(dateModal.item, iso);
+        }}
+      />
+
+      {vitolaSwap && (
+        <VitolaPickerModal
+          visible
+          brand={vitolaSwap.group.brand}
+          line={vitolaSwap.group.line}
+          // Exclude vitolas already owned in this group so the update can't
+          // violate the (user_id, cigar_id, status) unique constraint.
+          excludeCigarIds={vitolaSwap.group.items.map((i) => i.cigar_id)}
+          onClose={() => setVitolaSwap(null)}
+          onPick={(cigar) => swapItemVitola(vitolaSwap.item, cigar)}
         />
       )}
     </View>
@@ -572,6 +905,77 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.sm,
     borderTopWidth: 1,
     borderTopColor: COLORS.border,
+  },
+  // Owned-card redesign: per-vitola sub-row inside a brand+line group card.
+  vitolaRow: {
+    marginTop: SPACING.sm,
+    paddingTop: SPACING.sm,
+    borderTopWidth: 1,
+    borderTopColor: COLORS.border,
+  },
+  vitolaTopRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  // Wraps label + chevron. Becomes the tap target when alternatives exist.
+  vitolaLabelPressable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginRight: SPACING.sm,
+  },
+  vitolaLabel: {
+    fontFamily: 'Cormorant',
+    fontSize: 14,
+    fontWeight: '700',
+    color: COLORS.text,
+    flexShrink: 1,
+  },
+  vitolaChevron: {
+    marginLeft: 4,
+  },
+  vitolaDelete: {
+    padding: 4,
+  },
+  vitolaControls: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceEditRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  priceDollar: {
+    fontFamily: 'Cormorant',
+    fontSize: 11,
+    color: COLORS.muted,
+  },
+  priceInput: {
+    fontFamily: 'Cormorant',
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.text,
+    minWidth: 60,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.accent,
+    paddingVertical: 0,
+    paddingHorizontal: 2,
+    textAlign: 'right',
+  },
+  restingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 6,
+  },
+  restingText: {
+    fontFamily: 'Cormorant',
+    fontSize: 11,
+    color: COLORS.muted,
   },
   qtyStepper: {
     flexDirection: 'row',

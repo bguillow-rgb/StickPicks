@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, Alert, Image, TextInput, Pressable, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TextInput, Pressable, Animated } from 'react-native';
+import { Alert } from '@/src/components/ui/StyledAlert';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect, useRef } from 'react';
@@ -17,6 +18,9 @@ import { useCommunityRating } from '@/src/hooks/useCommunityRating';
 import { COLORS, SPACING, FONTS, RADIUS } from '@/src/constants/theme';
 import { useProStore } from '@/src/stores/useProStore';
 import { getDrinkPairings } from '@/src/features/quiz/pairings';
+import { CigarImage } from '@/src/components/cigar/CigarImage';
+import { useCigarImageUpload } from '@/src/hooks/useCigarImageUpload';
+import { ReportModal } from '@/src/components/ui/ReportModal';
 import type { Cigar, HumidorItem, CigarReview } from '@/src/types/cigar';
 
 export default function CigarDetailScreen() {
@@ -29,13 +33,33 @@ export default function CigarDetailScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [cigar, setCigar] = useState<Cigar | null>(null);
+  const { uploading: uploadingImage, pickAndSubmit: submitCigarImage } = useCigarImageUpload();
+  const [reportingImage, setReportingImage] = useState(false);
+
+  // Re-read the cigar from the catalog after a submission so a takedown-promoted
+  // image appears immediately without waiting for a route re-entry.
+  const refetchCigar = async () => {
+    if (!id) return;
+    const { data } = await supabase.from('cigars').select('*').eq('id', id).single();
+    if (data) setCigar(data as Cigar);
+  };
+
+  const handleAddPhoto = async () => {
+    if (!cigar) return;
+    const { submitted } = await submitCigarImage(cigar.id);
+    if (submitted) await refetchCigar();
+  };
   const [loading, setLoading] = useState(true);
   const [similar, setSimilar] = useState<Cigar[]>([]);
+  // Reset scroll to top whenever the cigar id changes. Tapping a "Similar
+  // Cigars" card at the bottom of the page otherwise leaves the user scrolled
+  // past the hero of the new cigar.
+  const scrollRef = useRef<ScrollView>(null);
+  useEffect(() => {
+    scrollRef.current?.scrollTo({ y: 0, animated: false });
+  }, [id]);
   const [humidorItems, setHumidorItems] = useState<HumidorItem[]>([]);
   const [statuses, setStatuses] = useState<Set<string>>(new Set());
-  const [notes, setNotes] = useState('');
-  const [editingNotes, setEditingNotes] = useState(false);
-  const [savingNotes, setSavingNotes] = useState(false);
 
   // Status helpers — use both fetched data AND passed param as fallback
   const isSmoked = statuses.has('smoked') || passedStatus === 'smoked';
@@ -81,11 +105,6 @@ export default function CigarDetailScreen() {
       const items = (data as HumidorItem[]) ?? [];
       setHumidorItems(items);
       setStatuses(new Set(items.map((i) => i.status)));
-      // Load notes from the most recent item
-      if (items.length > 0) {
-        const primary = items.reduce((a, b) => (a.updated_at > b.updated_at ? a : b));
-        setNotes(primary.notes ?? '');
-      }
     } catch (e: any) {
       console.warn('fetchHumidorItems exception:', e?.message);
     }
@@ -167,53 +186,6 @@ export default function CigarDetailScreen() {
       if (finished) setUndoVisible(false);
     });
   }, [from, cigar?.id]);
-
-  const handleSaveNotes = async () => {
-    if (!primaryItem) return;
-    setSavingNotes(true);
-    try {
-      // Save notes on all humidor items for this cigar
-      const { error } = await supabase
-        .from('humidor_items')
-        .update({ notes: notes.trim() || null })
-        .eq('id', primaryItem.id);
-      if (error) throw error;
-      await fetchHumidorItems();
-      setEditingNotes(false);
-    } catch (e: any) {
-      Alert.alert('Error', e?.message ?? 'Failed to save notes');
-    } finally {
-      setSavingNotes(false);
-    }
-  };
-
-  const handleDeleteNotes = () => {
-    Alert.alert('Delete Notes', 'Are you sure you want to delete your notes?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: async () => {
-          if (!primaryItem) return;
-          setSavingNotes(true);
-          try {
-            const { error } = await supabase
-              .from('humidor_items')
-              .update({ notes: null })
-              .eq('id', primaryItem.id);
-            if (error) throw error;
-            setNotes('');
-            await fetchHumidorItems();
-            setEditingNotes(false);
-          } catch (e: any) {
-            Alert.alert('Error', e?.message ?? 'Failed to delete notes');
-          } finally {
-            setSavingNotes(false);
-          }
-        },
-      },
-    ]);
-  };
 
   const handleSaveReview = async () => {
     if (overallRating === 0) {
@@ -322,7 +294,7 @@ export default function CigarDetailScreen() {
         }
       }
 
-      const label = status === 'smoked' ? 'Smoke logged!' : `Added to your ${status} list.`;
+      const label = status === 'smoked' ? 'Marked as smoked' : `Added to your ${status} list.`;
       Alert.alert('Saved', label);
       await fetchHumidorItems();
     } catch (e: any) {
@@ -379,6 +351,7 @@ export default function CigarDetailScreen() {
   return (
     <>
     <ScrollView
+      ref={scrollRef}
       style={[styles.screen]}
       contentContainerStyle={{
         paddingTop: insets.top + SPACING.md,
@@ -403,17 +376,25 @@ export default function CigarDetailScreen() {
 
       {/* Hero */}
       <View style={styles.hero}>
-        {cigar.image_url ? (
-          <Image
-            source={{ uri: cigar.image_url }}
-            style={styles.heroImg}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={styles.heroImage}>
-            <Ionicons name="leaf-outline" size={48} color={COLORS.accent} />
-          </View>
-        )}
+        <CigarImage
+          cigar={cigar}
+          style={styles.heroImg}
+          showAddAction
+          onAddPress={handleAddPhoto}
+          uploading={uploadingImage}
+        />
+        {/* Report affordance — required by App Review Guideline 1.2 so every
+            piece of user-contributable content (cigar images can be user
+            submissions) has a one-tap report flow. Always visible so the
+            moderation surface is discoverable. */}
+        <Pressable
+          onPress={() => setReportingImage(true)}
+          hitSlop={10}
+          style={styles.reportBtn}
+        >
+          <Ionicons name="flag-outline" size={14} color={COLORS.muted} />
+          <Text style={styles.reportBtnText}>Report image</Text>
+        </Pressable>
       </View>
 
       {/* Title */}
@@ -464,22 +445,22 @@ export default function CigarDetailScreen() {
 
       {/* Details grid */}
       <Card style={styles.detailsGrid}>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Wrapper</Text>
-          <Text style={styles.detailValue}>{cigar.wrapper ?? '—'}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Binder</Text>
-          <Text style={styles.detailValue}>{cigar.binder ?? '—'}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Filler</Text>
-          <Text style={styles.detailValue}>{cigar.filler?.join(', ') ?? '—'}</Text>
-        </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.detailLabel}>Origin</Text>
-          <Text style={styles.detailValue}>{cigar.origin ?? '—'}</Text>
-        </View>
+        {([
+          ['Wrapper', cigar.wrapper],
+          ['Binder', cigar.binder],
+          ['Filler', cigar.filler?.join(', ') ?? null],
+          ['Origin', cigar.origin],
+        ] as const).map(([label, value]) => (
+          <View key={label} style={styles.detailRow}>
+            <Text style={styles.detailLabel}>{label}</Text>
+            {/* Wrap the value Text in a flex View so long strings
+                (e.g. multi-country fillers) wrap to a second line at
+                larger Dynamic Type instead of overflowing the card. */}
+            <View style={styles.detailValueWrap}>
+              <Text style={styles.detailValue}>{value ?? '—'}</Text>
+            </View>
+          </View>
+        ))}
       </Card>
 
       {/* Drink Pairings — treat as Pro pre-hydration to avoid locked-state flash */}
@@ -638,7 +619,7 @@ export default function CigarDetailScreen() {
             <Button title="Mark as Owned" variant="secondary" onPress={() => handleAddToHumidor('owned')} />
           )}
           {!isSmoked && (
-            <Button title="Log a Smoke" variant="secondary" onPress={() => handleAddToHumidor('smoked')} />
+            <Button title="Mark as Smoked" variant="secondary" onPress={() => handleAddToHumidor('smoked')} />
           )}
           {hasAnyStatus && (
             <Button
@@ -659,7 +640,6 @@ export default function CigarDetailScreen() {
                             await supabase.from('humidor_items').delete().eq('id', item.id);
                           }
                           setHumidorItems([]);
-                          setNotes('');
                           Alert.alert('Removed', 'Cigar removed from your humidor.');
                         } catch {
                           Alert.alert('Error', 'Failed to remove cigar');
@@ -682,62 +662,6 @@ export default function CigarDetailScreen() {
         </View>
       ))}
 
-      {/* Notes */}
-      {primaryItem && (
-        <View style={styles.section}>
-          <View style={styles.notesHeader}>
-            <Text style={styles.sectionTitle}>My Notes</Text>
-            {primaryItem.notes && !editingNotes && (
-              <View style={styles.notesActions}>
-                <Pressable onPress={() => setEditingNotes(true)} hitSlop={8}>
-                  <Ionicons name="pencil-outline" size={18} color={COLORS.accent} />
-                </Pressable>
-                <Pressable onPress={handleDeleteNotes} hitSlop={8}>
-                  <Ionicons name="trash-outline" size={18} color={COLORS.muted} />
-                </Pressable>
-              </View>
-            )}
-          </View>
-          {editingNotes || !primaryItem.notes ? (
-            <View>
-              <TextInput
-                style={styles.notesInput}
-                value={notes}
-                onChangeText={setNotes}
-                placeholder="Add notes about this cigar..."
-                placeholderTextColor={COLORS.subtle}
-                multiline
-                textAlignVertical="top"
-              />
-              <View style={styles.notesButtons}>
-                <Button
-                  title={savingNotes ? 'Saving...' : 'Save Notes'}
-                  onPress={handleSaveNotes}
-                  style={{ flex: 1 }}
-                />
-                {editingNotes && (
-                  <Button
-                    title="Cancel"
-                    variant="ghost"
-                    onPress={() => {
-                      setNotes(primaryItem.notes ?? '');
-                      setEditingNotes(false);
-                    }}
-                    style={{ flex: 1 }}
-                  />
-                )}
-              </View>
-            </View>
-          ) : (
-            <Pressable onPress={() => setEditingNotes(true)}>
-              <Card style={styles.notesDisplay}>
-                <Text style={styles.notesText}>{primaryItem.notes}</Text>
-              </Card>
-            </Pressable>
-          )}
-        </View>
-      )}
-
       {/* Similar cigars */}
       {similar.length > 0 && (
         <View style={styles.section}>
@@ -751,6 +675,14 @@ export default function CigarDetailScreen() {
         </View>
       )}
     </ScrollView>
+
+    <ReportModal
+      visible={reportingImage}
+      targetKind="cigar_image"
+      targetId={cigar.id}
+      cigarId={cigar.id}
+      onClose={() => setReportingImage(false)}
+    />
 
     {/* Undo snackbar — only after scan-confirm, only while the window is open */}
     {fromScan && undoVisible && (
@@ -866,6 +798,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.md,
   },
+  reportBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  reportBtnText: {
+    fontFamily: 'Cormorant',
+    fontSize: 11,
+    color: COLORS.muted,
+  },
   heroImg: {
     width: 160,
     height: 160,
@@ -924,11 +869,16 @@ const styles = StyleSheet.create({
   section: {
     marginBottom: SPACING.md,
   },
+  // Section titles get an uppercase gold-label treatment so they clearly
+  // outrank the bold serif item names inside each section (e.g. "Pair It With"
+  // vs "Rye Whiskey" were previously the same visual weight and blended).
   sectionTitle: {
     fontFamily: 'Cormorant',
-    fontSize: 16,
-    fontWeight: '700',
-    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+    color: COLORS.accent,
+    textTransform: 'uppercase',
     marginBottom: SPACING.sm,
   },
   flavors: {
@@ -975,7 +925,8 @@ const styles = StyleSheet.create({
   },
   detailRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: SPACING.sm,
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.border,
@@ -985,12 +936,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.muted,
+    // Lock the label width so long values can't creep under it at larger
+    // Dynamic Type sizes (e.g. "Filler: Dominican, Colombian, Nicaraguan").
+    minWidth: 72,
+  },
+  detailValueWrap: {
+    // flex: 1 + minWidth: 0 is the canonical fix for flex children whose
+    // content would otherwise overflow the row. Without minWidth: 0 the
+    // container refuses to shrink below the text's intrinsic width.
+    flex: 1,
+    minWidth: 0,
   },
   detailValue: {
     fontFamily: 'Cormorant',
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.text,
+    textAlign: 'right',
   },
   statusBadges: {
     flexDirection: 'row',
@@ -1064,43 +1026,6 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
 
-  // Notes styles
-  notesHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: SPACING.sm,
-  },
-  notesActions: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-  },
-  notesInput: {
-    fontFamily: 'Cormorant',
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: RADIUS.md,
-    padding: SPACING.sm,
-    color: COLORS.text,
-    fontSize: 15,
-    lineHeight: 22,
-    minHeight: 100,
-  },
-  notesButtons: {
-    flexDirection: 'row',
-    gap: SPACING.sm,
-    marginTop: SPACING.sm,
-  },
-  notesDisplay: {
-    marginBottom: 0,
-  },
-  notesText: {
-    fontFamily: 'Cormorant',
-    fontSize: 15,
-    color: COLORS.muted,
-    lineHeight: 22,
-  },
   similarCard: {
     marginBottom: SPACING.sm,
   },

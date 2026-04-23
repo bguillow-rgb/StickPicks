@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Image, LogBox } from 'react-native';
+import { View, Text, StyleSheet, LogBox } from 'react-native';
 
 // RevenueCat can't fetch offerings until the products are live in App Store
 // Connect, which only happens for release builds. In dev, the expected failure
@@ -28,6 +28,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import 'react-native-reanimated';
 import { COLORS, FONTS } from '@/src/constants/theme';
+import { StyledAlertHost } from '@/src/components/ui/StyledAlert';
 import { supabase } from '@/lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { initRevenueCat, identifyUser, getCustomerInfo, isProActive } from '@/src/lib/revenuecat';
@@ -90,10 +91,13 @@ function useProtectedRoute(
     // Don't redirect anyone OUT of age-gate routes — they own the flow once inside.
     if (inAgeGate) return;
 
-    // 2) Auth gate
+    // 2) Auth gate. Anonymous (guest) users technically have a session but
+    // should still be allowed into /auth so they can upgrade to a real
+    // account — otherwise the paywall's "Sign in or create an account"
+    // banner bounces them straight back to home.
     if (!session && !inAuthGroup) {
       router.replace('/auth/login');
-    } else if (session && inAuthGroup) {
+    } else if (session && inAuthGroup && !session.user?.is_anonymous) {
       router.replace('/(tabs)');
     }
   }, [session, segments, isLoading, ageState]);
@@ -164,12 +168,13 @@ function AnimatedSplash({
     >
       <Animated.View style={[splashStyles.topLine, smokeStyle]} />
 
-      <Animated.View style={iconStyle}>
-        <Image
-          source={require('../assets/images/splash-icon.png')}
-          style={splashStyles.cigarPhoto}
-          resizeMode="cover"
-        />
+      {/* Text-only wordmark splash — the lit-cigar photo was removed so the
+          JS-side splash doesn't violate Apple's 1.4.3 "encourages tobacco use"
+          guideline. Note: the NATIVE launch screen (configured in
+          app.json -> splash.image) still renders splash-icon.png before React
+          mounts, so that PNG must also be replaced before store submission. */}
+      <Animated.View style={[iconStyle, splashStyles.monogram]}>
+        <Text style={splashStyles.monogramText}>SP</Text>
       </Animated.View>
 
       <Animated.View style={textStyle}>
@@ -199,13 +204,25 @@ const splashStyles = StyleSheet.create({
     backgroundColor: COLORS.accent,
     borderRadius: 1,
   },
-  cigarPhoto: {
-    width: 200,
-    height: 200,
-    borderRadius: 100,
+  // Replaced the cigarPhoto style with a text-based monogram to keep the
+  // splash on-brand without any tobacco imagery.
+  monogram: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
     marginBottom: 24,
     borderWidth: 2,
     borderColor: COLORS.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.card,
+  },
+  monogramText: {
+    fontFamily: FONTS.display,
+    fontSize: 72,
+    fontWeight: '800',
+    color: COLORS.accent,
+    letterSpacing: 4,
   },
   brand: {
     fontFamily: FONTS.display,
@@ -341,7 +358,11 @@ export default function RootLayout() {
         <Stack.Screen name="identify/camera" />
         <Stack.Screen name="identify/result" />
         <Stack.Screen name="cigar/[id]" />
-        <Stack.Screen name="paywall" options={{ presentation: 'modal' }} />
+        {/* Paywall used to use presentation: 'modal', but the iOS modal sheet
+            stayed layered behind the rest of the app after being dismissed,
+            leaving white space at the top of subsequent screens. A regular
+            stack push pops cleanly on router.back() and on tab navigation. */}
+        <Stack.Screen name="paywall" />
         <Stack.Screen name="legal/privacy" options={{ presentation: 'modal' }} />
         <Stack.Screen name="legal/terms" options={{ presentation: 'modal' }} />
       </Stack>
@@ -351,6 +372,10 @@ export default function RootLayout() {
           onFinish={handleSplashFinish}
         />
       )}
+      {/* Global host for themed Alert.alert — mounted once, never dismounts.
+          Sits above the stack so dialogs float over every route, including
+          modal-presented ones like paywall and legal screens. */}
+      <StyledAlertHost />
     </ThemeProvider>
   );
 }

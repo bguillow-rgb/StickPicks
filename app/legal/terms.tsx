@@ -26,7 +26,7 @@ export default function TermsScreen() {
         <Text style={styles.effective}>Effective Date: April 14, 2026</Text>
 
         <Text style={styles.body}>
-          These Terms of Service ("Terms") govern your use of Stick Picks ("the app"), published by Bob Guillow. By using the app, you agree to these Terms.
+          These Terms of Service ("Terms") govern your use of Stick Picks ("the app"), published by the Stick Picks team. By using the app, you agree to these Terms.
         </Text>
 
         <Text style={styles.h2}>1. Eligibility</Text>
@@ -64,12 +64,15 @@ export default function TermsScreen() {
           You retain ownership of content you create (reviews, notes, photos). By submitting reviews and ratings, you grant Stick Picks a non-exclusive, royalty-free license to display that content to other users within the app. You may delete your content at any time.
         </Text>
         <Text style={styles.body}>
-          You agree not to submit content that is unlawful, defamatory, obscene, or infringes on the rights of others. We reserve the right to remove content that violates these Terms.
+          You agree not to submit content that is unlawful, defamatory, obscene, harassing, abusive, objectionable, or infringes on the intellectual-property rights of others. We have zero tolerance for objectionable content or abusive behavior.
+        </Text>
+        <Text style={styles.body}>
+          Any user can report content through the in-app "Report" button. We review reports within 24 hours and will remove violating content and, where appropriate, restrict or terminate the offending account. We reserve the right to remove content at our discretion.
         </Text>
 
         <Text style={styles.h2}>7. Intellectual Property</Text>
         <Text style={styles.body}>
-          The Stick Picks name, logo, design, and code are the property of Bob Guillow. Cigar brand names, logos, and product information are the property of their respective owners and are used for informational and identification purposes only.
+          The Stick Picks name, logo, design, and code are the property of the Stick Picks team. Cigar brand names, logos, and product information are the property of their respective owners and are used for informational and identification purposes only.
         </Text>
 
         <Text style={styles.h2}>8. Health Notice & Assumption of Risk</Text>
@@ -87,7 +90,7 @@ export default function TermsScreen() {
         </Text>
         <Text style={styles.bullet}>•  Cigar smoking and all forms of tobacco use carry significant and well-documented health risks, including cancer, heart disease, lung disease, and addiction.</Text>
         <Text style={styles.bullet}>•  You voluntarily assume all risks associated with the use of tobacco products.</Text>
-        <Text style={styles.bullet}>•  Stick Picks, Bob Guillow, and any affiliated parties shall have no liability whatsoever for any illness, injury, addiction, death, or other harm of any kind that may result from your use of tobacco products, whether or not those products were identified, recommended, or referenced through the app.</Text>
+        <Text style={styles.bullet}>•  Stick Picks and its affiliated parties shall have no liability whatsoever for any illness, injury, addiction, death, or other harm of any kind that may result from your use of tobacco products, whether or not those products were identified, recommended, or referenced through the app.</Text>
         <Text style={styles.bullet}>•  You are solely responsible for complying with all federal, state, and local laws regarding the purchase, possession, and use of tobacco products in your jurisdiction.</Text>
 
         <Text style={styles.h2}>9. Disclaimer of Warranties</Text>

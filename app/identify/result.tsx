@@ -22,7 +22,7 @@ import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
 import { Meter } from '@/src/components/ui/Meter';
 import { Button } from '@/src/components/ui/Button';
-import { COLORS, SPACING, FONTS, RADIUS } from '@/src/constants/theme';
+import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
 import { useHumidorStatuses } from '@/src/hooks/useHumidorStatuses';
 import { StatusChips } from '@/src/components/ui/StatusChip';
 import type { Cigar } from '@/src/types/cigar';
@@ -587,7 +587,13 @@ export default function IdentifyResultScreen() {
         )}
 
         <Card style={styles.resultCard}>
-          <Text style={styles.kicker}>IDENTIFIED</Text>
+          {/* Kicker is softened when confidence is low so the app is not
+              asserting a definitive identification — satisfies Apple App
+              Review Guideline 1.1.6 (no false information). Users confirm
+              below via explicit Yes/Not quite buttons. */}
+          <Text style={styles.kicker}>
+            {confidence !== null && confidence < 0.7 ? 'BEST GUESS' : 'LIKELY MATCH'}
+          </Text>
           <Text style={styles.cigarName}>{displayName || cigar.line || cigar.name}</Text>
           <Text style={styles.cigarBrand}>{cigar.brand}</Text>
 
@@ -624,9 +630,9 @@ export default function IdentifyResultScreen() {
           ) : null}
         </Card>
 
-        <Text style={styles.confirmTitle}>Is this correct?</Text>
+        <Text style={styles.confirmTitle}>Does this look right?</Text>
         <View style={styles.confirmRow}>
-          <Button title="Yes, that's it!" onPress={handleConfirm} style={{ flex: 1 }} />
+          <Button title="Yes, confirm" onPress={handleConfirm} style={{ flex: 1 }} />
           <Button title="Not quite..." variant="secondary" onPress={handleCorrect} style={{ flex: 1 }} />
         </View>
 

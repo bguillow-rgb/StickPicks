@@ -14,6 +14,17 @@ export interface Cigar {
   flavors: string[];
   description: string | null;
   image_url: string | null;
+  // Migration 010: moderation state for the brand image. Client must gate
+  // display on image_status — a URL may still be present while the cigar is
+  // in takedown (we preserve it instead of deleting so it can be reactivated).
+  image_status: 'live' | 'takedown' | 'banned';
+  // Holds the previous image_url when a user-submitted replacement is
+  // auto-promoted, so admins can swap the original back in.
+  image_url_previous: string | null;
+  // Migration 012: how well-known the cigar is, 1=obscure/deep-cut, 5=iconic.
+  // Used by the quiz scorer's "adventure" mode to prefer classics vs deep cuts.
+  // Null is treated as tier 3 (neutral) by the scorer.
+  popularity_tier: number | null;
   price_usd_cents: number | null;
   created_at: string;
 }
@@ -25,6 +36,10 @@ export interface HumidorItem {
   status: 'wishlist' | 'owned' | 'smoked';
   quantity: number;
   purchase_price_cents: number | null;
+  // Per-item user-entered fields from migration 009 (main). Resting is
+  // derived from acquired_at alone (no separate rest_start_at column).
+  acquired_at: string | null;
+  custom_price_cents: number | null;
   notes: string | null;
   created_at: string;
   updated_at: string;

@@ -103,6 +103,98 @@ const FLAVOR_DRINK_MAP: Record<string, DrinkPairing[]> = {
   ],
 };
 
+// Deep-cut pairings — less-obvious options used to fill the 3rd slot when
+// possible, so every cigar gets a "huh, wouldn't have thought of that" rec
+// alongside two conventional picks. Kept separate from FLAVOR_DRINK_MAP so the
+// top-2 slots stay crowd-pleasing and category-diverse; only slot 3 is swapped
+// when a deep-cut matches the cigar's flavor profile.
+const DEEP_CUT_FLAVOR_DRINK_MAP: Record<string, DrinkPairing[]> = {
+  cream: [
+    { drink: 'Pedro Ximénez Sherry', category: 'wine', reason: 'Syrupy raisin-and-cream — a liquid dessert' },
+    { drink: 'Horchata', category: 'other', reason: 'Rice-and-cinnamon milk softens the smoke' },
+  ],
+  vanilla: [
+    { drink: 'Pineau des Charentes', category: 'wine', reason: 'Cognac-fortified grape juice, heavy on honey and vanilla' },
+    { drink: 'Japanese Whisky Highball', category: 'whiskey', reason: 'Lifts subtle vanilla without adding weight' },
+  ],
+  caramel: [
+    { drink: 'Añejo Tequila', category: 'other', reason: 'Aged agave pulls out caramel and vanilla oak' },
+    { drink: 'Tokaji Aszú', category: 'wine', reason: 'Hungarian dessert wine — apricot and burnt sugar' },
+  ],
+  honey: [
+    { drink: 'Sauternes', category: 'wine', reason: 'Botrytized Bordeaux — honey, apricot, and beeswax' },
+    { drink: 'Metaxa', category: 'other', reason: 'Greek brandy-wine blend with honey and cinnamon' },
+  ],
+  chocolate: [
+    { drink: 'Banyuls', category: 'wine', reason: 'French sweet red — cocoa and wild cherry' },
+    { drink: 'Mole Stout', category: 'beer', reason: 'Chocolate-chile stout pushes the mole territory further' },
+  ],
+  cocoa: [
+    { drink: 'Amaro Nonino', category: 'other', reason: 'Bittersweet Italian — cocoa with orange peel' },
+    { drink: 'Xocolatl Stout', category: 'beer', reason: 'Spiced cocoa stout made for a cigar' },
+  ],
+  earth: [
+    { drink: 'Mezcal', category: 'other', reason: 'Smoky agave mirrors an earthy, loamy wrapper' },
+    { drink: 'Barolo', category: 'wine', reason: 'Nebbiolo tar and roses — earthy and structured' },
+    { drink: 'Cask-Strength Islay', category: 'whiskey', reason: 'Unfiltered peat reads as damp forest floor' },
+  ],
+  leather: [
+    { drink: 'Armagnac', category: 'other', reason: 'Rustic cousin of Cognac — leather and dried fruit' },
+    { drink: 'Amaro Averna', category: 'other', reason: 'Sicilian bitter with herbal, saddle-leather depth' },
+  ],
+  cedar: [
+    { drink: 'Rioja Gran Reserva', category: 'wine', reason: 'Long American-oak aging leaves cedar in the glass' },
+    { drink: 'Sancerre', category: 'wine', reason: 'Flinty Sauvignon Blanc lifts the cedar without clashing' },
+  ],
+  wood: [
+    { drink: 'Eau de Vie', category: 'other', reason: 'Clear fruit brandy lets the wrapper\'s wood do the talking' },
+    { drink: 'Daiginjo Sake', category: 'other', reason: 'Chilled premium sake — unexpected wood interplay' },
+  ],
+  pepper: [
+    { drink: 'Mezcal', category: 'other', reason: 'Chile-edged smoke meets peppery wrapper' },
+    { drink: 'Northern Rhône Syrah', category: 'wine', reason: 'White pepper and cured olive in the glass' },
+    { drink: 'Gewürztraminer', category: 'wine', reason: 'Lychee and pink peppercorn — a surprising lift' },
+  ],
+  spice: [
+    { drink: 'Calvados', category: 'other', reason: 'Norman apple brandy — baking spice in aged bottlings' },
+    { drink: 'Genever', category: 'other', reason: 'Dutch malted gin with clove and juniper warmth' },
+    { drink: 'Rhum Agricole', category: 'rum', reason: 'Martinique cane juice rum — grassy and allspice-forward' },
+  ],
+  cinnamon: [
+    { drink: 'Xtabentún', category: 'other', reason: 'Mayan honey-anise liqueur — cinnamon\'s cousin' },
+    { drink: 'Mulled Wine', category: 'wine', reason: 'Spiced red done right — clove and cinnamon carry over' },
+  ],
+  nut: [
+    { drink: 'Madeira Bual', category: 'wine', reason: 'Nutty, volcanic Portuguese fortified — a thinking-person\'s pairing' },
+    { drink: 'Amontillado Sherry', category: 'wine', reason: 'Between fino and oloroso — hazelnut and sea air' },
+  ],
+  almond: [
+    { drink: 'Orgeat Cocktail', category: 'other', reason: 'Almond-syrup tiki drink (a proper Mai Tai) amplifies nuttiness' },
+    { drink: 'Fino Sherry', category: 'wine', reason: 'Crisp, bone-dry, with a nutty almond bite' },
+  ],
+  cherry: [
+    { drink: 'Kirschwasser', category: 'other', reason: 'German cherry brandy — cherry pit and stone' },
+    { drink: 'Kriek Lambic', category: 'beer', reason: 'Belgian wild ale on cherries — tart and unexpected' },
+    { drink: 'Amaro Montenegro', category: 'other', reason: 'Herbal Italian with dried cherry and rose petal' },
+  ],
+  citrus: [
+    { drink: 'Campari Spritz', category: 'other', reason: 'Bitter orange lifts citrus-forward wrappers' },
+    { drink: 'White Port & Tonic', category: 'wine', reason: 'Portugal\'s under-the-radar aperitif' },
+  ],
+  fruit: [
+    { drink: 'Madeira Sercial', category: 'wine', reason: 'Bright acidity and orchard fruit — cuts through body' },
+    { drink: 'Vintage Armagnac', category: 'other', reason: 'Aged fruit brandy with jammy stone-fruit depth' },
+  ],
+  coffee: [
+    { drink: 'Barrel-Aged Coffee Stout', category: 'beer', reason: 'Bourbon-barrel coffee stout — decadent and long-finishing' },
+    { drink: 'Espresso Martini', category: 'other', reason: 'Coffee, vodka, Kahlúa — a night-capping classic' },
+  ],
+  toast: [
+    { drink: 'Trappist Quadrupel', category: 'beer', reason: 'Rochefort 10 or similar — toasted malt and dark fruit' },
+    { drink: 'Madeira Verdelho', category: 'wine', reason: 'Off-dry Portuguese — toasted nuts and caramelized fruit' },
+  ],
+};
+
 // Strength-based defaults when flavor matching is sparse
 const STRENGTH_DEFAULTS: Record<number, DrinkPairing[]> = {
   1: [
@@ -162,7 +254,7 @@ export function getDrinkPairings(cigar: Cigar): DrinkPairing[] {
     }
   }
 
-  // 3. Return top 3, preferring variety across categories
+  // 3. Pick top 2 with category diversity (keep the crowd-pleasing anchors).
   const categories = new Set<string>();
   const diverse: DrinkPairing[] = [];
   const rest: DrinkPairing[] = [];
@@ -176,5 +268,36 @@ export function getDrinkPairings(cigar: Cigar): DrinkPairing[] {
     }
   }
 
-  return [...diverse, ...rest].slice(0, 3);
+  const ordered = [...diverse, ...rest];
+  const top2 = ordered.slice(0, 2);
+
+  // 4. Deep-cut slot 3: match the cigar's flavors against the deep-cut pool
+  //    and prefer a drink whose category isn't already in the top 2 (keeps
+  //    category diversity). Falls back to the next best regular match if no
+  //    deep cut applies, and falls back to nothing if we only have 2 total.
+  const usedDrinks = new Set(top2.map((p) => p.drink));
+  const usedCategories = new Set(top2.map((p) => p.category));
+
+  const deepCutCandidates: DrinkPairing[] = [];
+  const seenDeep = new Set<string>();
+  for (const flavor of cigar.flavors ?? []) {
+    const lower = flavor.toLowerCase();
+    for (const [keyword, drinks] of Object.entries(DEEP_CUT_FLAVOR_DRINK_MAP)) {
+      if (!lower.includes(keyword)) continue;
+      for (const d of drinks) {
+        if (usedDrinks.has(d.drink) || seenDeep.has(d.drink)) continue;
+        seenDeep.add(d.drink);
+        deepCutCandidates.push(d);
+      }
+    }
+  }
+
+  // Prefer deep cuts whose category differs from the top-2 picks.
+  const noveltyPick =
+    deepCutCandidates.find((d) => !usedCategories.has(d.category)) ??
+    deepCutCandidates[0];
+
+  if (noveltyPick) return [...top2, noveltyPick];
+
+  return ordered.slice(0, 3);
 }

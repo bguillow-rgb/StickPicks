@@ -1,4 +1,5 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { Alert } from '@/src/components/ui/StyledAlert';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useEffect } from 'react';
@@ -12,14 +13,39 @@ import { useRevenueCat } from '@/src/hooks/useRevenueCat';
 
 type Plan = 'monthly' | 'yearly';
 
+// Copy is tight on purpose. Users scan, not read. Each bullet earns its spot
+// by naming the one thing that distinguishes Pro from free and from other apps.
 const FEATURES = [
-  { icon: 'camera-outline' as const, title: 'Unlimited Cigar Scans', desc: 'Scan any cigar band with no limits — free accounts get 5' },
-  { icon: 'archive-outline' as const, title: 'Full Humidor Access', desc: 'Track wishlist, owned, and smoked cigars all in one place' },
-  { icon: 'star-outline' as const, title: 'Rate & Review', desc: 'Rate your smokes and share reviews with the community' },
-  { icon: 'wine-outline' as const, title: 'Drink Pairings', desc: 'Get curated drink pairings for every cigar' },
-  { icon: 'flask-outline' as const, title: 'Advanced Quiz', desc: '9 questions for precision cigar recommendations' },
-  { icon: 'list-outline' as const, title: 'Top 10 Results', desc: 'See all 10 best matches with detailed scoring' },
-  { icon: 'create-outline' as const, title: 'Cigar Notes', desc: 'Add personal tasting notes to any cigar' },
+  {
+    icon: 'wine-outline' as const,
+    title: 'Expert Drink Pairings',
+    desc: 'Three curated pours per cigar — including one deep cut no other app surfaces.',
+  },
+  {
+    icon: 'sparkles-outline' as const,
+    title: 'Unlimited AI Scans',
+    desc: 'Snap any band, know the cigar. Free gets 5; Pro is unlimited.',
+  },
+  {
+    icon: 'flask-outline' as const,
+    title: '9-Question Precision Quiz',
+    desc: 'Top 10 matches, scored to your palate. Free is 3 questions, 3 picks.',
+  },
+  {
+    icon: 'archive-outline' as const,
+    title: 'Full Humidor',
+    desc: 'Wishlist, owned, smoked — with pricing and resting days.',
+  },
+  {
+    icon: 'star-outline' as const,
+    title: 'Tasting Reviews',
+    desc: 'Rate draw, burn, and flavor. Build a personal journal.',
+  },
+  {
+    icon: 'trending-up-outline' as const,
+    title: 'New Features First',
+    desc: 'Pro funds the roadmap — you get it before anyone else.',
+  },
 ];
 
 export default function PaywallScreen() {
@@ -44,9 +70,12 @@ export default function PaywallScreen() {
     })();
   }, []);
 
-  // Use real prices from RevenueCat when available, fall back to hardcoded
-  const yearlyPrice = yearlyPackage?.product.priceString ?? '$24.99';
-  const monthlyPrice = monthlyPackage?.product.priceString ?? '$2.99';
+  // Use real prices from RevenueCat when available. Fallbacks match the
+  // intended App Store Connect prices ($4.99/mo, $39.99/yr = 33% off) and
+  // are only shown if RevenueCat offerings are still loading or unavailable.
+  // Update the fallbacks whenever App Store Connect prices change.
+  const yearlyPrice = yearlyPackage?.product.priceString ?? '$39.99';
+  const monthlyPrice = monthlyPackage?.product.priceString ?? '$4.99';
 
   async function handlePurchase() {
     if (isGuest) {
@@ -101,8 +130,12 @@ export default function PaywallScreen() {
   return (
     <ScrollView
       style={[styles.screen]}
-      // Modals are already inset from the top — don't add insets.top again.
-      contentContainerStyle={{ paddingTop: SPACING.md, paddingBottom: insets.bottom + 40 }}
+      // Regular stack push (not a modal) — add insets.top so the close X and
+      // header clear the status bar / notch.
+      contentContainerStyle={{
+        paddingTop: insets.top + SPACING.md,
+        paddingBottom: insets.bottom + 40,
+      }}
     >
       {/* Close */}
       <Pressable onPress={() => router.back()} hitSlop={12} style={styles.closeBtn}>
@@ -121,6 +154,15 @@ export default function PaywallScreen() {
       {/* Header */}
       <Text style={styles.header}>Stick Picks Pro</Text>
       <Text style={styles.subheader}>Your personal cigar sommelier</Text>
+
+      {/* Pitch — one sentence, named differentiators only. Users scan paywalls
+          rather than read them; we frontload the two claims no competitor can
+          make and let the bullets do the rest. */}
+      <View style={styles.pitchCard}>
+        <Text style={styles.pitchHeadline}>
+          The only cigar app with AI band ID and expert drink pairings.
+        </Text>
+      </View>
 
       {/* Features */}
       <View style={styles.features}>
@@ -153,7 +195,7 @@ export default function PaywallScreen() {
               <Text style={styles.planSavings}>
                 {yearlyPackage && monthlyPackage
                   ? `Save ${Math.round((1 - yearlyPackage.product.price / (monthlyPackage.product.price * 12)) * 100)}%`
-                  : 'Save 30%'}
+                  : 'Save 33%'}
               </Text>
             </Pressable>
 
@@ -228,6 +270,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: SPACING.xs,
     marginBottom: SPACING.lg,
+  },
+  // Pitch card frames the two-sentence sell above the features grid. Gold
+  // border on dark-green card echoes the section-title treatment from the
+  // cigar detail page — reads as editorial, not marketing.
+  pitchCard: {
+    backgroundColor: COLORS.card,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    borderRadius: RADIUS.md,
+    padding: SPACING.md,
+    marginBottom: SPACING.lg,
+  },
+  pitchHeadline: {
+    fontFamily: 'Cormorant',
+    fontSize: 18,
+    fontWeight: '800',
+    color: COLORS.text,
+    lineHeight: 24,
   },
   features: {
     gap: SPACING.md,

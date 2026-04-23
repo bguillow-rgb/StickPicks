@@ -1,23 +1,21 @@
-import { View, Text, StyleSheet, ImageBackground, Pressable, Image, Alert } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import { Alert } from '@/src/components/ui/StyledAlert';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { COLORS, SPACING, FONTS, RADIUS } from '@/src/constants/theme';
-import { useCigarCount } from '@/src/hooks/useCigarCount';
 import { useProStore } from '@/src/stores/useProStore';
 import { useUserAvatar } from '@/src/hooks/useUserAvatar';
 import { useScanCount } from '@/src/hooks/useScanCount';
 
-// Group of cigars in humidor — "Find Your Stick"
-const CIGARS_GROUP_IMG = 'https://images.unsplash.com/photo-1694716438178-c6f34bddd64d?w=800&q=80';
-// Single cigar with band on wood — "Scan a Stick"
-const SINGLE_CIGAR_IMG = 'https://images.unsplash.com/photo-1537752609-53bd413e0aa0?w=800&q=80';
+// Home uses zero photographic imagery so the first frame shown on cold start
+// can never violate Apple 1.4.3 ("promotes tobacco use"). Feature cards use
+// themed gradients + line icons instead of the original Unsplash cigar photos.
 
 export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const cigarCount = useCigarCount();
   const isPro = useProStore((s) => s.isPro);
   const hasHydrated = useProStore((s) => s.hasHydrated);
   // Treat as Pro until hydration completes — avoids Pro users seeing "· Pro" / scan-limit
@@ -68,7 +66,10 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      <Text style={styles.welcome}>What are we smoking today?</Text>
+      {/* Welcome copy — collection-building framing that doesn't use smoking
+          as a verb. Apple's App Review Guideline 1.4.3 flags copy that
+          encourages tobacco consumption; humidor-additions framing is safer. */}
+      <Text style={styles.welcome}>Let's add to your humidor today!</Text>
 
       {/* CTA Cards */}
       <View style={styles.cards}>
@@ -77,16 +78,16 @@ export default function HomeScreen() {
           onPress={() => router.push('/quiz')}
           style={({ pressed }) => [styles.ctaCard, pressed && styles.pressed]}
         >
-          <ImageBackground
-            source={{ uri: CIGARS_GROUP_IMG }}
-            style={styles.ctaImage}
-            imageStyle={styles.ctaImageInner}
-            resizeMode="cover"
+          <LinearGradient
+            colors={['#1A3324', '#0D3B13', '#061610']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.ctaGradientFull}
           >
-            <LinearGradient
-              colors={['transparent', 'rgba(6,16,10,0.85)', 'rgba(6,16,10,0.95)']}
-              style={styles.ctaGradient}
-            >
+            <View style={styles.ctaIconWrap}>
+              <Ionicons name="sparkles-outline" size={28} color={COLORS.accent} />
+            </View>
+            <View style={styles.ctaTextBlock}>
               <View style={styles.ctaLabelRow}>
                 <View style={styles.ctaDot} />
                 <Text style={styles.ctaLabel}>QUICK MATCH</Text>
@@ -95,8 +96,8 @@ export default function HomeScreen() {
               <Text style={styles.ctaSubtitle}>
                 3 questions — we'll match your palate to the perfect cigar
               </Text>
-            </LinearGradient>
-          </ImageBackground>
+            </View>
+          </LinearGradient>
         </Pressable>
 
         {/* Advanced Quiz (Pro) */}
@@ -117,16 +118,16 @@ export default function HomeScreen() {
           onPress={handleScan}
           style={({ pressed }) => [styles.ctaCard, pressed && styles.pressed]}
         >
-          <ImageBackground
-            source={{ uri: SINGLE_CIGAR_IMG }}
-            style={styles.ctaImage}
-            imageStyle={styles.ctaImageInner}
-            resizeMode="cover"
+          <LinearGradient
+            colors={['#264D35', '#12261A', '#061610']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.ctaGradientFull}
           >
-            <LinearGradient
-              colors={['transparent', 'rgba(6,16,10,0.85)', 'rgba(6,16,10,0.95)']}
-              style={styles.ctaGradient}
-            >
+            <View style={styles.ctaIconWrap}>
+              <Ionicons name="scan-outline" size={28} color={COLORS.accent} />
+            </View>
+            <View style={styles.ctaTextBlock}>
               <View style={styles.ctaLabelRow}>
                 <View style={styles.ctaDot} />
                 <Text style={styles.ctaLabel}>IDENTIFICATION</Text>
@@ -135,15 +136,18 @@ export default function HomeScreen() {
               <Text style={styles.ctaSubtitle}>
                 {!treatAsPro && remaining !== null
                   ? `${remaining} free scan${remaining !== 1 ? 's' : ''} remaining`
-                  : 'Point your camera at any cigar band — we\'ll tell you everything'}
+                  : 'Point your camera at any cigar band — AI does the rest'}
               </Text>
-            </LinearGradient>
-          </ImageBackground>
+            </View>
+          </LinearGradient>
         </Pressable>
       </View>
 
-      {/* Bottom tagline */}
-      <Text style={styles.footer}>{cigarCount !== null ? `${cigarCount} cigars in the library` : ''}</Text>
+      {/* Bottom tagline — evergreen copy instead of a catalog size number.
+          Showing "2,089 cigars" reads small next to competitors like Cigar
+          Scanner (~13k) and plants a stale-catalog impression before the
+          user has even tried the app. */}
+      <Text style={styles.footer}>Premium handmade cigars, curated weekly.</Text>
     </View>
   );
 }
@@ -214,16 +218,27 @@ const styles = StyleSheet.create({
     opacity: 0.9,
     transform: [{ scale: 0.98 }],
   },
-  ctaImage: {
+  // Full-bleed themed gradient that replaces the Unsplash-backed ImageBackground.
+  // Keeps the "two hero cards" layout but uses zero photography.
+  ctaGradientFull: {
     flex: 1,
-    justifyContent: 'flex-end',
-  },
-  ctaImageInner: {
-    borderRadius: RADIUS.lg,
-  },
-  ctaGradient: {
     padding: SPACING.md,
-    paddingTop: SPACING.xxl,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  ctaIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+    backgroundColor: 'rgba(212,175,55,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  ctaTextBlock: {
+    flex: 1,
   },
   ctaLabelRow: {
     flexDirection: 'row',

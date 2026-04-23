@@ -57,7 +57,7 @@ export default function JournalScreen() {
         ListEmptyComponent={
           <EmptyState
             title="No smokes logged yet"
-            subtitle="After you smoke a cigar, log it here with a rating and tasting notes."
+            subtitle="Log cigars you've smoked here with a rating and review."
             actionLabel="Browse Cigars"
             onAction={() => router.push('/(tabs)/browse')}
           />
@@ -74,9 +74,6 @@ export default function JournalScreen() {
               </View>
               <StarRating value={item.rating} size={14} />
             </View>
-            {item.notes ? (
-              <Text style={styles.entryNotes} numberOfLines={2}>{item.notes}</Text>
-            ) : null}
             <Text style={styles.entryDate}>
               {new Date(item.smoked_at).toLocaleDateString()}
             </Text>
@@ -119,13 +116,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: COLORS.muted,
     marginTop: 2,
-  },
-  entryNotes: {
-    fontFamily: 'Cormorant',
-    fontSize: 14,
-    color: COLORS.muted,
-    marginTop: 8,
-    lineHeight: 20,
   },
   entryDate: {
     fontFamily: 'Cormorant',

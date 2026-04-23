@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useRef, useEffect } from 'react';
@@ -114,14 +114,10 @@ export default function QuizScreen() {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      {/* Hero image — bundled local asset. Remote Unsplash URLs have caused
-          random image flashes during navigation when the CDN serves a different
-          photo for a cached ID. Local asset loads instantly and is stable. */}
-      <Image
-        source={require('../../assets/images/splash-icon.png')}
-        style={styles.heroImage}
-        resizeMode="cover"
-      />
+      {/* Hero image removed — splash-icon.png is a lit cigar photo that
+          violates Apple's 1.4.3 "encourages tobacco use" guideline. The
+          step indicator + title + subtitle are enough orientation; we can
+          re-add a compliant product-shot banner once the new asset is ready. */}
 
       <Animated.View
         key={step}
@@ -218,13 +214,6 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: COLORS.accent,
     borderRadius: RADIUS.full,
-  },
-  heroImage: {
-    width: '100%',
-    height: 140,
-    borderRadius: RADIUS.md,
-    marginBottom: SPACING.md,
-    backgroundColor: COLORS.card,
   },
   questionContainer: {
     flex: 1,
