@@ -34,6 +34,12 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 
 const args = new Set(process.argv.slice(2));
 const DRY = args.has('--dry-run');
+// Default to strict-null-only: a non-null image_url is treated as "off-limits"
+// no matter how thin it looks (even reused Unsplash stock). Pass
+// --include-unsplash to override and also consider images.unsplash.com rows
+// as candidates for replacement. The default was flipped after a prior run
+// overwrote ~3000 rows that shouldn't have been touched.
+const INCLUDE_UNSPLASH = args.has('--include-unsplash');
 const LIMIT_IDX = process.argv.indexOf('--limit');
 const LIMIT = LIMIT_IDX >= 0 ? parseInt(process.argv[LIMIT_IDX + 1], 10) : 0;
 
@@ -123,24 +129,48 @@ function isGenericStock(url: string | null): boolean {
 
 // ---- Load candidates ----
 
-function loadCandidates(): Candidate[] {
+function loadCandidates(dbBrands: Set<string>): Candidate[] {
   const dataDir = path.join(__dirname, 'data');
   const pool: Candidate[] = [];
 
-  // Halfwheel — structured
+  // Halfwheel's scrape captured only the FIRST WORD of multi-word brands
+  // (e.g. "Rocky Patel Vintage 1990 Torpedo" → brand="Rocky" + line="Patel
+  // Vintage 1990"). Reconstruct full brand names by concatenating brand+line
+  // and finding the longest DB brand that's a prefix of that string. The
+  // remainder becomes the effective line for matching.
+  const normDbBrands = new Map<string, string>(); // normalized → original
+  for (const b of dbBrands) normDbBrands.set(norm(b), b);
+  const normBrandKeys = [...normDbBrands.keys()].sort((a, b) => b.length - a.length);
+
   try {
     const raw = JSON.parse(fs.readFileSync(path.join(dataDir, 'halfwheel-raw.json'), 'utf8')) as HalfwheelRow[];
+    let reassigned = 0;
     for (const r of raw) {
       if (!r.image_url || !r.brand) continue;
+
+      let effBrand = r.brand;
+      let effLine: string | null = r.line ?? null;
+      const combined = norm(`${r.brand} ${r.line ?? ''}`);
+      for (const nb of normBrandKeys) {
+        if (!nb) continue;
+        if (combined === nb || combined.startsWith(nb + ' ')) {
+          const matched = normDbBrands.get(nb)!;
+          if (matched !== r.brand) reassigned++;
+          effBrand = matched;
+          effLine = combined === nb ? null : combined.slice(nb.length + 1);
+          break;
+        }
+      }
+
       pool.push({
-        brand: r.brand,
-        line: r.line ?? null,
+        brand: effBrand,
+        line: effLine,
         vitola: r.vitola ?? null,
         imageUrl: r.image_url,
         source: 'halfwheel',
       });
     }
-    console.log(`  halfwheel: ${pool.length} candidates`);
+    console.log(`  halfwheel: ${pool.length} candidates (brand reassigned on ${reassigned})`);
   } catch (e: any) {
     console.warn(`  halfwheel-raw.json unavailable: ${e.message}`);
   }
@@ -256,8 +286,6 @@ async function fetchMissingCigars(): Promise<CigarRow[]> {
   let from = 0;
   const PAGE = 1000;
   while (true) {
-    // Fetch rows where image_url IS NULL — we handle generic-stock overwrite
-    // as a second pass on the client side to avoid a gnarly or-clause.
     const { data, error } = await supabase
       .from('cigars')
       .select('id, brand, line, name, vitola, image_url')
@@ -266,7 +294,14 @@ async function fetchMissingCigars(): Promise<CigarRow[]> {
     if (error) throw error;
     if (!data || data.length === 0) break;
     for (const r of data) {
-      if (!r.image_url || isGenericStock(r.image_url)) out.push(r as CigarRow);
+      // Strict-null by default so no existing image_url gets overwritten.
+      // --include-unsplash relaxes to also treat the 743 reused stock photos
+      // as candidates for replacement.
+      if (!r.image_url) {
+        out.push(r as CigarRow);
+      } else if (INCLUDE_UNSPLASH && isGenericStock(r.image_url)) {
+        out.push(r as CigarRow);
+      }
     }
     if (data.length < PAGE) break;
     from += PAGE;
@@ -275,14 +310,43 @@ async function fetchMissingCigars(): Promise<CigarRow[]> {
 }
 
 async function main() {
-  console.log(`Backfill mode: ${DRY ? 'DRY-RUN' : 'WRITE'}${LIMIT ? ` (limit ${LIMIT})` : ''}\n`);
-  console.log('Loading candidates from scripts/data/...');
-  const pool = loadCandidates();
-  console.log(`Total candidate pool: ${pool.length}\n`);
+  console.log(
+    `Backfill mode: ${DRY ? 'DRY-RUN' : 'WRITE'}` +
+      `  unsplash-overwrite=${INCLUDE_UNSPLASH}` +
+      (LIMIT ? `  limit=${LIMIT}` : '') +
+      '\n',
+  );
 
-  console.log('Loading cigars that need images (null OR generic Unsplash)...');
+  console.log(
+    `Loading target cigars (${INCLUDE_UNSPLASH ? 'null OR Unsplash stock' : 'null ONLY'})...`,
+  );
   const missing = await fetchMissingCigars();
   console.log(`Cigars needing images: ${missing.length}\n`);
+
+  // Collect every distinct brand in the DB — needed to repair halfwheel's
+  // truncated brand names before we build the candidate pool.
+  const dbBrands = new Set<string>();
+  {
+    let from = 0;
+    const PAGE = 1000;
+    while (true) {
+      const { data, error } = await supabase
+        .from('cigars')
+        .select('brand')
+        .order('brand')
+        .range(from, from + PAGE - 1);
+      if (error) throw error;
+      if (!data || data.length === 0) break;
+      for (const r of data) if (r.brand) dbBrands.add(String(r.brand).trim());
+      if (data.length < PAGE) break;
+      from += PAGE;
+    }
+  }
+  console.log(`Distinct DB brands: ${dbBrands.size}`);
+
+  console.log('Loading candidates from scripts/data/...');
+  const pool = loadCandidates(dbBrands);
+  console.log(`Total candidate pool: ${pool.length}\n`);
 
   const targets = LIMIT > 0 ? missing.slice(0, LIMIT) : missing;
 

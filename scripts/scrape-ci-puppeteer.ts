@@ -8,16 +8,21 @@ const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 // Flags:
-//   --brands-from-db   Pull the brand list from cigars table instead of the
-//                      hardcoded array below. Required to cover the 300+
-//                      brands the original hardcoded list missed.
-//   --only-missing     Skip cigars that already have a non-generic image
-//                      (leaves Unsplash stock and existing CI photos alone
-//                      as a second-pass targeting true gaps).
-//   --dry-run          Scrape as usual but skip DB writes.
+//   --brands-from-db    Pull the brand list from cigars table instead of the
+//                       hardcoded array below. Required to cover the 300+
+//                       brands the original hardcoded list missed.
+//   --only-missing      Restrict writes to cigars where image_url IS NULL.
+//                       Default safety — nothing with a non-null URL ever
+//                       gets overwritten. Protects against the mass-overwrite
+//                       that clobbered 3000 rows on a prior run.
+//   --include-unsplash  Combine with --only-missing to also treat the reused
+//                       Unsplash stock URLs as eligible targets (still never
+//                       overwrites genuine CI / Supabase-storage photos).
+//   --dry-run           Scrape + match as usual but skip DB writes.
 const args = new Set(process.argv.slice(2));
 const BRANDS_FROM_DB = args.has('--brands-from-db');
 const ONLY_MISSING = args.has('--only-missing');
+const INCLUDE_UNSPLASH = args.has('--include-unsplash');
 const DRY_RUN = args.has('--dry-run');
 
 interface ScrapedProduct {
@@ -218,9 +223,13 @@ async function main() {
   }
 
   const candidates = ONLY_MISSING
-    ? cigars.filter((c) => !c.image_url || isGenericStock(c.image_url))
+    ? cigars.filter((c) => !c.image_url || (INCLUDE_UNSPLASH && isGenericStock(c.image_url)))
     : cigars;
-  console.log(`Mapping ${candidates.length} cigars${ONLY_MISSING ? ' (only-missing)' : ''}...\n`);
+  console.log(
+    `Mapping ${candidates.length} cigars` +
+      (ONLY_MISSING ? ` (only-missing${INCLUDE_UNSPLASH ? ' +unsplash' : ''})` : '') +
+      '\n',
+  );
 
   let matched = 0;
   let unmatched = 0;
