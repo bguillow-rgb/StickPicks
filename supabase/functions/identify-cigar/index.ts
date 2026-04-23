@@ -17,7 +17,7 @@ const TOTAL_SCAN_LIMIT = 10;
 const RATE_LIMIT_HOURLY = 30;
 const RATE_LIMIT_DAILY = 100;
 
-const IDENTIFY_PROMPT = `You are a cigar identification expert. You may receive ONE OR MORE photos of the same cigar, taken from different rotation angles while the user rotates it. Use ALL of them together.
+const IDENTIFY_PROMPT_BASE = `You are a cigar identification expert. You may receive ONE OR MORE photos of the same cigar, taken from different rotation angles while the user rotates it. Use ALL of them together.
 
 STRATEGY when multiple images are given:
 - Read every fragment of text visible on the band across all frames.
@@ -34,23 +34,31 @@ IMPORTANT distinctions:
 
 You usually CANNOT determine vitola from a close-up band photo. Only fill in vitola if you see a clear size indicator on the band or packaging. Otherwise, set vitola to null.
 
+Return a ranked list of up to 3 candidate identifications — your strongest guess first, then plausible alternatives. If you are highly confident, one candidate is fine; you are not required to invent alternatives when none exist.
+
 Respond ONLY with valid JSON in this exact format:
 {
-  "brand": "the brand name",
-  "line": "the specific cigar line/name, WITHOUT vitola",
-  "vitola": "the size if and ONLY if clearly determinable, else null",
-  "confidence": 0.85,
-  "reasoning": "Brief explanation of how you identified it across the frames"
+  "candidates": [
+    {
+      "brand": "the brand name",
+      "line": "the specific cigar line/name, WITHOUT vitola",
+      "vitola": "the size if and ONLY if clearly determinable, else null",
+      "confidence": 0.91,
+      "reasoning": "Brief explanation of how you identified it across the frames"
+    }
+  ],
+  "overall_reasoning": "One-sentence cross-frame summary. Keep it short."
 }
 
-If you cannot identify the cigar, respond with:
+If you cannot identify the cigar at all, respond with:
 {
-  "brand": null,
-  "line": null,
-  "vitola": null,
-  "confidence": 0,
-  "reasoning": "Explanation of why identification failed"
+  "candidates": [],
+  "overall_reasoning": "Explanation of why identification failed"
 }`;
+
+const ENHANCE_PREFIX = `This is a retry of a previously-low-confidence capture of the same cigar. Be more aggressive reading subtle, low-contrast, or partially-obscured text; favor careful OCR over visual similarity; only propose a candidate if you can actually read band text supporting it.
+
+`;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -68,6 +76,9 @@ interface RequestBody {
   imageBase64?: string;
   mediaType?: string;
   device_id?: string;
+  // Client sets this on the "Enhance and retry" path so the prompt leans
+  // harder on OCR and suppresses visual-similarity guesses.
+  enhance?: boolean;
 }
 
 function jsonResponse(body: unknown, status: number): Response {
@@ -173,6 +184,14 @@ Deno.serve(async (req) => {
       },
     }));
 
+    // Enhance hint flips the prompt to an OCR-biased variant without changing
+    // anything else about the request shape. Back-compat with older clients
+    // is automatic — they just don't send the flag.
+    const promptText = body.enhance
+      ? ENHANCE_PREFIX + IDENTIFY_PROMPT_BASE
+      : IDENTIFY_PROMPT_BASE;
+
+    const requestStartedAt = Date.now();
     const anthropicResponse = await fetch(
       "https://api.anthropic.com/v1/messages",
       {
@@ -183,14 +202,19 @@ Deno.serve(async (req) => {
           "anthropic-version": "2023-06-01",
         },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 500,
+          // Sonnet 4.6 — materially stronger at fine-grained OCR and
+          // brand-logo recognition than the prior 4.0-20250514 generation.
+          model: "claude-sonnet-4-6",
+          // Ranked top-3 + per-candidate reasoning needs more headroom than
+          // the single-candidate schema required. 1500 is generous; a
+          // typical response lands well under.
+          max_tokens: 1500,
           messages: [
             {
               role: "user",
               content: [
                 ...imageContent,
-                { type: "text", text: IDENTIFY_PROMPT },
+                { type: "text", text: promptText },
               ],
             },
           ],
@@ -209,6 +233,22 @@ Deno.serve(async (req) => {
     }
 
     const apiResult = await anthropicResponse.json();
+
+    // Cheap structured log so PostHog/Supabase can alert on cost outliers
+    // later. One line per successful scan, zero schema changes. `usage`
+    // field is present on every Messages-API response.
+    const usage = (apiResult as { usage?: { input_tokens?: number; output_tokens?: number } })?.usage ?? {};
+    console.log(
+      "identify-cigar usage:",
+      JSON.stringify({
+        input_tokens: usage.input_tokens ?? null,
+        output_tokens: usage.output_tokens ?? null,
+        image_count: images.length,
+        latency_ms: Date.now() - requestStartedAt,
+        enhance: body.enhance === true,
+      }),
+    );
+
     return jsonResponse(apiResult, 200);
   } catch (err: any) {
     console.error("Edge function error:", err);
