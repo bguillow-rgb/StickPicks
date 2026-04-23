@@ -82,6 +82,11 @@ export default function PaywallScreen() {
   // ASC price change so they stay in lockstep.
   const yearlyPrice = yearlyPackage?.product.priceString ?? '$24.99';
   const monthlyPrice = monthlyPackage?.product.priceString ?? '$2.99';
+  // Per-month equivalent of the annual plan — Apple 3.1.2(a) requires this
+  // to be shown alongside the annual price.
+  const yearlyPerMonth = yearlyPackage
+    ? `$${(yearlyPackage.product.price / 12).toFixed(2)}/month billed annually`
+    : '$2.08/month billed annually';
 
   async function handlePurchase() {
     if (isGuest) {
@@ -198,6 +203,7 @@ export default function PaywallScreen() {
               </View>
               <Text style={styles.planPrice}>{yearlyPrice}</Text>
               <Text style={styles.planPeriod}>per year</Text>
+              <Text style={styles.planPerMonth}>{yearlyPerMonth}</Text>
               <Text style={styles.planSavings}>
                 {yearlyPackage && monthlyPackage
                   ? `Save ${Math.round((1 - yearlyPackage.product.price / (monthlyPackage.product.price * 12)) * 100)}%`
@@ -215,6 +221,13 @@ export default function PaywallScreen() {
             </Pressable>
           </View>
 
+          {/* Pre-purchase disclosure — Apple 3.1.2(a) requires this BEFORE the CTA. */}
+          <Text style={styles.preCtaDisclosure}>
+            {selectedPlan === 'yearly'
+              ? `Auto-renews at ${yearlyPrice}/year until canceled.`
+              : `Auto-renews at ${monthlyPrice}/month until canceled.`}
+          </Text>
+
           {/* CTA */}
           <Button
             title={purchasing
@@ -224,7 +237,7 @@ export default function PaywallScreen() {
             onPress={handlePurchase}
             disabled={purchasing}
             loading={purchasing}
-            style={{ marginTop: SPACING.md }}
+            style={{ marginTop: SPACING.xs }}
           />
         </>
       )}
@@ -367,6 +380,20 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: COLORS.accent,
     marginTop: 4,
+  },
+  planPerMonth: {
+    fontFamily: 'Cormorant',
+    fontSize: 11,
+    color: COLORS.subtle,
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  preCtaDisclosure: {
+    fontFamily: 'Cormorant',
+    fontSize: 11,
+    color: COLORS.subtle,
+    textAlign: 'center',
+    marginTop: SPACING.md,
   },
   guestBanner: {
     flexDirection: 'row',

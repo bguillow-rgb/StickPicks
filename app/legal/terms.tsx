@@ -105,10 +105,10 @@ export default function TermsScreen() {
 
         <Text style={styles.h2}>11. Account Deletion</Text>
         <Text style={styles.body}>
-          You may delete your account at any time from the Profile screen within the app. Deletion permanently removes all your data including humidor entries, journal entries, scan history, quiz results, and reviews. This action cannot be undone.
+          You may delete your account at any time from the Profile screen within the app. Tap Delete Account and confirm. Deletion permanently removes all your data including humidor entries, journal entries, scan history, quiz results, and reviews. This action cannot be undone.
         </Text>
         <Text style={styles.body}>
-          If you cannot access the app, you may also request deletion by emailing support@stickpicks.app from your account email; we will permanently remove your account within 7 days. Deleting your account does not cancel an active App Store subscription — manage subscriptions in Settings → Apple ID → Subscriptions.
+          Deleting your account does not cancel an active App Store subscription — manage subscriptions in Settings → Apple ID → Subscriptions.
         </Text>
 
         <Text style={styles.h2}>12. Changes to These Terms</Text>

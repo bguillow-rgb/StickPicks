@@ -18,10 +18,10 @@ export default function AgeGateScreen() {
     router.replace('/auth/login');
   };
 
-  const handleNo = () => {
+  const handleNo = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
-    // Session-only — does NOT persist. Relaunch restores to 'unknown'.
-    markBlocked();
+    // Persists a 24h cooldown timestamp so restart can't bypass the gate.
+    await markBlocked();
     router.replace('/age-gate/blocked');
   };
 
