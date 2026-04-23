@@ -3,13 +3,20 @@ import { Ionicons } from '@expo/vector-icons';
 import { COLORS, RADIUS, FONTS, SPACING } from '@/src/constants/theme';
 import type { Cigar } from '@/src/types/cigar';
 import type { ImageStyle, StyleProp } from 'react-native';
+import { getBrandLogo } from '@/src/lib/brandLogos';
 
 // Display-layer wrapper for every cigar image in the app. Centralizes the
 // moderation rules so each call site doesn't re-implement them:
-//   - image_status !== 'live' → render placeholder regardless of image_url
-//   - image_url null/empty   → render placeholder
-// On the detail page we also pass showAddAction to expose a "Add a photo"
-// affordance when the image is missing; everywhere else it's display-only.
+//   - image_status is 'takedown' or 'banned' → placeholder with "Add a photo"
+//     affordance. Moderation wins over any fallback.
+//   - image_url present + live                → use it
+//   - image_url missing + brand logo available → render brand logo as fallback
+//     (seeded by scripts/seed-brand-logos.ts; covers brands where we can't
+//     find a per-vitola product shot)
+//   - nothing matches                          → placeholder
+//
+// On the detail page showAddAction={true} exposes the "Add a photo" button
+// when the moderation placeholder is showing.
 
 interface CigarImageProps {
   cigar: Pick<Cigar, 'image_url' | 'image_status' | 'brand' | 'line' | 'name'> | null | undefined;
@@ -38,8 +45,24 @@ export function CigarImage({
   onAddPress,
   uploading = false,
 }: CigarImageProps) {
-  if (hasLiveImage(cigar)) {
+  // Moderation first — an explicitly-pulled image MUST show the placeholder
+  // with the add-photo affordance, regardless of any brand fallback. Falling
+  // back to the brand logo here would re-expose content the admin just took
+  // down for a different vitola.
+  const takenDown = !!cigar?.image_status && cigar.image_status !== 'live';
+
+  if (!takenDown && hasLiveImage(cigar)) {
     return <Image source={{ uri: cigar.image_url }} style={style} resizeMode={resizeMode} />;
+  }
+
+  // Brand-logo fallback — only when the image is simply missing (not moderated).
+  // Gives the UI a brand-appropriate fill instead of a bare placeholder for the
+  // ~1000+ cigars we can't find per-vitola photos for.
+  if (!takenDown) {
+    const brandLogo = cigar?.brand ? getBrandLogo(cigar.brand) : null;
+    if (brandLogo) {
+      return <Image source={{ uri: brandLogo }} style={style} resizeMode={resizeMode} />;
+    }
   }
 
   return (
