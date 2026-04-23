@@ -114,13 +114,14 @@ export default function QuizScreen() {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      {/* Hero — SP monogram placeholder. Zero tobacco imagery per Apple 1.4.3.
-          TODO: swap to a humidor-interior photo in a post-launch update by
-          bundling assets/images/quiz-hero.jpg and updating this require(). */}
+      {/* Hero — open humidor with cigars (Unsplash, license-clean for
+          commercial use). The app is already rated 17+ for tobacco context;
+          static humidor imagery with no smoking and no persons is in-bounds
+          for Apple 1.4.3. */}
       <Image
-        source={require('../../assets/images/splash-icon.png')}
+        source={require('../../assets/images/quiz-hero.jpg')}
         style={styles.hero}
-        resizeMode="contain"
+        resizeMode="cover"
       />
 
 
@@ -220,7 +221,6 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: RADIUS.md,
     marginBottom: SPACING.md,
-    backgroundColor: COLORS.card,
   },
   progressFill: {
     height: '100%',

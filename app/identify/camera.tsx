@@ -6,7 +6,7 @@
 // photo. This screen is a thin viewfinder + capture button that hands the
 // photo to /identify/result for the AI round-trip.
 
-import { View, Text, StyleSheet, Pressable, Linking, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Linking, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { Alert } from '@/src/components/ui/StyledAlert';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -44,6 +44,7 @@ export default function CameraScreen() {
 
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice('back');
+  const { width: winW, height: winH } = useWindowDimensions();
 
   const scans = useScanCount();
 
@@ -88,6 +89,18 @@ export default function CameraScreen() {
     }
   }, []);
 
+  // Pre-focus on the framing-guide center once the camera becomes active, so
+  // the first Concierge tap captures a sharp photo instead of a cold one.
+  // Re-fires on every focus gain (isActive false→true) because the lens can
+  // drift while the screen is backgrounded.
+  useEffect(() => {
+    if (!isActive || !device) return;
+    const t = setTimeout(() => {
+      handleFocus(winW / 2, winH * 0.43);
+    }, 350); // give the camera a beat to initialise before kicking AF
+    return () => clearTimeout(t);
+  }, [isActive, device, handleFocus, winW, winH]);
+
   const tapGesture = useMemo(
     () =>
       Gesture.Tap().onEnd((e) => {
@@ -120,9 +133,23 @@ export default function CameraScreen() {
 
   // VisionCamera 4: takeSnapshot is Android-only. Use takePhoto on both
   // platforms — it writes a full-quality JPEG to a temp path we can re-read.
+  //
+  // Before capture, explicitly focus on the center of the framing guide and
+  // await the focus-lock promise. Cigar bands are close-up subjects with fine
+  // text; without a pre-capture focus lock, the shutter often fires before the
+  // lens has settled and the resulting photo is too blurry for the AI to read.
   const takeSnapshotFile = useCallback(async (): Promise<string | null> => {
     if (!cameraRef.current) return null;
     try {
+      // Frame guide is top:28% to bottom:42% → vertical midpoint ≈ 43% of screen.
+      const focusX = winW / 2;
+      const focusY = winH * 0.43;
+      try {
+        await cameraRef.current.focus({ x: focusX, y: focusY });
+      } catch {
+        // Some devices reject focus() outside of AF-capable areas or when
+        // the lens is already focusing — fall through to the capture anyway.
+      }
       const photo = await cameraRef.current.takePhoto({
         flash: 'off',
         enableShutterSound: false,
@@ -131,7 +158,7 @@ export default function CameraScreen() {
     } catch {
       return null;
     }
-  }, []);
+  }, [winW, winH]);
 
   const handleConcierge = useCallback(async () => {
     if (capturing) return;
@@ -263,6 +290,9 @@ export default function CameraScreen() {
             photo={true}
             torch={torchOn ? 'on' : 'off'}
             zoom={zoom}
+            // Prioritise sharpness over capture speed — cigar-band text is the
+            // subject, and latency (~200ms) matters less than legibility here.
+            photoQualityBalance="quality"
           />
 
           {/* Back */}
