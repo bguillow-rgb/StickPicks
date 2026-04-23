@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Image } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useState, useRef, useEffect } from 'react';
@@ -114,10 +114,15 @@ export default function QuizScreen() {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      {/* Hero image removed — splash-icon.png is a lit cigar photo that
-          violates Apple's 1.4.3 "encourages tobacco use" guideline. The
-          step indicator + title + subtitle are enough orientation; we can
-          re-add a compliant product-shot banner once the new asset is ready. */}
+      {/* Hero — SP monogram placeholder. Zero tobacco imagery per Apple 1.4.3.
+          TODO: swap to a humidor-interior photo in a post-launch update by
+          bundling assets/images/quiz-hero.jpg and updating this require(). */}
+      <Image
+        source={require('../../assets/images/splash-icon.png')}
+        style={styles.hero}
+        resizeMode="contain"
+      />
+
 
       <Animated.View
         key={step}
@@ -209,6 +214,13 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.border,
     marginBottom: SPACING.lg,
     overflow: 'hidden',
+  },
+  hero: {
+    width: '100%',
+    height: 140,
+    borderRadius: RADIUS.md,
+    marginBottom: SPACING.md,
+    backgroundColor: COLORS.card,
   },
   progressFill: {
     height: '100%',
