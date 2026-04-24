@@ -19,6 +19,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '@/lib/supabase';
 import { getDeviceId } from '@/lib/deviceId';
 import { useProStore } from '@/src/stores/useProStore';
+import { captureException } from '@/src/lib/observability';
 
 export const TOTAL_SCAN_LIMIT = 10;
 export const GUEST_SCAN_LIMIT = 5;
@@ -52,8 +53,10 @@ export function useScanCount(): ScanCountState {
         .select('id', { count: 'exact', head: true })
         .eq('device_id', deviceId);
       setCount(c ?? 0);
-    } catch {
+    } catch (err) {
       // Keep previous count on failure; don't wipe state mid-session.
+      // Report so on-call can see paywall-adjacent RLS / network errors.
+      captureException(err, { context: 'scanCount.refresh' });
     } finally {
       setLoading(false);
     }

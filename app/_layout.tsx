@@ -42,6 +42,7 @@ import {
   identify as identifyAnalytics,
   resetAnalytics,
   setErrorUser,
+  captureSilent,
 } from '@/src/lib/observability';
 
 export { ErrorBoundary } from 'expo-router';
@@ -271,7 +272,7 @@ export default function RootLayout() {
         if (!sess.user.is_anonymous) {
           pullAllStreaks(sess.user.id)
             .then((rows) => useStreakStore.getState().hydrate(rows))
-            .catch(() => {});
+            .catch(captureSilent('streak.hydrate'));
           // Fire-and-forget engagement tick — the act of opening the
           // app counts, and this handles the cold-boot case where the
           // AppState listener below doesn't see a transition (already

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import { captureException } from '@/src/lib/observability';
 
 type HumidorStatus = 'wishlist' | 'owned' | 'smoked';
 
@@ -31,8 +32,11 @@ export function useHumidorStatuses(cigarIds: string[]): Map<string, HumidorStatu
           result.set(row.cigar_id, arr);
         }
         setMap(result);
-      } catch {
+      } catch (err) {
+        // Reset on failure to avoid showing stale status chips; still
+        // report so a widespread RLS outage is visible on the dashboard.
         setMap(new Map());
+        captureException(err, { context: 'humidorStatuses.batchFetch' });
       }
     })();
   }, [cigarIds.join(',')]);
