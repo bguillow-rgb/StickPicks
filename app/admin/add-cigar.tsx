@@ -14,7 +14,7 @@
 // admin-only writes even if a non-admin somehow reaches this screen
 // (AdminOnly wrapper also blocks rendering).
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -26,7 +26,7 @@ import {
   ActivityIndicator,
   Linking,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
@@ -82,9 +82,31 @@ export default function AddCigarScreen() {
 
 function Form() {
   const router = useRouter();
-  const [state, setState] = useState<FormState>(initial);
-  const [photoUri, setPhotoUri] = useState<string | null>(null);
+  // Optional params — used when this form is invoked from "Approve
+  // Submission" on /admin/submissions. When present, brand/line/vitola/
+  // notes/scanImageUrl seed the initial state, and submissionId triggers
+  // a follow-up status update on successful insert so the submission is
+  // marked merged.
+  const params = useLocalSearchParams<{
+    submissionId?: string;
+    prefillBrand?: string;
+    prefillLine?: string;
+    prefillVitola?: string;
+    prefillNotes?: string;
+    scanImageUrl?: string;
+  }>();
+  const [state, setState] = useState<FormState>(() => ({
+    ...initial,
+    brand: params.prefillBrand ?? '',
+    line: params.prefillLine ?? '',
+    vitola: params.prefillVitola ?? '',
+    description: params.prefillNotes ?? '',
+  }));
+  const [photoUri, setPhotoUri] = useState<string | null>(
+    params.scanImageUrl ?? null,
+  );
   const [submitting, setSubmitting] = useState(false);
+  const submissionId = params.submissionId ?? null;
   const set = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setState((s) => ({ ...s, [k]: v }));
 
@@ -134,8 +156,15 @@ function Form() {
 
   // Resize -> upload -> return public URL. Throws on failure so the
   // outer submit() flow can surface the error and keep form data intact.
+  // If photoUri is already a Supabase public URL (e.g. from an
+  // approve-submission prefill), we reuse it as-is rather than
+  // re-uploading.
   const uploadPhoto = async (): Promise<string | null> => {
     if (!photoUri) return null;
+    // Already a hosted URL — reuse directly.
+    if (photoUri.startsWith('http://') || photoUri.startsWith('https://')) {
+      return photoUri;
+    }
     const resized = await ImageManipulator.manipulateAsync(
       photoUri,
       [{ resize: { width: 1024 } }],
@@ -219,7 +248,32 @@ function Form() {
       const { error } = await supabase.from('cigars').insert(row);
       if (error) throw error;
 
-      Alert.alert('Added', `${row.name} added to the catalog.`);
+      // If this insert came from an "Approve Submission" flow, flip
+      // that submission's status to merged now that the cigar is live.
+      if (submissionId) {
+        const { error: updErr } = await supabase
+          .from('cigar_submissions')
+          .update({ status: 'merged', reviewed_at: new Date().toISOString() })
+          .eq('id', submissionId);
+        if (updErr) {
+          // Cigar landed but submission didn't flip. Not fatal — admin
+          // can re-mark later. Warn but don't roll back the cigar insert.
+          captureException(updErr, { context: 'admin.approveSubmission.status' });
+          Alert.alert(
+            'Added, but…',
+            `${row.name} was added, but we couldn't mark the submission as merged. You can fix it on the submissions screen.`,
+          );
+          router.back();
+          return;
+        }
+      }
+
+      Alert.alert(
+        'Added',
+        submissionId
+          ? `${row.name} added and submission merged.`
+          : `${row.name} added to the catalog.`,
+      );
       setState(initial);
       setPhotoUri(null);
       router.back();
