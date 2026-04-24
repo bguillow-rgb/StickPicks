@@ -13,6 +13,7 @@
 // telemetry + UI concerns stay separate from the RPC surface.
 
 import { supabase } from '@/lib/supabase';
+import { captureException } from '@/src/lib/observability';
 
 export type StreakType = 'engagement' | 'scan' | 'quiz';
 
@@ -25,6 +26,31 @@ export interface StreakState {
 
 export interface StreakTickResult extends StreakState {
   did_increment: boolean;
+}
+
+// Runtime validator for the tick_streak RPC response row. Protects
+// against silent schema drift (rename, type change, a new enum value)
+// without pulling in a validation library. If the server schema evolves
+// and this starts rejecting valid rows, the Sentry report tells us
+// *before* users see undefined-dereference crashes.
+function isValidTickRow(v: unknown): v is {
+  streak_type: StreakType;
+  current_streak: number;
+  best_streak: number;
+  did_increment: boolean;
+  last_activity_date: string | null;
+} {
+  if (!v || typeof v !== 'object') return false;
+  const r = v as Record<string, unknown>;
+  return (
+    (r.streak_type === 'engagement' ||
+      r.streak_type === 'scan' ||
+      r.streak_type === 'quiz') &&
+    typeof r.current_streak === 'number' &&
+    typeof r.best_streak === 'number' &&
+    typeof r.did_increment === 'boolean' &&
+    (r.last_activity_date === null || typeof r.last_activity_date === 'string')
+  );
 }
 
 // Resolve the user's IANA timezone string. Falls back to UTC if the JS
@@ -61,13 +87,19 @@ export async function tickStreak(type: StreakType): Promise<StreakTickResult | n
   // Supabase RPCs that RETURN TABLE come back as an array of rows.
   if (!Array.isArray(data) || data.length === 0) return null;
 
-  const row = data[0] as {
-    streak_type: StreakType;
-    current_streak: number;
-    best_streak: number;
-    did_increment: boolean;
-    last_activity_date: string | null;
-  };
+  const row = data[0];
+  if (!isValidTickRow(row)) {
+    // Schema drift or corrupted row — report so we catch it *before*
+    // UI renders undefined. Same null-return behavior as pre-validation:
+    // caller treats this as "try again later," UI keeps cached values.
+    captureException(new Error('tick_streak: unexpected row shape'), {
+      context: 'streaks.tick.schema',
+      type,
+      row,
+    });
+    if (__DEV__) console.warn('[streaks] unexpected RPC shape', row);
+    return null;
+  }
 
   return {
     streak_type: row.streak_type,
