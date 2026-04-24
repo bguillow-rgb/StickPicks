@@ -454,7 +454,7 @@ export default function CameraScreen() {
         <Ionicons name="lock-closed-outline" size={48} color={COLORS.muted} style={{ marginBottom: SPACING.md }} />
         <Text style={styles.permTitle}>You've used your {scans.limit} free scans</Text>
         <Text style={styles.permText}>
-          Upgrade to Pro for unlimited identifications, wishlists, and smoking history.
+          Upgrade to Pro for unlimited identifications, wishlists, and your full collection journal.
         </Text>
         <Button title="Go Pro" onPress={() => router.replace('/paywall')} style={{ marginTop: SPACING.md }} />
         <Button title="Go Back" variant="ghost" onPress={() => router.back()} style={{ marginTop: SPACING.sm }} />

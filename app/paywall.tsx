@@ -38,8 +38,8 @@ const FEATURES = [
   },
   {
     icon: 'star-outline' as const,
-    title: 'Tasting Reviews',
-    desc: 'Rate draw, burn, and flavor. Build a personal journal.',
+    title: 'Tasting Notes',
+    desc: 'Record flavor impressions and notes for each cigar. Build a personal journal.',
   },
   {
     icon: 'flame-outline' as const,
