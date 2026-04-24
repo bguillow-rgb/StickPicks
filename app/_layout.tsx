@@ -114,19 +114,22 @@ function AnimatedSplash({
   onFinish: () => void;
 }) {
   // The branded splash PNG is a 1284x1284 square (humidor lounge +
-  // wordmark). We want it edge-to-edge on every phone aspect ratio, so:
-  //   - outer container lives under resizeMode="cover" (fills the screen,
-  //     over-cropping the square as needed) on a dark-green bg that matches
-  //     the PNG's own background
-  //   - a subtle Ken-Burns pass (slow scale + slight vertical drift) runs
-  //     while we're on screen so static letterboxing never shows, and the
-  //     reveal feels cinematic rather than flat
-  //   - the outer Animated.View fades the whole thing out when auth gates
-  //     resolve
+  // wordmark). On portrait phones (~2:1) we render it with resizeMode
+  // "contain" so the full wordmark is visible — the image's dark-green
+  // background matches COLORS.bg, so the top/bottom letterbox fills
+  // seamlessly and reads as a single surface to the user.
   //
-  // Durations are tuned to the 1.6s hold: Ken-Burns runs longer than the
-  // hold so we never catch the end of the animation — the image is always
-  // in motion when the fade-out begins.
+  // An earlier attempt used resizeMode "cover" to kill a perceived
+  // letterbox artifact; on most phone aspect ratios that cropped the
+  // left and right ~27% of the square, cutting "STICK PICKS" in half.
+  // Not worth the visual risk — "contain" with matching bg is the
+  // correct default for a square source on portrait devices.
+  //
+  // Ken-Burns pass (slow scale + slight vertical drift) still runs so
+  // the reveal feels cinematic rather than flat. Durations are tuned
+  // to the 1.6s hold: Ken-Burns runs 4s so we only ever see the first
+  // ~40% of motion before the fade — the image is always in motion
+  // when fade-out begins.
   const opacity = useSharedValue(1);
   const kenBurns = useSharedValue(0);
 
@@ -173,7 +176,7 @@ function AnimatedSplash({
       <Animated.Image
         source={require('../assets/images/splash-icon.png')}
         style={[splashStyles.fullImage, imageStyle]}
-        resizeMode="cover"
+        resizeMode="contain"
       />
     </Animated.View>
   );
@@ -187,10 +190,12 @@ const splashStyles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 100,
   },
-  // Absolute-fill with `resizeMode=cover` so the 1284x1284 square scene
-  // fills every phone aspect ratio edge-to-edge. The image is inside a
-  // transform-animated wrapper (Ken Burns) — `absoluteFillObject` gives
-  // that wrapper a stable origin so the zoom+pan always lands centred.
+  // Absolute-fill with `resizeMode=contain` so the 1284x1284 square
+  // scene fits entirely inside the viewport without cropping. The image
+  // is inside a transform-animated wrapper (Ken Burns) — `absoluteFill
+  // Object` gives that wrapper a stable origin so the zoom+pan always
+  // lands centred. Matching bg color makes top/bottom letterbox visually
+  // continuous with the image.
   fullImage: {
     ...StyleSheet.absoluteFillObject,
   },
