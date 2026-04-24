@@ -133,7 +133,7 @@ function StatCard({
   highlight?: boolean;
 }) {
   return (
-    <Card style={[styles.card, highlight && styles.cardHighlight]}>
+    <Card style={highlight ? { ...styles.card, ...styles.cardHighlight } : styles.card}>
       <Text style={styles.label}>{label}</Text>
       <Text style={[styles.value, highlight && styles.valueHighlight]}>
         {value === null ? '—' : value.toLocaleString()}
