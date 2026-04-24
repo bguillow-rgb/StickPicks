@@ -400,7 +400,16 @@ export default function HumidorScreen() {
                   setFilter(f);
                 }
               }}
-              style={[styles.chip, filter === f && styles.chipActive, locked && styles.chipLocked]}
+              // UX Eyes P1: add a `pressed` opacity nudge so tapping an
+              // already-active chip visibly registers. Prior behavior
+              // left the chip static on re-tap, reading as "tap didn't
+              // work."
+              style={({ pressed }) => [
+                styles.chip,
+                filter === f && styles.chipActive,
+                locked && styles.chipLocked,
+                pressed && { opacity: 0.75 },
+              ]}
             >
               <Text
                 numberOfLines={1}
