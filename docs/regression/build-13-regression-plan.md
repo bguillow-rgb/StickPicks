@@ -767,6 +767,113 @@ These are automated, not manual. Run `npm test` — every suite must pass.
 
 ---
 
+## Section U — Non-functional / performance
+
+Explicit perf budgets with measurement steps. Every budget is informed
+by what iOS users will tolerate without complaint; misses mean we
+queue a perf fix and re-test.
+
+### U1. Cold-start time
+
+- [ ] Force-quit app. Start stopwatch when tapping icon, stop when
+      age gate or home screen is interactive.
+- [ ] Target: **< 2.5s** on an iPhone 13 or newer. Accept up to **3.5s** on iPhone SE / older.
+- [ ] If > 3.5s: profile with Instruments (Time Profiler), look for blocking JS init or heavy splash-screen assets.
+
+### U2. Splash duration
+
+- [ ] Measured from first paint to fade-out complete.
+- [ ] Target: 2.8s hold (intentional) + 450ms fade = **~3.3s total**. Should not exceed 4s.
+
+### U3. Scan round-trip latency
+
+- [ ] Tap shutter → first visible result on screen.
+- [ ] Target: **< 6s end-to-end** on good wifi. Accept up to 12s on LTE.
+- [ ] Include: image resize + upload + edge function + Anthropic + response parse.
+- [ ] If > 12s on wifi: check PostHog STREAK_TICKED / scan-latency logs for outliers, check Anthropic usage dashboard for rate-limit throttling.
+
+### U4. Humidor render with many items
+
+- [ ] Seed a test account with **100 humidor items**. Open Humidor tab.
+- [ ] Target: first render **< 800ms**. Scrolling: **60fps sustained** (no dropped frames visible).
+- [ ] If jank: check for N+1 queries in `useCommunityRatings` / `useHumidorStatuses`; check `grouped` useMemo complexity.
+
+### U5. Browse search responsiveness
+
+- [ ] Type "padron" rapidly. Watch for input lag.
+- [ ] Target: keystrokes register instantly; debounced search fires once at end of burst.
+- [ ] Results list should render within **500ms** of the debounced query firing.
+
+### U6. Cigar detail first render
+
+- [ ] Tap a cigar from Browse. Stopwatch tap → content visible.
+- [ ] Target: **< 600ms** including image load (with cache), up to **1.5s** cold.
+- [ ] Loading state must appear instantly (no blank screen).
+
+### U7. Admin Add Cigar photo upload
+
+- [ ] Capture a photo from camera → tap "Add to catalog" (with a filled form).
+- [ ] Target: total roundtrip **< 5s** for the image resize + upload + DB insert.
+- [ ] If > 10s: check Storage region, check bucket RLS, check device network quality.
+
+### U8. Admin Dashboard load
+
+- [ ] Open `/admin/dashboard`. Stopwatch tap → stats visible.
+- [ ] Target: **< 1.2s**. All four count queries should complete in parallel.
+
+### U9. Memory stability
+
+- [ ] Navigate through: tabs → scan → detail → back → quiz → humidor → admin → 20x.
+- [ ] Watch for: memory warnings, slow-downs, janky transitions after minutes of use.
+- [ ] Target: no iOS memory warnings, no visible slowdown.
+- [ ] If leaks observed: suspect ToastHost listener accumulation (though Set-swap fix should prevent), suspect scan_images URL cache growth.
+
+### U10. Battery / thermal
+
+- [ ] After 10 minutes of active use (scanning + browsing + humidor CRUD), phone should not become noticeably warm, battery shouldn't drop more than 3%.
+- [ ] If drains: profile which screen is CPU-hot in Instruments.
+
+---
+
+## Section V — Auto-promote user image submissions (from migration 017)
+
+New trigger behavior: admin seeds a cigar without an image → user
+submits a photo → auto-promotes to the canonical image for everyone.
+Must not break the pre-existing moderation-queue behavior for cigars
+that already have an image.
+
+### V1. Happy path — admin-seeded cigar with no image
+
+- [ ] Admin: Add Cigar form, fill brand/line/vitola/origin, skip photo. Submit. Row created in `cigars` with `image_url=NULL`.
+- [ ] Regular user (different device, non-admin account): open the cigar's detail page. Brand-logo fallback renders (no image).
+- [ ] Regular user: tap the Add-photo affordance (if present on detail screen), capture a photo, submit.
+- [ ] Refresh: cigar now shows the submitted photo. DB check:
+  - `cigars.image_url` = submitted URL
+  - `cigars.image_status` = 'live'
+  - `cigar_image_submissions.status` = 'approved'
+
+### V2. Existing moderation still works — cigar with a live image
+
+- [ ] Pick a cigar that already has `image_url` set + `image_status='live'`.
+- [ ] Regular user: submit a replacement photo.
+- [ ] Refresh: cigar still shows the original photo. DB check:
+  - `cigars.image_url` unchanged
+  - `cigar_image_submissions.status` = 'pending'
+
+### V3. Banned cigars never auto-promote
+
+- [ ] Pick a cigar and manually SET `image_status='banned'` via Supabase SQL editor.
+- [ ] Regular user: submit a photo for that cigar.
+- [ ] Refresh: photo NOT promoted. Submission stays 'pending'.
+
+### V4. Takedown case still auto-promotes (from migration 010)
+
+- [ ] Pick a cigar and manually SET `image_status='takedown'`.
+- [ ] Regular user: submit a photo.
+- [ ] Refresh: photo promoted. `image_status` flips back to 'live'. Submission is 'approved'.
+
+---
+
 ## Section Z — Cross-section sign-off gate
 
 Only tick these after every above section's boxes are green.
@@ -774,10 +881,12 @@ Only tick these after every above section's boxes are green.
 - [ ] **All A-L** pre-existing surfaces passed (regression floor)
 - [ ] **All M-S** new admin surfaces passed (feature acceptance)
 - [ ] **Section T** Jest suite passes in CI
+- [ ] **Section U** perf budgets met (or exceptions justified)
+- [ ] **Section V** auto-promote trigger behaves correctly (all four cases)
 - [ ] No P0 or P1 finding from Compliance Cop persona remains unaddressed
 - [ ] No P0 or P1 finding from UX Eyes persona remains unaddressed
 - [ ] `npm run typecheck` clean
-- [ ] `git status` on scanner-overhaul shows only the commits we planned (A-I + tests)
+- [ ] `git status` on scanner-overhaul shows only the commits we planned
 - [ ] App Store asset pack (`docs/app-store/`) prerequisites satisfied: public privacy/terms/support URLs live
 - [ ] Reviewer demo account created and plugged into ASC
 
