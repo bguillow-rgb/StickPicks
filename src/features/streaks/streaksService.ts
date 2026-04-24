@@ -14,6 +14,7 @@
 
 import { supabase } from '@/lib/supabase';
 import { captureException } from '@/src/lib/observability';
+import { track } from '@/src/lib/observability/analytics';
 
 export type StreakType = 'engagement' | 'scan' | 'quiz';
 
@@ -73,35 +74,84 @@ function deviceTz(): string {
  * should treat a null return as "keep cache as-is, try again later."
  */
 export async function tickStreak(type: StreakType): Promise<StreakTickResult | null> {
+  // Build 14 instrumentation — user_streaks was empty across every
+  // user in prod at Build 13 time, meaning every tickStreak call was
+  // failing silently. Telemetry + Sentry wiring here gives us a paper
+  // trail for every attempt, error, and unexpected shape so the next
+  // build can root-cause from logs.
+  const tz = deviceTz();
+  track('STREAK_TICK_ATTEMPTED' as never, { type, tz });
+
+  // Sanity-check session BEFORE the RPC so we can distinguish
+  // "no auth" errors from "RPC-internal" errors in Sentry reports.
+  const { data: sessionData } = await supabase.auth.getSession();
+  const hasSession = !!sessionData?.session?.user?.id;
+
   const { data, error } = await supabase.rpc('tick_streak', {
     p_type: type,
-    p_tz: deviceTz(),
+    p_tz: tz,
   });
 
   if (error) {
-    // Never throw — streaks are a side-feature, they must not break the
-    // calling flow (scan confirm, app foreground, etc.). Log to console
-    // in dev; the real signal is the absence of STREAK_TICKED telemetry.
+    // Sentry-report every error. Streaks never break the calling flow
+    // (the caller ignores our null return), so reporting here is safe.
+    captureException(error, {
+      context: 'streaks.tick.rpcError',
+      type,
+      hasSession,
+      errorCode: (error as any).code,
+      errorHint: (error as any).hint,
+      errorMessage: error.message,
+    });
+    track('STREAK_TICK_FAILED' as never, {
+      type,
+      phase: 'rpc_error',
+      hasSession,
+      error_message: error.message,
+    });
     if (__DEV__) console.warn('[streaks] tick failed', type, error.message);
     return null;
   }
 
   // Supabase RPCs that RETURN TABLE come back as an array of rows.
-  if (!Array.isArray(data) || data.length === 0) return null;
+  if (!Array.isArray(data) || data.length === 0) {
+    captureException(new Error('tick_streak: empty response'), {
+      context: 'streaks.tick.emptyResponse',
+      type,
+      hasSession,
+      dataType: typeof data,
+      dataJson: JSON.stringify(data),
+    });
+    track('STREAK_TICK_FAILED' as never, {
+      type,
+      phase: 'empty_response',
+      hasSession,
+    });
+    return null;
+  }
 
   const row = data[0];
   if (!isValidTickRow(row)) {
-    // Schema drift or corrupted row — report so we catch it *before*
-    // UI renders undefined. Same null-return behavior as pre-validation:
-    // caller treats this as "try again later," UI keeps cached values.
     captureException(new Error('tick_streak: unexpected row shape'), {
       context: 'streaks.tick.schema',
       type,
+      hasSession,
       row,
+    });
+    track('STREAK_TICK_FAILED' as never, {
+      type,
+      phase: 'schema_rejection',
+      hasSession,
     });
     if (__DEV__) console.warn('[streaks] unexpected RPC shape', row);
     return null;
   }
+
+  track('STREAK_TICK_SUCCEEDED' as never, {
+    type,
+    current_streak: row.current_streak,
+    did_increment: row.did_increment,
+  });
 
   return {
     streak_type: row.streak_type,
