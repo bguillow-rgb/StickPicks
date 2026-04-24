@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, ScrollView } from 'react-native';
 import { Alert } from '@/src/components/ui/StyledAlert';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -200,7 +200,14 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + SPACING.md }]}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.xl },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Profile</Text>
 
       <Card style={styles.profileCard}>
@@ -270,7 +277,7 @@ export default function ProfileScreen() {
           <Text style={styles.deleteText}>Delete Account</Text>
         </Pressable>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -278,6 +285,8 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: COLORS.bg,
+  },
+  scrollContent: {
     paddingHorizontal: SPACING.md,
   },
   title: {
