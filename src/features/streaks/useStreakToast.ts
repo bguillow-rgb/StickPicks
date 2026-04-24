@@ -46,6 +46,19 @@ let lastToastAt = 0;
 let lastToastedPriority = -1;
 const SUPPRESSION_WINDOW_MS = 500;
 
+// Per-type client-side rate limiter. The server RPC is already idempotent
+// (same-day ticks are no-ops) but we still pay the round-trip cost on
+// every call — and AppState 'active' can fire multiple times during fast
+// lock/unlock cycles on iOS, which otherwise each invoke recordActivity.
+// 30s is long enough to collapse rapid-fire bursts but short enough that
+// a transient RPC failure retries naturally on the user's next activity.
+const DEBOUNCE_WINDOW_MS = 30_000;
+const lastCalledAt: Record<StreakType, number> = {
+  engagement: 0,
+  quiz: 0,
+  scan: 0,
+};
+
 function shouldSuppress(type: StreakType): boolean {
   const age = Date.now() - lastToastAt;
   if (age > SUPPRESSION_WINDOW_MS) return false;
@@ -106,16 +119,28 @@ function labelFor(type: StreakType): string {
  * toast is priority-suppressed by the scan/quiz toast that just ran.
  */
 export async function recordActivity(type: StreakType): Promise<void> {
+  // Rate-limit at entry (not resolution) so in-flight calls rate-limit
+  // concurrent callers correctly.
+  const now = Date.now();
+  if (now - lastCalledAt[type] < DEBOUNCE_WINDOW_MS) return;
+  lastCalledAt[type] = now;
+
   const result = await tickStreak(type);
   if (!result) return;
   applyResult(type, result);
 
   // Implicit engagement tick on scan/quiz — keeps the engagement streak
   // honest even if the user never lands on the home tab. Runs after the
-  // primary tick finishes so the primary can own the toast slot.
+  // primary tick finishes so the primary can own the toast slot. Also
+  // rate-limited; a scan immediately after another scan (< 30s) skips
+  // the duplicate engagement tick.
   if (type !== 'engagement') {
-    const engResult = await tickStreak('engagement');
-    if (engResult) applyResult('engagement', engResult);
+    const engNow = Date.now();
+    if (engNow - lastCalledAt.engagement >= DEBOUNCE_WINDOW_MS) {
+      lastCalledAt.engagement = engNow;
+      const engResult = await tickStreak('engagement');
+      if (engResult) applyResult('engagement', engResult);
+    }
   }
 }
 
