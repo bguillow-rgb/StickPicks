@@ -21,6 +21,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   runOnJS,
+  Easing,
 } from 'react-native-reanimated';
 import 'react-native-reanimated';
 import { COLORS } from '@/src/constants/theme';
@@ -111,15 +112,31 @@ function AnimatedSplash({
   onReady?: () => void;
   onFinish: () => void;
 }) {
-  // Now that assets/images/splash-icon.png IS the full branded scene
-  // (humidor lounge + wordmark, baked by the product team), the JS
-  // splash just needs to keep rendering that same image while we gate
-  // on auth + age, then fade out. No more monogram theater — the native
-  // PNG is doing the heavy lifting and this view exists only to hold
-  // the frame without jump-cutting to the app.
+  // The branded splash PNG is a 1284x1284 square (humidor lounge +
+  // wordmark). We want it edge-to-edge on every phone aspect ratio, so:
+  //   - outer container lives under resizeMode="cover" (fills the screen,
+  //     over-cropping the square as needed) on a dark-green bg that matches
+  //     the PNG's own background
+  //   - a subtle Ken-Burns pass (slow scale + slight vertical drift) runs
+  //     while we're on screen so static letterboxing never shows, and the
+  //     reveal feels cinematic rather than flat
+  //   - the outer Animated.View fades the whole thing out when auth gates
+  //     resolve
+  //
+  // Durations are tuned to the 1.6s hold: Ken-Burns runs longer than the
+  // hold so we never catch the end of the animation — the image is always
+  // in motion when the fade-out begins.
   const opacity = useSharedValue(1);
+  const kenBurns = useSharedValue(0);
 
   useEffect(() => {
+    // 4s ease-in-out is longer than the 1.6s hold by design; the user
+    // only ever sees the first ~40% of the pan, which is the part with
+    // the most visible motion-per-second.
+    kenBurns.value = withTiming(1, {
+      duration: 4000,
+      easing: Easing.inOut(Easing.ease),
+    });
     const timeout = setTimeout(() => {
       opacity.value = withTiming(0, { duration: 450 }, () => {
         runOnJS(onFinish)();
@@ -132,6 +149,17 @@ function AnimatedSplash({
     opacity: opacity.value,
   }));
 
+  // Zoom 1.00 → 1.08, drift up 3% — both subtle so the wordmark never
+  // clips and the humidor doesn't crawl dramatically. Classic "premium
+  // photo framing" motion.
+  const imageStyle = useAnimatedStyle(() => {
+    const scale = 1 + kenBurns.value * 0.08;
+    const translateY = -kenBurns.value * 0.03 * 800; // ~24px drift on a phone
+    return {
+      transform: [{ scale }, { translateY }],
+    };
+  });
+
   return (
     <Animated.View
       style={[splashStyles.container, containerStyle]}
@@ -141,10 +169,10 @@ function AnimatedSplash({
       // the gap where (tabs) could flash through.
       onLayout={() => onReady?.()}
     >
-      <Image
+      <Animated.Image
         source={require('../assets/images/splash-icon.png')}
-        style={splashStyles.fullImage}
-        resizeMode="contain"
+        style={[splashStyles.fullImage, imageStyle]}
+        resizeMode="cover"
       />
     </Animated.View>
   );
@@ -158,13 +186,12 @@ const splashStyles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 100,
   },
-  // The PNG is a full 1284x1284 branded scene (humidor lounge + wordmark).
-  // `contain` preserves its aspect ratio on every device size — any
-  // letterboxing fills with the container's bg (#0A1A0F), which matches
-  // the PNG's own background so the seam is invisible.
+  // Absolute-fill with `resizeMode=cover` so the 1284x1284 square scene
+  // fills every phone aspect ratio edge-to-edge. The image is inside a
+  // transform-animated wrapper (Ken Burns) — `absoluteFillObject` gives
+  // that wrapper a stable origin so the zoom+pan always lands centred.
   fullImage: {
-    width: '100%',
-    height: '100%',
+    ...StyleSheet.absoluteFillObject,
   },
 });
 
