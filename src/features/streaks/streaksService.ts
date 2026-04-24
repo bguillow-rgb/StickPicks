@@ -33,7 +33,9 @@ export interface StreakTickResult extends StreakState {
 // without pulling in a validation library. If the server schema evolves
 // and this starts rejecting valid rows, the Sentry report tells us
 // *before* users see undefined-dereference crashes.
-function isValidTickRow(v: unknown): v is {
+// Exported for unit-test visibility; no runtime consumer outside this
+// file.
+export function isValidTickRow(v: unknown): v is {
   streak_type: StreakType;
   current_streak: number;
   best_streak: number;
