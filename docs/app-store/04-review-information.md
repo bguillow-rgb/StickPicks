@@ -92,6 +92,35 @@ WHAT YOU WON'T SEE
 - Any external links to buy cigars or tobacco products.
 - Any content encouraging smoking, consumption, or underage use.
 - Tracking prompts (we don't use IDFA; ATT isn't needed).
+- The admin surfaces described below — they are gated and will not
+  appear for the reviewer account.
+
+ADMIN SURFACES (disclosure)
+The app includes a set of back-office catalog-management screens at
+/admin/* (add cigar, edit cigar, review submissions, dashboard, manage
+other admins). These are:
+  - Gated by a useIsAdmin() client hook that calls an RPC
+    (is_current_user_admin()) backed by a database table
+    (comped_users.is_admin).
+  - Gated additionally by Row-Level Security policies on the
+    Postgres side — even a malicious client bypassing the UI hook
+    cannot write to the cigars table without the admin flag.
+  - Not visible on the tab bar. The entry point is a single tile
+    on the Profile screen that renders only when useIsAdmin() returns
+    true. For the provided reviewer account, this tile will not
+    render.
+
+Admin surfaces exist so the development team can seed the catalog
+without a separate web dashboard. They are not user-facing
+functionality. If you would like to verify gating, attempting to
+deep-link to /admin/* with a non-admin account (like the one we
+provided) redirects back to the Profile tab.
+
+ANALYTICS DISCLOSURE
+We use PostHog for product analytics and Sentry for crash / diagnostic
+reporting. Neither is configured for advertising, cross-app tracking,
+or IDFA usage. All analytics are linked to our own authenticated user
+IDs, not Apple's advertising identifier. ATT is not required.
 
 ACCOUNT DELETION
 The profile tab has a "Delete Account" button that calls a Supabase

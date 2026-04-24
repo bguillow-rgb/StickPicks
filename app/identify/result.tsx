@@ -723,7 +723,7 @@ export default function IdentifyResultScreen() {
             <Text style={styles.tips}>
               {enhanceRetriesExhausted
                 ? "We've tried twice. A new photo in better light will give us much better odds."
-                : 'Tip: hold the band centered with good light. Glare and motion blur make it tough.'}
+                : 'Tip: the scanner reads the band text, logos, and colors — any angle that keeps the brand name legible works. Glare and motion blur are the usual culprits; rotating the band helps when info is split across sides.'}
             </Text>
             {/* Only show Enhance-and-retry until the ceiling is hit. After
                 two failed enhances the UI nudges the user toward a fresh
