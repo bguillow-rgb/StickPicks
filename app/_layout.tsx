@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, LogBox, AppState, type AppStateStatus } from 'react-native';
+import { View, Text, StyleSheet, LogBox, AppState, Image, type AppStateStatus } from 'react-native';
 
 // RevenueCat can't fetch offerings until the products are live in App Store
 // Connect, which only happens for release builds. In dev, the expected failure
@@ -20,14 +20,10 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  withSequence,
-  withDelay,
   runOnJS,
-  Easing,
-  withRepeat,
 } from 'react-native-reanimated';
 import 'react-native-reanimated';
-import { COLORS, FONTS } from '@/src/constants/theme';
+import { COLORS } from '@/src/constants/theme';
 import { StyledAlertHost } from '@/src/components/ui/StyledAlert';
 import { ToastHost } from '@/src/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
@@ -115,81 +111,42 @@ function AnimatedSplash({
   onReady?: () => void;
   onFinish: () => void;
 }) {
-  // Start at opacity 1 so the hand-off from the native launch screen (which
-  // renders assets/images/splash-icon.png in the same steady-state layout) is
-  // seamless — no disappear/reappear flash. Only the scale bounce animates in.
-  const scale = useSharedValue(1);
+  // Now that assets/images/splash-icon.png IS the full branded scene
+  // (humidor lounge + wordmark, baked by the product team), the JS
+  // splash just needs to keep rendering that same image while we gate
+  // on auth + age, then fade out. No more monogram theater — the native
+  // PNG is doing the heavy lifting and this view exists only to hold
+  // the frame without jump-cutting to the app.
   const opacity = useSharedValue(1);
-  const textOpacity = useSharedValue(1);
-  const smokeOpacity = useSharedValue(0.4);
 
   useEffect(() => {
-    // Subtle scale-bounce gives the monogram a moment of life once React mounts,
-    // without a visible pop-in (opacity is already 1 on the first paint).
-    scale.value = withSequence(
-      withTiming(1.05, { duration: 400, easing: Easing.out(Easing.quad) }),
-      withTiming(1, { duration: 300 }),
-    );
-
-    smokeOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0.6, { duration: 800 }),
-        withTiming(0.2, { duration: 800 }),
-      ),
-      3,
-      true,
-    );
-
     const timeout = setTimeout(() => {
-      opacity.value = withTiming(0, { duration: 400 });
-      textOpacity.value = withTiming(0, { duration: 300 }, () => {
+      opacity.value = withTiming(0, { duration: 450 }, () => {
         runOnJS(onFinish)();
       });
-    }, 2800);
-
+    }, 1600);
     return () => clearTimeout(timeout);
   }, []);
 
-  const iconStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+  const containerStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
   }));
 
-  const smokeStyle = useAnimatedStyle(() => ({
-    opacity: smokeOpacity.value,
-  }));
-
-  const textStyle = useAnimatedStyle(() => ({
-    opacity: textOpacity.value,
-  }));
-
   return (
-    <View
-      style={splashStyles.container}
-      // Fires once the splash view has been measured — a reliable signal that
-      // the first frame is about to be painted. Used to hide the native launch
-      // screen only AFTER this view is ready, eliminating the gap where the
-      // (tabs) screen could flash through.
+    <Animated.View
+      style={[splashStyles.container, containerStyle]}
+      // Fires once the splash view has been measured — a reliable signal
+      // that the first frame is about to be painted. Used to hide the
+      // native launch screen only AFTER this view is ready, eliminating
+      // the gap where (tabs) could flash through.
       onLayout={() => onReady?.()}
     >
-      <Animated.View style={[splashStyles.topLine, smokeStyle]} />
-
-      {/* Text-only wordmark splash — matches the native launch screen
-          (assets/images/splash-icon.png) at its steady-state so the hand-off
-          from iOS's pre-splash into this animated view is invisible. Keeping
-          all elements at opacity 1 on first paint is load-bearing for that. */}
-      <Animated.View style={[iconStyle, splashStyles.monogram]}>
-        <Text style={splashStyles.monogramText}>SP</Text>
-      </Animated.View>
-
-      <Animated.View style={textStyle}>
-        <Text style={splashStyles.brand}>STICK PICKS</Text>
-        <View style={splashStyles.divider} />
-        <Text style={splashStyles.tagline}>EST. 2025</Text>
-      </Animated.View>
-
-      <Animated.View style={[splashStyles.bottomLine, smokeStyle]} />
-    </View>
+      <Image
+        source={require('../assets/images/splash-icon.png')}
+        style={splashStyles.fullImage}
+        resizeMode="contain"
+      />
+    </Animated.View>
   );
 }
 
@@ -201,65 +158,13 @@ const splashStyles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 100,
   },
-  topLine: {
-    position: 'absolute',
-    top: '22%',
-    width: 60,
-    height: 2,
-    backgroundColor: COLORS.accent,
-    borderRadius: 1,
-  },
-  // Replaced the cigarPhoto style with a text-based monogram to keep the
-  // splash on-brand without any tobacco imagery.
-  monogram: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    marginBottom: 24,
-    borderWidth: 2,
-    borderColor: COLORS.accent,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.card,
-  },
-  monogramText: {
-    fontFamily: FONTS.display,
-    fontSize: 72,
-    fontWeight: '800',
-    color: COLORS.accent,
-    letterSpacing: 4,
-  },
-  brand: {
-    fontFamily: FONTS.display,
-    fontSize: 34,
-    fontWeight: '800',
-    color: COLORS.accent,
-    textAlign: 'center',
-    letterSpacing: 6,
-  },
-  divider: {
-    width: 40,
-    height: 2,
-    backgroundColor: COLORS.accent,
-    alignSelf: 'center',
-    marginVertical: 10,
-    borderRadius: 1,
-  },
-  tagline: {
-    fontFamily: 'Cormorant',
-    fontSize: 12,
-    fontWeight: '600',
-    color: COLORS.muted,
-    textAlign: 'center',
-    letterSpacing: 4,
-  },
-  bottomLine: {
-    position: 'absolute',
-    bottom: '22%',
-    width: 60,
-    height: 2,
-    backgroundColor: COLORS.accent,
-    borderRadius: 1,
+  // The PNG is a full 1284x1284 branded scene (humidor lounge + wordmark).
+  // `contain` preserves its aspect ratio on every device size — any
+  // letterboxing fills with the container's bg (#0A1A0F), which matches
+  // the PNG's own background so the seam is invisible.
+  fullImage: {
+    width: '100%',
+    height: '100%',
   },
 });
 
@@ -305,11 +210,31 @@ export default function RootLayout() {
       }
     };
 
+    // Comped-user re-check on every session. Previously the comp flag was
+    // only consulted on fresh sign-in (app/auth/login.tsx), which meant a
+    // user already signed-in-from-earlier who got added to comped_users
+    // later would never flip to Pro. This re-check closes that gap — safe
+    // to run every session because the RPC only ever RETURNS a boolean
+    // and never writes. Silently no-ops on network error.
+    const maybeComp = async () => {
+      try {
+        const { data, error } = await supabase.rpc('is_current_user_comped');
+        if (error) return;
+        if (data === true) activate();
+      } catch {
+        // Transient / unreachable — retry on next session change.
+      }
+    };
+
     const onSession = (sess: Session | null) => {
       setSession(sess);
       setAuthLoading(false);
       if (sess?.user?.id) {
         syncRevenueCat(sess.user.id);
+        // Non-anon only: comp check requires a real auth.uid() to resolve.
+        if (!sess.user.is_anonymous) {
+          void maybeComp();
+        }
         identifyAnalytics(sess.user.id, { is_anonymous: !!sess.user.is_anonymous });
         setErrorUser({ id: sess.user.id, email: sess.user.email ?? null });
         // Streak cache hydration — pull on sign-in (or app boot with an

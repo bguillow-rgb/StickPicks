@@ -130,25 +130,51 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Too many frames (max 8)" }, 400);
     }
 
+    // --- Comped / Pro bypass check ---
+    // is_current_user_comped() uses auth.uid() which isn't populated when
+    // we call it from the service-role client here — instead we look up
+    // the user's email directly in comped_users (trigger lowercases all
+    // emails at write time, so the equality check is safe). The table's
+    // RLS doesn't apply to the service-role client.
+    //
+    // TODO: when RevenueCat entitlement webhook lands, add a second
+    // bypass path here that reads a `pro_entitlements` table, so paid
+    // Pro subscribers also skip the free-tier quota on the server side.
+    let isComped = false;
+    if (user.email) {
+      const { data: compedRow } = await supabase
+        .from("comped_users")
+        .select("email")
+        .eq("email", user.email.toLowerCase())
+        .maybeSingle();
+      isComped = !!compedRow;
+    }
+
     // --- Free-scan quota enforcement (device-scoped, not user-scoped) ---
+    // Skipped entirely for comped users. The rate-limit check below still
+    // runs for them so an abusive token can't DoS the Anthropic bill.
     const deviceId = typeof body.device_id === "string" ? body.device_id.trim() : "";
     if (!deviceId) {
       return jsonResponse({ error: "Missing device_id" }, 400);
     }
 
-    const { count: deviceScans } = await supabase
-      .from("scan_images")
-      .select("id", { count: "exact", head: true })
-      .eq("device_id", deviceId);
+    if (!isComped) {
+      const { count: deviceScans } = await supabase
+        .from("scan_images")
+        .select("id", { count: "exact", head: true })
+        .eq("device_id", deviceId);
 
-    if ((deviceScans ?? 0) >= TOTAL_SCAN_LIMIT) {
-      return jsonResponse(
-        { error: "You've hit the free-scan limit. Upgrade to Pro for unlimited scans." },
-        429
-      );
+      if ((deviceScans ?? 0) >= TOTAL_SCAN_LIMIT) {
+        return jsonResponse(
+          { error: "You've hit the free-scan limit. Upgrade to Pro for unlimited scans." },
+          429
+        );
+      }
     }
 
     // --- Per-user rate limit (abuse prevention) ---
+    // Applied to everyone including comped/Pro users. A compromised token
+    // should never blow up cost regardless of entitlement.
     const now = new Date();
     const hourAgo = new Date(now.getTime() - 60 * 60 * 1000).toISOString();
     const dayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000).toISOString();

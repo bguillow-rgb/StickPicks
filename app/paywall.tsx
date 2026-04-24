@@ -42,6 +42,11 @@ const FEATURES = [
     desc: 'Rate draw, burn, and flavor. Build a personal journal.',
   },
   {
+    icon: 'flame-outline' as const,
+    title: 'Daily Streaks & Milestones',
+    desc: 'Track engagement, scan, and quiz streaks. Hit milestones, build the ritual.',
+  },
+  {
     icon: 'trending-up-outline' as const,
     title: 'New Features First',
     desc: 'Pro funds the roadmap — you get it before anyone else.',

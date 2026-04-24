@@ -5,11 +5,20 @@
 // Policy:
 //   TOTAL_SCAN_LIMIT    — absolute cap for any caller on this device.
 //   GUEST_SCAN_LIMIT    — anonymous users block here; must sign in to go further.
+//   Pro / comped users  — bypass both caps entirely (unlimited scans).
+//                         Both the client gate below and the server quota
+//                         block in supabase/functions/identify-cigar
+//                         honor this so the rule stays in sync on both
+//                         sides of the wire. Without this bypass, a Pro
+//                         user still sees the "used all free scans" gate
+//                         because the count query doesn't care about
+//                         entitlement.
 
 import { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '@/lib/supabase';
 import { getDeviceId } from '@/lib/deviceId';
+import { useProStore } from '@/src/stores/useProStore';
 
 export const TOTAL_SCAN_LIMIT = 10;
 export const GUEST_SCAN_LIMIT = 5;
@@ -61,16 +70,32 @@ export function useScanCount(): ScanCountState {
     return () => sub.subscription.unsubscribe();
   }, [refresh]);
 
+  // Pro / comped users bypass the quota. Reading from the store here keeps
+  // the hook reactive — as soon as the session's comp-check flips isPro
+  // true, any screen gated on `limitReached` re-renders with it cleared.
+  const isPro = useProStore((s) => s.isPro);
+  const hasProHydrated = useProStore((s) => s.hasHydrated);
+
   const effectiveLimit = isAnonymous ? GUEST_SCAN_LIMIT : TOTAL_SCAN_LIMIT;
+  // Hide the gate entirely for Pro users. Until the Pro store has
+  // hydrated we fail-open (treat as Pro) so we never flash the "used
+  // all scans" screen during cold-boot, which would be a worse bug than
+  // briefly letting a non-Pro user tap through.
+  const bypassQuota = isPro || !hasProHydrated;
+
   const guestLimitReached =
-    isAnonymous === true && count !== null && count >= GUEST_SCAN_LIMIT;
-  const limitReached = count !== null && count >= TOTAL_SCAN_LIMIT;
+    !bypassQuota && isAnonymous === true && count !== null && count >= GUEST_SCAN_LIMIT;
+  const limitReached = !bypassQuota && count !== null && count >= TOTAL_SCAN_LIMIT;
 
   return {
     count,
     isAnonymous,
     limit: effectiveLimit,
-    remaining: count !== null ? Math.max(0, effectiveLimit - count) : null,
+    remaining: bypassQuota
+      ? Infinity
+      : count !== null
+      ? Math.max(0, effectiveLimit - count)
+      : null,
     limitReached,
     guestLimitReached,
     loading,
