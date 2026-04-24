@@ -18,8 +18,8 @@ type Plan = 'monthly' | 'yearly';
 const FEATURES = [
   {
     icon: 'wine-outline' as const,
-    title: 'Expert Drink Pairings',
-    desc: 'Three curated pours per cigar — including one deep cut no other app surfaces.',
+    title: 'Flavor Companions',
+    desc: 'Three beverages that share flavor notes with each cigar — including one deep-cut reference no other app surfaces.',
   },
   {
     icon: 'sparkles-outline' as const,
@@ -176,7 +176,7 @@ export default function PaywallScreen() {
           make and let the bullets do the rest. */}
       <View style={styles.pitchCard}>
         <Text style={styles.pitchHeadline}>
-          The only cigar app with AI band ID and expert drink pairings.
+          The only cigar app with AI band ID and flavor-matched companions.
         </Text>
       </View>
 

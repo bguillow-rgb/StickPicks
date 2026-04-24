@@ -476,10 +476,13 @@ export default function CigarDetailScreen() {
         ))}
       </Card>
 
-      {/* Drink Pairings — treat as Pro pre-hydration to avoid locked-state flash */}
+      {/* Flavor Companions — beverages that share flavor notes with this
+          cigar. Intentionally NOT framed as consumption pairing for
+          App Store §1.4.3 compliance. Treat as Pro pre-hydration to
+          avoid locked-state flash. */}
       {(treatAsPro ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pair It With</Text>
+          <Text style={styles.sectionTitle}>Flavor Companions</Text>
           {getDrinkPairings(cigar).map((p, i) => (
             <View key={i} style={styles.pairingRow}>
               <Text style={styles.pairingDrink}>{p.drink}</Text>
@@ -489,10 +492,10 @@ export default function CigarDetailScreen() {
         </View>
       ) : (
         <Pressable onPress={() => router.push('/paywall')} style={styles.section}>
-          <Text style={styles.sectionTitle}>Pair It With</Text>
+          <Text style={styles.sectionTitle}>Flavor Companions</Text>
           <View style={styles.proLockedRow}>
             <Ionicons name="lock-closed-outline" size={16} color={COLORS.accent} />
-            <Text style={styles.proLockedText}>Upgrade to Pro for drink pairings</Text>
+            <Text style={styles.proLockedText}>Upgrade to Pro for flavor companions</Text>
           </View>
         </Pressable>
       ))}
@@ -898,7 +901,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   // Section titles get an uppercase gold-label treatment so they clearly
-  // outrank the bold serif item names inside each section (e.g. "Pair It With"
+  // outrank the bold serif item names inside each section (e.g. "Flavor Companions"
   // vs "Rye Whiskey" were previously the same visual weight and blended).
   sectionTitle: {
     fontFamily: 'Cormorant',

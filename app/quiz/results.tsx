@@ -175,12 +175,14 @@ export default function QuizResultsScreen() {
               ))}
             </View>
           )}
-          {/* Pairings are a Pro feature — show to advanced-quiz takers AND
-              to Pro users who took the basic quiz. treatAsPro covers the
-              pre-hydration window so we don't flash "locked" on every render. */}
+          {/* Flavor companions are a Pro feature — show to advanced-quiz
+              takers AND to Pro users who took the basic quiz. treatAsPro
+              covers the pre-hydration window so we don't flash "locked"
+              on every render. Framing as shared-flavor reference (not
+              consumption pairing) keeps the copy App Store 1.4.3-safe. */}
           {(isAdvanced || treatAsPro) && (
             <View style={styles.pairings}>
-              <Text style={styles.pairingsTitle}>Pair it with</Text>
+              <Text style={styles.pairingsTitle}>Flavor companions</Text>
               {getDrinkPairings(top.cigar).map((p, i) => (
                 <View key={i} style={styles.pairingRow}>
                   <Text style={styles.pairingDrink}>{p.drink}</Text>
