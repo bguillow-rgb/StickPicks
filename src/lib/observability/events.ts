@@ -53,6 +53,17 @@ export const EVENTS = {
   PRO_PURCHASE_FAILED: 'pro_purchase_failed',
   PRO_RESTORE_STARTED: 'pro_restore_started',
   PRO_RESTORE_COMPLETED: 'pro_restore_completed',
+
+  // Gamification — streaks v1
+  // STREAK_TICKED fires on every tick_streak RPC call that mutated state
+  // (consecutive-day increment OR gap-reset). same-day no-ops don't fire.
+  // STREAK_TOASTED fires only when we actually rendered a toast (true
+  // increment + priority-winning + not a reset). Gap between the two is
+  // the abandonment signal for roadmap tuning.
+  STREAK_TICKED: 'streak_ticked',
+  STREAK_TOASTED: 'streak_toasted',
+  STREAK_VIEWED: 'streak_viewed',
+  ENGAGEMENT_ACTIVE: 'engagement_active',
 } as const;
 
 export type EventName = typeof EVENTS[keyof typeof EVENTS];

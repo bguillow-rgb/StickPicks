@@ -6,6 +6,8 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { Button } from '@/src/components/ui/Button';
 import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
+import { track } from '@/src/lib/observability/analytics';
+import { EVENTS } from '@/src/lib/observability/events';
 
 import { BASIC_QUESTIONS, ALL_QUESTIONS } from '@/src/features/quiz/questions';
 import type { QuizAnswers } from '@/src/types/cigar';
@@ -40,12 +42,19 @@ export default function QuizScreen() {
     };
   }, []);
 
+  // QUIZ_STARTED — fire once per mount. Previously declared but never
+  // emitted; now populated as part of streak-roadmap telemetry.
+  useEffect(() => {
+    track(EVENTS.QUIZ_STARTED, { advanced: isAdvanced, question_count: questions.length });
+  }, [isAdvanced, questions.length]);
+
   const q = questions[step];
   const isLast = step === questions.length - 1;
   const progress = questions.length > 1 ? step / (questions.length - 1) : 1;
 
   function navigateToResults(ans: QuizAnswers) {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    track(EVENTS.QUIZ_COMPLETED, { advanced: isAdvanced, question_count: questions.length });
     setComputing(true);
     setTimeout(() => {
       setComputing(false);

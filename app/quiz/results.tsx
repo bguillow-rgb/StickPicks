@@ -16,6 +16,9 @@ import { useCommunityRatings } from '@/src/hooks/useCommunityRating';
 import { useHumidorStatuses } from '@/src/hooks/useHumidorStatuses';
 import { StatusChips } from '@/src/components/ui/StatusChip';
 import { useProStore } from '@/src/stores/useProStore';
+import { track } from '@/src/lib/observability/analytics';
+import { EVENTS } from '@/src/lib/observability/events';
+import { recordActivity } from '@/src/features/streaks/useStreakToast';
 import type { Cigar, QuizAnswers } from '@/src/types/cigar';
 
 interface ScoredCigar {
@@ -60,6 +63,13 @@ export default function QuizResultsScreen() {
         setLoading(false);
       }
     })();
+    // QUIZ_RESULT_VIEWED — populated now that results actually render;
+    // streak tick fires alongside so the quiz streak advances once per
+    // day when the user completes + views a quiz. Fire-and-forget; the
+    // scoring UX above is independent.
+    track(EVENTS.QUIZ_RESULT_VIEWED, { advanced: isAdvanced });
+    void recordActivity('quiz');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = includeCubans

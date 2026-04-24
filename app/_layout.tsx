@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, LogBox } from 'react-native';
+import { View, Text, StyleSheet, LogBox, AppState, type AppStateStatus } from 'react-native';
 
 // RevenueCat can't fetch offerings until the products are live in App Store
 // Connect, which only happens for release builds. In dev, the expected failure
@@ -29,10 +29,14 @@ import Animated, {
 import 'react-native-reanimated';
 import { COLORS, FONTS } from '@/src/constants/theme';
 import { StyledAlertHost } from '@/src/components/ui/StyledAlert';
+import { ToastHost } from '@/src/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { initRevenueCat, identifyUser, getCustomerInfo, isProActive } from '@/src/lib/revenuecat';
 import { loadBrandLogos } from '@/src/lib/brandLogos';
+import { pullAllStreaks } from '@/src/features/streaks/streaksService';
+import { recordActivity } from '@/src/features/streaks/useStreakToast';
+import { useStreakStore } from '@/src/stores/useStreakStore';
 import { useProStore } from '@/src/stores/useProStore';
 import { useAgeGateStore, useHydrateAgeGate } from '@/src/stores/useAgeGateStore';
 import {
@@ -308,10 +312,28 @@ export default function RootLayout() {
         syncRevenueCat(sess.user.id);
         identifyAnalytics(sess.user.id, { is_anonymous: !!sess.user.is_anonymous });
         setErrorUser({ id: sess.user.id, email: sess.user.email ?? null });
+        // Streak cache hydration — pull on sign-in (or app boot with an
+        // existing session) so the profile surface renders real numbers
+        // immediately instead of AsyncStorage leftovers. Non-blocking;
+        // if the network's down the cached values stay visible.
+        if (!sess.user.is_anonymous) {
+          pullAllStreaks(sess.user.id)
+            .then((rows) => useStreakStore.getState().hydrate(rows))
+            .catch(() => {});
+          // Fire-and-forget engagement tick — the act of opening the
+          // app counts, and this handles the cold-boot case where the
+          // AppState listener below doesn't see a transition (already
+          // 'active' at mount).
+          void recordActivity('engagement');
+        }
       } else {
         resetAnalytics();
         setErrorUser(null);
         identifiedUserId = null;
+        // Clear streak cache so the next signed-in user (or a guest
+        // flow that ends at the signed-out state) doesn't see previous
+        // user's numbers bleed through.
+        useStreakStore.getState().reset();
       }
     };
 
@@ -325,6 +347,26 @@ export default function RootLayout() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // AppState → foreground: tick engagement streak with a 60s debounce so
+  // rapid background/foreground toggles (switching to Messages and back)
+  // don't spam the RPC. Gated on a signed-in, non-anonymous user so we
+  // never ping the server for guests.
+  useEffect(() => {
+    let lastFiredAt = 0;
+    const DEBOUNCE_MS = 60 * 1000;
+    const handler = (status: AppStateStatus) => {
+      if (status !== 'active') return;
+      const user = session?.user;
+      if (!user?.id || user.is_anonymous) return;
+      const now = Date.now();
+      if (now - lastFiredAt < DEBOUNCE_MS) return;
+      lastFiredAt = now;
+      void recordActivity('engagement');
+    };
+    const sub = AppState.addEventListener('change', handler);
+    return () => sub.remove();
+  }, [session]);
 
   useEffect(() => {
     if (error) throw error;
@@ -380,6 +422,11 @@ export default function RootLayout() {
           Sits above the stack so dialogs float over every route, including
           modal-presented ones like paywall and legal screens. */}
       <StyledAlertHost />
+      {/* Toast host for gamification feedback (streaks, future
+          micro-confirmations). Non-modal, non-blocking, lives above all
+          routes. See src/components/ui/Toast.tsx for the single-toast
+          replacement behavior. */}
+      <ToastHost />
     </ThemeProvider>
   );
 }

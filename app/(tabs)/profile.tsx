@@ -13,6 +13,7 @@ import { Button } from '@/src/components/ui/Button';
 import { Card } from '@/src/components/ui/Card';
 import { COLORS, SPACING, FONTS } from '@/src/constants/theme';
 import { useProStore } from '@/src/stores/useProStore';
+import { StreakCard } from '@/src/components/streaks/StreakCard';
 import type { User } from '@supabase/supabase-js';
 
 export default function ProfileScreen() {
@@ -240,6 +241,11 @@ export default function ProfileScreen() {
           </View>
         </Card>
       </Pressable>
+
+      {/* Gamification v1 — three daily streaks. Guests see a sign-in
+          nudge inside the card instead of empty rows. Non-blocking:
+          nothing else on this screen depends on streak state. */}
+      <StreakCard userId={user?.id ?? null} />
 
       <View style={styles.actions}>
         <Button

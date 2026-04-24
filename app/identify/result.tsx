@@ -19,6 +19,7 @@ import { identifyCigar, type CigarCandidate } from '@/src/features/identify/iden
 import { track, usePostHogFeatureFlag } from '@/src/lib/observability/analytics';
 import { captureException } from '@/src/lib/observability/errors';
 import { EVENTS } from '@/src/lib/observability/events';
+import { recordActivity } from '@/src/features/streaks/useStreakToast';
 import { SuggestCigarSheet } from '@/src/components/identify/SuggestCigarSheet';
 import { CigarImage } from '@/src/components/cigar/CigarImage';
 import { Card } from '@/src/components/ui/Card';
@@ -386,6 +387,11 @@ export default function IdentifyResultScreen() {
   const handleConfirm = async () => {
     if (cigar) {
       track(EVENTS.SCAN_RESULT_CONFIRMED, { method: 'concierge', cigar_id: cigar.id });
+      // Streak tick — fire-and-forget. Scanning is the highest-value
+      // daily activity, so this tick (a) increments the scan streak and
+      // (b) implicitly ticks engagement via recordActivity's fallthrough.
+      // Never awaited; scan UX has already rewarded the user here.
+      void recordActivity('scan');
     }
     // Mark scan as confirmed
     if (scanId) {
