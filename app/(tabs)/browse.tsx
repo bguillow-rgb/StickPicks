@@ -123,11 +123,21 @@ export default function BrowseScreen() {
     setLoading(true);
     setHasSearched(true);
     try {
-      // Search brand as exact start-of-string match, name as contains
+      // B3 fix: searches previously only matched brand prefix + name contains,
+      // so vitola-level searches (e.g. "Hyde Park" for Macanudo Hyde Park)
+      // returned nothing or wrong rows. Now also matches on `line` and
+      // `vitola` as contains-substrings, so users can search by any of the
+      // four identifier columns. Purely additive: existing matches still
+      // match, new matches added on top.
       const { data } = await supabase
         .from('cigars')
         .select('*')
-        .or(`brand.ilike.${search}%,name.ilike.%${search}%`)
+        .or(
+          `brand.ilike.${search}%,` +
+          `name.ilike.%${search}%,` +
+          `line.ilike.%${search}%,` +
+          `vitola.ilike.%${search}%`
+        )
         .order('brand')
         .limit(100);
       setCigars((data as Cigar[]) ?? []);
