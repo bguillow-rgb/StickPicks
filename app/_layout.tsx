@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, LogBox, AppState, Image, type AppStateStatus } from 'react-native';
+import { View, Text, StyleSheet, LogBox, AppState, type AppStateStatus } from 'react-native';
 
 // RevenueCat can't fetch offerings until the products are live in App Store
 // Connect, which only happens for release builds. In dev, the expected failure
@@ -20,11 +20,13 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  withSequence,
+  withRepeat,
   runOnJS,
   Easing,
 } from 'react-native-reanimated';
 import 'react-native-reanimated';
-import { COLORS } from '@/src/constants/theme';
+import { COLORS, FONTS } from '@/src/constants/theme';
 import { StyledAlertHost } from '@/src/components/ui/StyledAlert';
 import { ToastHost } from '@/src/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
@@ -113,72 +115,87 @@ function AnimatedSplash({
   onReady?: () => void;
   onFinish: () => void;
 }) {
-  // The branded splash PNG is a 1284x1284 square (humidor lounge +
-  // wordmark). On portrait phones (~2:1) we render it with resizeMode
-  // "contain" so the full wordmark is visible — the image's dark-green
-  // background matches COLORS.bg, so the top/bottom letterbox fills
-  // seamlessly and reads as a single surface to the user.
-  //
-  // An earlier attempt used resizeMode "cover" to kill a perceived
-  // letterbox artifact; on most phone aspect ratios that cropped the
-  // left and right ~27% of the square, cutting "STICK PICKS" in half.
-  // Not worth the visual risk — "contain" with matching bg is the
-  // correct default for a square source on portrait devices.
-  //
-  // Ken-Burns pass (slow scale + slight vertical drift) still runs so
-  // the reveal feels cinematic rather than flat. Durations are tuned
-  // to the 1.6s hold: Ken-Burns runs 4s so we only ever see the first
-  // ~40% of motion before the fade — the image is always in motion
-  // when fade-out begins.
+  // Text-based SP-monogram splash — reliable across all device aspect
+  // ratios (no image scaling hazards). The earlier full-bleed photo
+  // splash cropped the wordmark on portrait phones; reverted to this
+  // pre-refresh version which uses an SP circle + wordmark text + two
+  // gold divider lines that subtly pulse while we hold.
+  const scale = useSharedValue(1);
   const opacity = useSharedValue(1);
-  const kenBurns = useSharedValue(0);
+  const textOpacity = useSharedValue(1);
+  const smokeOpacity = useSharedValue(0.4);
 
   useEffect(() => {
-    // 4s ease-in-out is longer than the 1.6s hold by design; the user
-    // only ever sees the first ~40% of the pan, which is the part with
-    // the most visible motion-per-second.
-    kenBurns.value = withTiming(1, {
-      duration: 4000,
-      easing: Easing.inOut(Easing.ease),
-    });
+    // Subtle scale-bounce gives the monogram a moment of life once React
+    // mounts, without a visible pop-in (opacity is already 1 on first
+    // paint since the native launch screen renders the same SP PNG).
+    scale.value = withSequence(
+      withTiming(1.05, { duration: 400, easing: Easing.out(Easing.quad) }),
+      withTiming(1, { duration: 300 }),
+    );
+
+    // Thin gold lines above/below pulse opacity for the duration of the
+    // hold — that's the "throb" that signals "we're loading".
+    smokeOpacity.value = withRepeat(
+      withSequence(
+        withTiming(0.6, { duration: 800 }),
+        withTiming(0.2, { duration: 800 }),
+      ),
+      3,
+      true,
+    );
+
     const timeout = setTimeout(() => {
-      opacity.value = withTiming(0, { duration: 450 }, () => {
+      opacity.value = withTiming(0, { duration: 400 });
+      textOpacity.value = withTiming(0, { duration: 300 }, () => {
         runOnJS(onFinish)();
       });
-    }, 1600);
+    }, 2800);
+
     return () => clearTimeout(timeout);
   }, []);
 
-  const containerStyle = useAnimatedStyle(() => ({
+  const iconStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
     opacity: opacity.value,
   }));
 
-  // Zoom 1.00 → 1.08, drift up 3% — both subtle so the wordmark never
-  // clips and the humidor doesn't crawl dramatically. Classic "premium
-  // photo framing" motion.
-  const imageStyle = useAnimatedStyle(() => {
-    const scale = 1 + kenBurns.value * 0.08;
-    const translateY = -kenBurns.value * 0.03 * 800; // ~24px drift on a phone
-    return {
-      transform: [{ scale }, { translateY }],
-    };
-  });
+  const smokeStyle = useAnimatedStyle(() => ({
+    opacity: smokeOpacity.value,
+  }));
+
+  const textStyle = useAnimatedStyle(() => ({
+    opacity: textOpacity.value,
+  }));
 
   return (
-    <Animated.View
-      style={[splashStyles.container, containerStyle]}
+    <View
+      style={splashStyles.container}
       // Fires once the splash view has been measured — a reliable signal
       // that the first frame is about to be painted. Used to hide the
       // native launch screen only AFTER this view is ready, eliminating
       // the gap where (tabs) could flash through.
       onLayout={() => onReady?.()}
     >
-      <Animated.Image
-        source={require('../assets/images/splash-icon.png')}
-        style={[splashStyles.fullImage, imageStyle]}
-        resizeMode="contain"
-      />
-    </Animated.View>
+      <Animated.View style={[splashStyles.topLine, smokeStyle]} />
+
+      {/* Text-only wordmark splash — matches the native launch screen
+          (assets/images/splash-icon.png, which renders an SP monogram)
+          at its steady-state so the hand-off from iOS's pre-splash into
+          this animated view is invisible. Keeping all elements at
+          opacity 1 on first paint is load-bearing for that. */}
+      <Animated.View style={[iconStyle, splashStyles.monogram]}>
+        <Text style={splashStyles.monogramText}>SP</Text>
+      </Animated.View>
+
+      <Animated.View style={textStyle}>
+        <Text style={splashStyles.brand}>STICK PICKS</Text>
+        <View style={splashStyles.divider} />
+        <Text style={splashStyles.tagline}>EST. 2025</Text>
+      </Animated.View>
+
+      <Animated.View style={[splashStyles.bottomLine, smokeStyle]} />
+    </View>
   );
 }
 
@@ -190,14 +207,63 @@ const splashStyles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 100,
   },
-  // Absolute-fill with `resizeMode=contain` so the 1284x1284 square
-  // scene fits entirely inside the viewport without cropping. The image
-  // is inside a transform-animated wrapper (Ken Burns) — `absoluteFill
-  // Object` gives that wrapper a stable origin so the zoom+pan always
-  // lands centred. Matching bg color makes top/bottom letterbox visually
-  // continuous with the image.
-  fullImage: {
-    ...StyleSheet.absoluteFillObject,
+  topLine: {
+    position: 'absolute',
+    top: '22%',
+    width: 60,
+    height: 2,
+    backgroundColor: COLORS.accent,
+    borderRadius: 1,
+  },
+  monogram: {
+    width: 160,
+    height: 160,
+    borderRadius: 80,
+    marginBottom: 24,
+    borderWidth: 2,
+    borderColor: COLORS.accent,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.card,
+  },
+  monogramText: {
+    fontFamily: FONTS.display,
+    fontSize: 72,
+    fontWeight: '800',
+    color: COLORS.accent,
+    letterSpacing: 4,
+  },
+  brand: {
+    fontFamily: FONTS.display,
+    fontSize: 34,
+    fontWeight: '800',
+    color: COLORS.accent,
+    textAlign: 'center',
+    letterSpacing: 6,
+  },
+  divider: {
+    width: 40,
+    height: 2,
+    backgroundColor: COLORS.accent,
+    alignSelf: 'center',
+    marginVertical: 10,
+    borderRadius: 1,
+  },
+  tagline: {
+    fontFamily: 'Cormorant',
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.muted,
+    textAlign: 'center',
+    letterSpacing: 4,
+  },
+  bottomLine: {
+    position: 'absolute',
+    bottom: '22%',
+    width: 60,
+    height: 2,
+    backgroundColor: COLORS.accent,
+    borderRadius: 1,
   },
 });
 
