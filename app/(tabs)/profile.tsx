@@ -14,6 +14,7 @@ import { Card } from '@/src/components/ui/Card';
 import { COLORS, SPACING, FONTS } from '@/src/constants/theme';
 import { useProStore } from '@/src/stores/useProStore';
 import { StreakCard } from '@/src/components/streaks/StreakCard';
+import { useIsAdmin } from '@/src/features/admin/useIsAdmin';
 import type { User } from '@supabase/supabase-js';
 
 export default function ProfileScreen() {
@@ -23,6 +24,7 @@ export default function ProfileScreen() {
   const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [stats, setStats] = useState({ humidor: 0, smoked: 0, scans: 0 });
+  const { isAdmin } = useIsAdmin();
 
   const fetchUser = useCallback(async () => {
     const { data } = await supabase.auth.getUser();
@@ -254,6 +256,25 @@ export default function ProfileScreen() {
           nothing else on this screen depends on streak state. */}
       <StreakCard userId={user?.id ?? null} />
 
+      {/* Admin entry — only rendered if useIsAdmin() resolves true.
+          RPC is loading-safe: hook returns isAdmin=false during the
+          initial check, so there's no flash of admin UI on first
+          render. */}
+      {isAdmin && (
+        <Pressable onPress={() => router.push('/admin')}>
+          <Card style={styles.adminTile}>
+            <Ionicons name="shield-checkmark-outline" size={22} color={COLORS.accent} />
+            <View style={styles.adminTextWrap}>
+              <Text style={styles.adminTitle}>Admin</Text>
+              <Text style={styles.adminSubtitle}>
+                Catalog, submissions, invites
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.muted} />
+          </Card>
+        </Pressable>
+      )}
+
       <View style={styles.actions}>
         <Button
           title="Sign Out"
@@ -353,6 +374,28 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     marginBottom: SPACING.md,
+  },
+  adminTile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.md,
+  },
+  adminTextWrap: {
+    flex: 1,
+  },
+  adminTitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  adminSubtitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 13,
+    color: COLORS.muted,
+    marginTop: 2,
   },
   sectionTitle: {
     fontFamily: 'Cormorant',
