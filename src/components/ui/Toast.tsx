@@ -28,7 +28,10 @@ interface ToastState {
   durationMs: number;
 }
 
-let listeners: ((s: ToastState) => void)[] = [];
+// Subscriber registry. Set (not array) so identity-keyed deletion is O(1)
+// and the same closure can never be subscribed twice even under Fast
+// Refresh / StrictMode double-invocation.
+const listeners = new Set<(s: ToastState) => void>();
 let nextId = 1;
 
 const DEFAULT_DURATION_MS = 2400;
@@ -64,9 +67,9 @@ export function ToastHost() {
       }
       setState(s);
     };
-    listeners.push(sub);
+    listeners.add(sub);
     return () => {
-      listeners = listeners.filter((l) => l !== sub);
+      listeners.delete(sub);
       if (dismissTimerRef.current !== null) clearTimeout(dismissTimerRef.current);
     };
   }, []);
