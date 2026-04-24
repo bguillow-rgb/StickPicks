@@ -369,25 +369,51 @@ export async function identifyCigar(
   }
 
   // Dedup on (brand, line) — Sonnet sometimes returns near-duplicates as
-  // alternatives. Keep the first, drop subsequent same-key entries.
+  // alternatives. Keep the first, drop subsequent same-key entries. The
+  // winner (captured by reference before dedup) is preserved even if it
+  // was a duplicate of an earlier entry — dedup only drops *later* copies.
+  // Finally, remap chosenCandidateIndex to its new position in the deduped
+  // list so UI consumers don't index out of bounds.
+  const winnerBeforeDedup =
+    chosenCandidateIndex >= 0 ? matched[chosenCandidateIndex] : null;
+
   const seen = new Set<string>();
   const dedupedCandidates: CigarCandidate[] = [];
-  for (const c of matched) {
+  const indexRemap = new Map<number, number>();
+  for (let i = 0; i < matched.length; i++) {
+    const c = matched[i];
     const key = `${foldAccents(c.rawBrand ?? '').toLowerCase()}|${foldAccents(
       c.rawLine ?? '',
     ).toLowerCase()}`;
     if (seen.has(key)) continue;
     seen.add(key);
+    indexRemap.set(i, dedupedCandidates.length);
     dedupedCandidates.push(c);
   }
 
-  // The "winner" is whichever candidate at chosenCandidateIndex actually
-  // matched the DB. If nothing did, present candidate 0 as a best-guess
-  // with `cigar: null` — the UI's Partial/Unknown states handle that.
+  // Defensive: if the winner was dropped by dedup (shouldn't happen because
+  // the winner is always the first match for its (brand,line) key, so it
+  // lands first in the dedup pass too — but we guard anyway), reinstate it
+  // by rehoming the original chosenCandidateIndex.
+  if (winnerBeforeDedup && !indexRemap.has(chosenCandidateIndex)) {
+    // Winner was somehow absent from deduped — put it back at the front.
+    indexRemap.set(chosenCandidateIndex, 0);
+    dedupedCandidates.unshift(winnerBeforeDedup);
+  }
+
+  // Remap chosenCandidateIndex from matched[] space → dedupedCandidates[] space.
+  if (chosenCandidateIndex >= 0) {
+    const remapped = indexRemap.get(chosenCandidateIndex);
+    chosenCandidateIndex = remapped === undefined ? -1 : remapped;
+  }
+
+  // The "winner" is whichever candidate at chosenCandidateIndex (now in
+  // deduped space) actually matched the DB. If nothing did, present
+  // candidate 0 as a best-guess — the UI's Partial/Unknown states handle it.
   const winner =
     chosenCandidateIndex >= 0
-      ? matched[chosenCandidateIndex]
-      : matched[0] ?? null;
+      ? dedupedCandidates[chosenCandidateIndex]
+      : dedupedCandidates[0] ?? null;
 
   const matchedCigar = winner?.cigar ?? null;
   const confidence = winner?.confidence ?? 0;

@@ -17,6 +17,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 import { supabase } from '@/lib/supabase';
 import { identifyCigar, type CigarCandidate } from '@/src/features/identify/identifyService';
 import { track, usePostHogFeatureFlag } from '@/src/lib/observability/analytics';
+import { captureException } from '@/src/lib/observability/errors';
 import { EVENTS } from '@/src/lib/observability/events';
 import { SuggestCigarSheet } from '@/src/components/identify/SuggestCigarSheet';
 import { CigarImage } from '@/src/components/cigar/CigarImage';
@@ -94,17 +95,46 @@ function deriveConfidenceState(
   return 'unknown';
 }
 
-// Map raw error to a user-facing copy + decide whether to ping Sentry. Any
-// unrecognized error gets generic copy AND a Sentry breadcrumb so we can
-// investigate. Never leaks raw backend strings to a premium surface.
+// Known-safe error messages — each one is copy we've either authored
+// ourselves (in identifyService) or a recognizable pattern whose exact
+// wording is already user-safe. Anything outside this set is treated as
+// untrusted and mapped to generic copy + a Sentry log.
+const FRIENDLY_ERROR_PATTERNS: RegExp[] = [
+  /^scan(ning)? limit\b/i,
+  /^you've hit the scan limit/i,
+  /^please sign in again/i,
+];
+
+// Map raw error to user-facing copy. Any unrecognized error shape gets
+// generic copy AND a Sentry capture with the raw details so we can
+// investigate without ever leaking transport strings to the UI. Built
+// from QA feedback that `String(err)` would serialize raw Supabase
+// network errors including request internals on the error screen.
 function mapIdentifyError(raw: unknown): string {
-  const msg = (raw as any)?.message ?? String(raw ?? '');
-  if (typeof msg === 'string') {
-    if (msg.includes('credit balance') || msg.includes('billing')) {
-      return 'Cigar scanning is temporarily unavailable. Please try again later.';
-    }
-    if (msg.includes('scan limit')) return msg; // already friendly
-    if (msg.includes('sign in')) return msg; // already friendly
+  const rawMessage =
+    typeof (raw as any)?.message === 'string'
+      ? (raw as any).message
+      : typeof raw === 'string'
+      ? raw
+      : '';
+
+  // Billing / credit surfaces — existing copy is already user-safe, keep.
+  if (rawMessage.includes('credit balance') || rawMessage.includes('billing')) {
+    return 'Cigar scanning is temporarily unavailable. Please try again later.';
+  }
+
+  // Explicit allowlist — messages we authored in identifyService that
+  // are already polished for the user.
+  for (const pattern of FRIENDLY_ERROR_PATTERNS) {
+    if (pattern.test(rawMessage)) return rawMessage;
+  }
+
+  // Everything else → generic copy + Sentry breadcrumb with the real
+  // error so on-call can diagnose without us leaking it to the screen.
+  try {
+    captureException(raw, { source: 'identify-result', raw_message: rawMessage });
+  } catch {
+    // Sentry failing is not a reason to break the UI.
   }
   return "We couldn't read that one. Try again in better light, or tap Enhance and retry.";
 }
@@ -150,6 +180,14 @@ export default function IdentifyResultScreen() {
   const [error, setError] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<CigarCandidate[]>([]);
   const [retrying, setRetrying] = useState(false);
+  // Retry ceiling — two attempts with Enhance, then we stop offering the
+  // button and nudge the user to try a different path. Prevents the
+  // frustration loop of "Enhance → fail → Enhance → fail → Enhance…"
+  // where the underlying capture is genuinely too poor and re-encoding
+  // can't save it.
+  const MAX_ENHANCE_ATTEMPTS = 2;
+  const [enhanceAttempts, setEnhanceAttempts] = useState(0);
+  const enhanceRetriesExhausted = enhanceAttempts >= MAX_ENHANCE_ATTEMPTS;
 
   // Alternatives = candidates past the winner that actually matched the DB.
   // Deduped on (brand, line) in the service already; just slice here.
@@ -168,10 +206,11 @@ export default function IdentifyResultScreen() {
   // originals with the enhance hint if image-manipulation fails — either
   // way the user gets a meaningfully different attempt, not a fake spinner.
   const handleEnhanceRetry = useCallback(async () => {
-    if (retrying) return;
+    if (retrying || enhanceRetriesExhausted) return;
     setRetrying(true);
     setError(null);
-    track(EVENTS.SCAN_RETRY_WITH_ENHANCE, {});
+    setEnhanceAttempts((n) => n + 1);
+    track(EVENTS.SCAN_RETRY_WITH_ENHANCE, { attempt: enhanceAttempts + 1 });
     try {
       let processedUris = allUris;
       try {
@@ -207,7 +246,7 @@ export default function IdentifyResultScreen() {
     } finally {
       setRetrying(false);
     }
-  }, [allUris, retrying]);
+  }, [allUris, retrying, enhanceRetriesExhausted, enhanceAttempts]);
 
   const humidorMap = useHumidorStatuses(cigar ? [cigar.id] : []);
 
@@ -672,16 +711,28 @@ export default function IdentifyResultScreen() {
             <Text style={styles.errorTitle}>Couldn't identify this cigar</Text>
             <Text style={styles.errorSubtitle}>{error ?? 'No match found in our database'}</Text>
             <Text style={styles.tips}>
-              Tip: hold the band centered with good light. Glare and motion blur make it tough.
+              {enhanceRetriesExhausted
+                ? "We've tried twice. A new photo in better light will give us much better odds."
+                : 'Tip: hold the band centered with good light. Glare and motion blur make it tough.'}
             </Text>
+            {/* Only show Enhance-and-retry until the ceiling is hit. After
+                two failed enhances the UI nudges the user toward a fresh
+                capture or manual find rather than looping indefinitely. */}
+            {!enhanceRetriesExhausted && (
+              <Button
+                title={retrying ? 'Enhancing…' : 'Enhance and retry'}
+                onPress={handleEnhanceRetry}
+                disabled={retrying}
+                style={{ marginTop: SPACING.md }}
+              />
+            )}
             <Button
-              title={retrying ? 'Enhancing…' : 'Enhance and retry'}
-              onPress={handleEnhanceRetry}
-              disabled={retrying}
-              style={{ marginTop: SPACING.md }}
+              title="Retake photo"
+              variant={enhanceRetriesExhausted ? undefined : 'secondary'}
+              onPress={() => router.replace('/identify/camera')}
+              style={{ marginTop: enhanceRetriesExhausted ? SPACING.md : SPACING.sm }}
             />
             <Button title="Find It Manually" variant="secondary" onPress={handleCorrect} style={{ marginTop: SPACING.sm }} />
-            <Button title="Try Again" variant="ghost" onPress={() => router.replace('/identify/camera')} style={{ marginTop: SPACING.xs }} />
             <Button title="Suggest a Cigar" variant="ghost" onPress={openSuggest} style={{ marginTop: SPACING.xs }} />
             <Button title="Go Home" variant="ghost" onPress={() => router.replace('/(tabs)')} style={{ marginTop: SPACING.xs }} />
           </ScrollView>

@@ -395,15 +395,36 @@ export default function CameraScreen() {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: false,
-        // Keep the user's original fidelity — any compression we do happens
-        // after our own guide-crop, not before.
+        // Keep the user's original fidelity — we'll downscale below so we
+        // don't ship a 12 MP photo through the LLM. Pre-ImagePicker
+        // compression loses detail we can't get back; we want the raw.
         quality: 1,
         selectionLimit: 1,
       });
       if (result.canceled || !result.assets?.[0]?.uri) return;
+
+      // Gallery-imported photos aren't framed against our on-screen guide,
+      // so we can't crop them the way we crop burst captures. Instead,
+      // downscale to a sane maximum (1200px on the longest side) so the
+      // token cost of a gallery scan is roughly comparable to a camera
+      // scan. For a 4000×3000 iPhone photo that's a ~6× payload reduction
+      // while still preserving enough detail for the model to read a band.
+      let finalUri = result.assets[0].uri;
+      try {
+        const resized = await ImageManipulator.manipulateAsync(
+          finalUri,
+          [{ resize: { width: 1200 } }],
+          { compress: 0.92, format: ImageManipulator.SaveFormat.JPEG, base64: false },
+        );
+        finalUri = resized.uri;
+      } catch {
+        // Resize failure is non-fatal — fall through with the original.
+        // Costs more tokens but still gives the user a scan attempt.
+      }
+
       router.replace({
         pathname: '/identify/result',
-        params: { imageUris: JSON.stringify([result.assets[0].uri]) },
+        params: { imageUris: JSON.stringify([finalUri]) },
       });
     } catch (e: any) {
       Alert.alert('Picker error', e?.message ?? 'Could not open the photo library.');
