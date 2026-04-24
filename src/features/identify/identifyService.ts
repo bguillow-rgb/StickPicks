@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { getDeviceId } from '@/lib/deviceId';
 import { track } from '@/src/lib/observability/analytics';
 import { EVENTS } from '@/src/lib/observability/events';
+import { useProStore } from '@/src/stores/useProStore';
 import type { Cigar } from '@/src/types/cigar';
 
 // ---- Response contract ----
@@ -286,6 +287,19 @@ export async function identifyCigar(
       throw new Error('Please sign in again and try scanning.');
     }
     if (status === 429) {
+      // Two server 429 paths share a status code:
+      //  - quota exceeded (free tier only) -> "hit the free-scan limit"
+      //  - hourly/daily rate limit (applies to everyone) -> "too many scans"
+      // Previously we hardcoded the free-tier "upgrade to Pro" copy for
+      // every 429, which meant Pro/comped users saw an "Upgrade to Pro"
+      // nudge when they were rate-limited. If the user is already Pro,
+      // never suggest upgrading — give them the rate-limit copy instead.
+      const isPro = useProStore.getState().isPro;
+      if (isPro) {
+        throw new Error(
+          'Too many scans in a short time — please wait a minute and try again.',
+        );
+      }
       throw new Error('You\'ve hit the scan limit. Upgrade to Pro for unlimited scans.');
     }
     throw new Error('Cigar scanning is temporarily unavailable. Please try again later.');
