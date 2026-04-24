@@ -103,6 +103,10 @@ function deriveConfidenceState(
 const FRIENDLY_ERROR_PATTERNS: RegExp[] = [
   /^scan(ning)? limit\b/i,
   /^you've hit the scan limit/i,
+  // Pro-user 429 branch surfaced from identifyService after the B5 fix.
+  // Listed here so the rate-limit copy passes through the friendly
+  // filter and doesn't get rewritten to a generic server-error message.
+  /^too many scans in a short time/i,
   /^please sign in again/i,
 ];
 

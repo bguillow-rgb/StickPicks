@@ -246,15 +246,29 @@ export default function BrowseScreen() {
         >
           <Text style={styles.sectionLabel}>POPULAR BRANDS</Text>
           <View style={styles.brandGrid}>
-            {POPULAR_BRANDS.map((brand) => (
-              <Pressable
-                key={brand}
-                onPress={() => handleBrandTap(brand)}
-                style={({ pressed }) => [styles.brandChip, pressed && styles.brandChipPressed]}
-              >
-                <Text style={styles.brandChipText}>{brand}</Text>
-              </Pressable>
-            ))}
+            {POPULAR_BRANDS.map((brand) => {
+              const isActive = activeBrand === brand;
+              return (
+                <Pressable
+                  key={brand}
+                  onPress={() => handleBrandTap(brand)}
+                  style={({ pressed }) => [
+                    styles.brandChip,
+                    isActive && styles.brandChipActive,
+                    pressed && !isActive && styles.brandChipPressed,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.brandChipText,
+                      isActive && styles.brandChipTextActive,
+                    ]}
+                  >
+                    {brand}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
 
           <Text style={[styles.sectionLabel, { marginTop: SPACING.xl }]}>BROWSE BY STRENGTH</Text>
@@ -378,6 +392,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
   },
   brandChipPressed: {
+    backgroundColor: COLORS.card2 ?? COLORS.card,
+    borderColor: COLORS.accent,
+  },
+  // B5-adjacent UX Eyes P1: persistent active state so the user knows
+  // which popular-brand filter is currently applied. Differentiated
+  // from `brandChipPressed` (momentary, during touch) by being a gold
+  // fill rather than a bordered preview.
+  brandChipActive: {
     backgroundColor: COLORS.accent,
     borderColor: COLORS.accent,
   },
@@ -386,6 +408,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.text,
+  },
+  brandChipTextActive: {
+    color: COLORS.bg,
   },
   browseOptions: {
     flexDirection: 'row',
