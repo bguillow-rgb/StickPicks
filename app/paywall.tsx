@@ -18,28 +18,28 @@ type Plan = 'monthly' | 'yearly';
 const FEATURES = [
   {
     icon: 'wine-outline' as const,
-    title: 'Expert Drink Pairings',
+    title: 'Expert Flavor Companions',
     desc: 'Three curated pours per cigar — including one deep cut no other app surfaces.',
   },
   {
     icon: 'sparkles-outline' as const,
-    title: 'Unlimited AI Scans',
-    desc: 'Snap any band, know the cigar. Free gets 5; Pro is unlimited.',
+    title: 'Unlimited AI Identification',
+    desc: 'Snap any band, find it in the catalog. Free gets 5; Pro is unlimited.',
   },
   {
     icon: 'flask-outline' as const,
-    title: '9-Question Precision Quiz',
-    desc: 'Top 10 matches, scored to your palate. Free is 3 questions, 3 picks.',
+    title: '9-Question Detailed Match',
+    desc: 'Top 10 catalog matches, scored to your profile. Free is 3 questions, 3 results.',
   },
   {
     icon: 'archive-outline' as const,
     title: 'Full Humidor',
-    desc: 'Wishlist, owned, smoked — with pricing and resting days.',
+    desc: 'Wishlist, owned, and logged — with pricing and resting days.',
   },
   {
     icon: 'star-outline' as const,
     title: 'Tasting Reviews',
-    desc: 'Rate draw, burn, and flavor. Build a personal journal.',
+    desc: 'Rate flavor profiles and build a personal tasting log.',
   },
   {
     icon: 'trending-up-outline' as const,
@@ -164,14 +164,14 @@ export default function PaywallScreen() {
 
       {/* Header */}
       <Text style={styles.header}>Stick Picks Pro</Text>
-      <Text style={styles.subheader}>Your personal cigar sommelier</Text>
+      <Text style={styles.subheader}>Your personal cigar reference</Text>
 
       {/* Pitch — one sentence, named differentiators only. Users scan paywalls
           rather than read them; we frontload the two claims no competitor can
           make and let the bullets do the rest. */}
       <View style={styles.pitchCard}>
         <Text style={styles.pitchHeadline}>
-          The only cigar app with AI band ID and expert drink pairings.
+          The only cigar reference with AI band identification and expert flavor companions.
         </Text>
       </View>
 

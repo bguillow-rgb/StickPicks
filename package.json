@@ -7,6 +7,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "typecheck": "tsc --noEmit",
+    "check:functions": "deno check supabase/functions/*/index.ts",
     "postinstall": "bash scripts/patch-vision-camera-text-recognition.sh",
     "eas-build-post-install": "bash scripts/patch-vision-camera-text-recognition.sh"
   },

@@ -206,9 +206,9 @@ export default function CameraScreen() {
     return (
       <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
         <Ionicons name="lock-closed-outline" size={48} color={COLORS.muted} style={{ marginBottom: SPACING.md }} />
-        <Text style={styles.permTitle}>You've used your {scans.limit} free scans</Text>
+        <Text style={styles.permTitle}>You've used your {scans.limit} free identifications</Text>
         <Text style={styles.permText}>
-          Upgrade to Pro for unlimited identifications, wishlists, and smoking history.
+          Upgrade to Pro for unlimited band identification, wishlists, and tasting log.
         </Text>
         <Button title="Go Pro" onPress={() => router.replace('/paywall')} style={{ marginTop: SPACING.md }} />
         <Button title="Go Back" variant="ghost" onPress={() => router.back()} style={{ marginTop: SPACING.sm }} />
@@ -220,9 +220,9 @@ export default function CameraScreen() {
     return (
       <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
         <Ionicons name="person-add-outline" size={48} color={COLORS.accent} style={{ marginBottom: SPACING.md }} />
-        <Text style={styles.permTitle}>Sign in for 5 more scans</Text>
+        <Text style={styles.permTitle}>Sign in for 5 more identifications</Text>
         <Text style={styles.permText}>
-          Guests get {scans.limit} free scans. Sign in to unlock 5 more — your scans so far will stick with you.
+          Guests get {scans.limit} free identifications. Sign in to unlock 5 more — your history so far will stick with you.
         </Text>
         <Button title="Sign In" onPress={() => router.replace('/auth/login')} style={{ marginTop: SPACING.md }} />
         <Button title="Go Back" variant="ghost" onPress={() => router.back()} style={{ marginTop: SPACING.sm }} />

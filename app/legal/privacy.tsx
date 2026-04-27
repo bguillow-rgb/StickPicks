@@ -26,7 +26,7 @@ export default function PrivacyScreen() {
         <Text style={styles.effective}>Effective Date: April 14, 2026</Text>
 
         <Text style={styles.body}>
-          Stick Picks ("we", "our", or "the app") is a cigar recommendation and identification app published by the Stick Picks team. This policy explains how we collect, use, and protect your information.
+          Stick Picks ("we", "our", or "the app") is a cigar catalog and identification reference app published by the Stick Picks team. This policy explains how we collect, use, and protect your information.
         </Text>
 
         <Text style={styles.h2}>1. Information We Collect</Text>
@@ -44,7 +44,7 @@ export default function PrivacyScreen() {
         </Text>
 
         <Text style={styles.h2}>2. How We Use Your Information</Text>
-        <Text style={styles.bullet}>•  To provide cigar identification, recommendations, and personalized results</Text>
+        <Text style={styles.bullet}>•  To provide cigar identification, catalog matching, and personalized reference results</Text>
         <Text style={styles.bullet}>•  To sync your humidor, journal, and scan history across devices</Text>
         <Text style={styles.bullet}>•  To improve our cigar identification accuracy using anonymized scan data</Text>
         <Text style={styles.bullet}>•  To manage your subscription and account</Text>

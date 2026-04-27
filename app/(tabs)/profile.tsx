@@ -231,7 +231,7 @@ export default function ProfileScreen() {
             </View>
             <View style={styles.stat}>
               <Text style={styles.statNumber}>{stats.smoked}</Text>
-              <Text style={styles.statLabel}>Smoked</Text>
+              <Text style={styles.statLabel}>Logged</Text>
             </View>
             <View style={styles.stat}>
               <Text style={styles.statNumber}>{stats.scans}</Text>

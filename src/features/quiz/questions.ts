@@ -33,7 +33,7 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
   {
     key: 'flavors',
     title: 'Pick flavors you enjoy',
-    subtitle: 'Select up to 3 — this drives your match',
+    subtitle: 'Select up to 3 — this drives your catalog match',
     type: 'multi',
     max: 3,
     tier: 'basic',
@@ -55,7 +55,7 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
   {
     key: 'price',
     title: "What's your budget?",
-    subtitle: 'From everyday smokes to special occasions',
+    subtitle: 'From everyday cigars to special occasions',
     type: 'scale',
     tier: 'basic',
     options: [
@@ -74,7 +74,7 @@ export const ADVANCED_QUESTIONS: QuizQuestion[] = [
   {
     key: 'body',
     title: 'What body do you prefer?',
-    subtitle: 'The weight and richness of the smoke',
+    subtitle: 'The weight and richness in the catalog profile',
     type: 'scale',
     tier: 'advanced',
     options: [
@@ -125,8 +125,8 @@ export const ADVANCED_QUESTIONS: QuizQuestion[] = [
   },
   {
     key: 'time',
-    title: 'When are you smoking?',
-    subtitle: 'Time of day changes what works best',
+    title: 'Typical occasion?',
+    subtitle: 'Different catalog profiles suit different times of day',
     type: 'choice',
     tier: 'advanced',
     options: [
@@ -139,7 +139,7 @@ export const ADVANCED_QUESTIONS: QuizQuestion[] = [
   {
     key: 'adventure',
     title: 'How adventurous are you?',
-    subtitle: 'Stick to classics or try something new?',
+    subtitle: 'Limit results to classics or open them up?',
     type: 'choice',
     tier: 'advanced',
     options: [

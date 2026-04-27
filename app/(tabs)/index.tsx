@@ -27,8 +27,8 @@ export default function HomeScreen() {
   function handleScan() {
     if (!treatAsPro && limitReached) {
       Alert.alert(
-        'Scan Limit Reached',
-        'Free accounts include 5 scans. Upgrade to Pro for unlimited scanning.',
+        'Identification Limit Reached',
+        'Free accounts include 5 identifications. Upgrade to Pro for unlimited band identification.',
         [
           { text: 'Not Now', style: 'cancel' },
           { text: 'Upgrade', onPress: () => router.push('/paywall') },
@@ -66,10 +66,11 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* Welcome copy — collection-building framing that doesn't use smoking
-          as a verb. Apple's App Review Guideline 1.4.3 flags copy that
-          encourages tobacco consumption; humidor-additions framing is safer. */}
-      <Text style={styles.welcome}>Let's add to your humidor today!</Text>
+      {/* Welcome copy — pure reference/catalog framing. Apple's App Review
+          Guideline 1.4.3 flags copy that encourages tobacco consumption,
+          including daily nudges ("today!") and acquisition language. This
+          frames the app as a catalog reference, not a buying assistant. */}
+      <Text style={styles.welcome}>Your cigar reference</Text>
 
       {/* CTA Cards */}
       <View style={styles.cards}>
@@ -90,11 +91,11 @@ export default function HomeScreen() {
             <View style={styles.ctaTextBlock}>
               <View style={styles.ctaLabelRow}>
                 <View style={styles.ctaDot} />
-                <Text style={styles.ctaLabel}>QUICK MATCH</Text>
+                <Text style={styles.ctaLabel}>CATALOG MATCH</Text>
               </View>
-              <Text style={styles.ctaTitle}>Find Your Stick</Text>
+              <Text style={styles.ctaTitle}>Profile Match</Text>
               <Text style={styles.ctaSubtitle}>
-                3 questions — we'll match your palate to the perfect cigar
+                3 questions to surface catalog entries with similar profiles
               </Text>
             </View>
           </LinearGradient>
@@ -107,8 +108,8 @@ export default function HomeScreen() {
         >
           <Ionicons name="flask-outline" size={20} color={COLORS.accent} />
           <View style={{ flex: 1 }}>
-            <Text style={styles.ctaSmallTitle}>Advanced Quiz{!treatAsPro ? ' · Pro' : ''}</Text>
-            <Text style={styles.ctaSmallSub}>9 questions for precision picks</Text>
+            <Text style={styles.ctaSmallTitle}>Detailed Match{!treatAsPro ? ' · Pro' : ''}</Text>
+            <Text style={styles.ctaSmallSub}>9 questions for precise catalog matching</Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={COLORS.muted} />
         </Pressable>
@@ -132,11 +133,11 @@ export default function HomeScreen() {
                 <View style={styles.ctaDot} />
                 <Text style={styles.ctaLabel}>IDENTIFICATION</Text>
               </View>
-              <Text style={styles.ctaTitle}>Scan a Stick</Text>
+              <Text style={styles.ctaTitle}>Identify by Band</Text>
               <Text style={styles.ctaSubtitle}>
                 {!treatAsPro && remaining !== null
-                  ? `${remaining} free scan${remaining !== 1 ? 's' : ''} remaining`
-                  : 'Point your camera at any cigar band — AI does the rest'}
+                  ? `${remaining} free identification${remaining !== 1 ? 's' : ''} remaining`
+                  : 'Point your camera at any cigar band to find it in the catalog'}
               </Text>
             </View>
           </LinearGradient>
@@ -147,7 +148,7 @@ export default function HomeScreen() {
           Showing "2,089 cigars" reads small next to competitors like Cigar
           Scanner (~13k) and plants a stale-catalog impression before the
           user has even tried the app. */}
-      <Text style={styles.footer}>Premium handmade cigars, curated weekly.</Text>
+      <Text style={styles.footer}>Reference catalog · updated weekly</Text>
     </View>
   );
 }

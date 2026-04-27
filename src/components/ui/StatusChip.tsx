@@ -6,7 +6,7 @@ type HumidorStatus = 'wishlist' | 'owned' | 'smoked';
 
 const STATUS_CONFIG: Record<HumidorStatus, { label: string; icon: string; bg: string; fg: string }> = {
   owned: { label: 'Owned', icon: 'checkmark-circle', bg: 'rgba(76,175,80,0.15)', fg: '#4CAF50' },
-  smoked: { label: 'Smoked', icon: 'flame', bg: 'rgba(199,162,75,0.15)', fg: '#C7A24B' },
+  smoked: { label: 'Logged', icon: 'checkmark-done-circle', bg: 'rgba(199,162,75,0.15)', fg: '#C7A24B' },
   wishlist: { label: 'Wishlist', icon: 'heart', bg: 'rgba(100,181,246,0.15)', fg: '#64B5F6' },
 };
 
