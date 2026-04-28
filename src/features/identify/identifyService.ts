@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { getDeviceId } from '@/lib/deviceId';
 import { track } from '@/src/lib/observability/analytics';
 import { EVENTS } from '@/src/lib/observability/events';
+import { useProStore } from '@/src/stores/useProStore';
 import type { Cigar } from '@/src/types/cigar';
 
 interface IdentifyResult {
@@ -90,12 +91,20 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
   );
 
   const deviceId = await getDeviceId();
+  // Pull Pro flag from the client store and forward to the edge function so
+  // Pro users bypass the device-scoped free-scan cap. NOTE: this is a
+  // client-claimed flag — a determined attacker can spoof isPro:true to
+  // bypass the quota. Server-side Pro entitlement (RevenueCat webhook →
+  // Supabase entitlements table) is tracked as a post-approval hardening
+  // (security finding #2). Acceptable for the resubmission cycle so paying
+  // users aren't blocked at scan #11.
+  const isPro = useProStore.getState().isPro;
 
   // Call our Supabase Edge Function — keeps Anthropic key server-side.
   // supabase.functions.invoke automatically attaches the user's JWT.
   const { data: apiResult, error: invokeError } = await supabase.functions.invoke(
     'identify-cigar',
-    { body: { images, device_id: deviceId } },
+    { body: { images, device_id: deviceId, isPro } },
   );
 
   if (invokeError) {
