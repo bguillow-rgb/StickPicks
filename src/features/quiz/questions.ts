@@ -32,8 +32,8 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
   },
   {
     key: 'flavors',
-    title: 'Pick flavors you enjoy',
-    subtitle: 'Select up to 3 — this drives your catalog match',
+    title: 'Select flavor preferences',
+    subtitle: 'Pick up to 3 — this drives your catalog match',
     type: 'multi',
     max: 3,
     tier: 'basic',

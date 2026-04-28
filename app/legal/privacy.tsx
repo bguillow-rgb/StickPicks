@@ -65,6 +65,16 @@ export default function PrivacyScreen() {
           Community ratings and reviews you submit are visible to other users. Your display name is shown alongside reviews; your email is never displayed.
         </Text>
 
+        <Text style={styles.h2}>4a. Analytics & Crash Reporting</Text>
+        <Text style={styles.body}>
+          To improve app stability and understand how the app is used, we use the following services:
+        </Text>
+        <Text style={styles.bullet}>•  <Text style={styles.bold}>Sentry</Text> (error and crash reporting; receives device metadata such as OS version and device model, an internal user ID, and stack traces when an error occurs)</Text>
+        <Text style={styles.bullet}>•  <Text style={styles.bold}>PostHog</Text> (product analytics; receives event names, basic event properties, and an internal user ID to measure feature usage)</Text>
+        <Text style={styles.body}>
+          Neither service receives the IDFA (Identifier for Advertisers) or other persistent device identifiers beyond what is necessary for the stated purpose. Both services are configured to keep collected data limited to the diagnostic and analytics use cases above.
+        </Text>
+
         <Text style={styles.h2}>5. Data Retention</Text>
         <Text style={styles.body}>
           Your data is retained as long as your account is active. You may delete your account at any time from the Profile screen, which permanently removes all associated data including humidor entries, journal entries, scan history, and reviews.

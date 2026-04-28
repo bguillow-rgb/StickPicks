@@ -72,8 +72,14 @@ Deno.serve(async (req) => {
           })
           .filter((p): p is string => !!p);
       }
-    } catch {
+    } catch (err) {
       // Non-fatal — proceed with row deletion even if path extraction fails.
+      // Log so silent failures are visible in Supabase function logs and the
+      // operator can spot drift if storage paths get orphaned for one user.
+      console.warn(
+        `delete-account: submission path extraction failed for ${userId}:`,
+        err,
+      );
     }
 
     // 2b. Delete user-owned rows. Best-effort — if any single delete fails we still
@@ -95,13 +101,25 @@ Deno.serve(async (req) => {
       tables.map((t) =>
         admin.from(t).delete().eq("user_id", userId).then(
           () => null,
-          () => null,
+          (err) => {
+            console.warn(
+              `delete-account: row delete failed for ${t}/${userId}:`,
+              err,
+            );
+            return null;
+          },
         )
       ),
     );
     await admin.from("profiles").delete().eq("id", userId).then(
       () => null,
-      () => null,
+      (err) => {
+        console.warn(
+          `delete-account: profiles row delete failed for ${userId}:`,
+          err,
+        );
+        return null;
+      },
     );
 
     // 3. Best-effort: clear user's storage objects.
@@ -120,15 +138,24 @@ Deno.serve(async (req) => {
             .from(bucket)
             .remove(files.map((f) => `${userId}/${f.name}`));
         }
-      } catch {
-        // Ignore — storage may not have any files for this user.
+      } catch (err) {
+        // Storage may simply have no files for this user; still log so we can
+        // tell the no-files case from a real auth/RLS failure post-mortem.
+        console.warn(
+          `delete-account: storage cleanup failed for bucket ${bucket}/${userId}:`,
+          err,
+        );
       }
     }
     if (submissionPaths.length > 0) {
       try {
         await admin.storage.from("cigar-images").remove(submissionPaths);
-      } catch {
-        // Ignore — submission rows are already gone; storage cleanup is best-effort.
+      } catch (err) {
+        // Submission rows are already gone; storage cleanup is best-effort.
+        console.warn(
+          `delete-account: submission storage cleanup failed for ${userId}:`,
+          err,
+        );
       }
     }
 

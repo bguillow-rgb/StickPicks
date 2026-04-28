@@ -314,7 +314,7 @@ export default function CameraScreen() {
             <Text style={styles.tip}>• Use even, bright light — avoid glare</Text>
             <Text style={styles.tip}>• Hold steady, keep text in focus</Text>
             <Text style={styles.tipHint}>
-              Tap Cigar Concierge when you're ready — AI handles the rest.
+              Tap Cigar Concierge to scan — AI handles the rest.
             </Text>
           </View>
 
