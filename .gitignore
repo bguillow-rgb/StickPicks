@@ -43,6 +43,15 @@ yarn-error.*
 # Local build artifacts (not needed in source control)
 build/
 
+# Astro content / type cache (web/.astro)
+.astro/
+
+# Local product strategy / research notes (kept out of source control)
+research/
+
+# Local Claude Code session data, settings, scheduled tasks, etc.
+.claude/
+
 # Large image datasets (sourced from external storage, not tracked)
 scripts/data/adventura-images/
 scripts/data/crux-images/
