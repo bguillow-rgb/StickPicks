@@ -294,7 +294,7 @@ export default function CigarDetailScreen() {
         }
       }
 
-      const label = status === 'smoked' ? 'Marked as smoked' : `Added to your ${status} list.`;
+      const label = status === 'smoked' ? 'Logged' : `Added to your ${status} list.`;
       Alert.alert('Saved', label);
       await fetchHumidorItems();
     } catch (e: any) {
@@ -592,20 +592,27 @@ export default function CigarDetailScreen() {
         </View>
       )}
 
-      {/* Current status badges */}
+      {/* Current status badges. Map the DB enum value to its user-facing
+          label so we don't bleed `smoked` (lowercase enum) into the UI when
+          the rest of the app says "Logged". */}
       {hasAnyStatus && (
         <View style={styles.statusBadges}>
-          {humidorItems.map((item) => (
-            <Badge
-              key={item.id}
-              label={item.status}
-              color={
-                item.status === 'owned' ? COLORS.success :
-                item.status === 'smoked' ? COLORS.accent :
-                COLORS.info
-              }
-            />
-          ))}
+          {humidorItems.map((item) => {
+            const label =
+              item.status === 'smoked' ? 'logged' :
+              item.status;
+            return (
+              <Badge
+                key={item.id}
+                label={label}
+                color={
+                  item.status === 'owned' ? COLORS.success :
+                  item.status === 'smoked' ? COLORS.accent :
+                  COLORS.info
+                }
+              />
+            );
+          })}
         </View>
       )}
 
@@ -619,7 +626,7 @@ export default function CigarDetailScreen() {
             <Button title="Mark as Owned" variant="secondary" onPress={() => handleAddToHumidor('owned')} />
           )}
           {!isSmoked && (
-            <Button title="Mark as Smoked" variant="secondary" onPress={() => handleAddToHumidor('smoked')} />
+            <Button title="Mark as Logged" variant="secondary" onPress={() => handleAddToHumidor('smoked')} />
           )}
           {hasAnyStatus && (
             <Button
@@ -658,7 +665,7 @@ export default function CigarDetailScreen() {
           {!isOwned && (
             <Button title="Mark as Owned" onPress={() => handleAddToHumidor('owned')} />
           )}
-          <Button title="Wishlist, Smoked & More · Pro" variant="secondary" onPress={() => router.push('/paywall')} />
+          <Button title="Wishlist, Logged & More · Pro" variant="secondary" onPress={() => router.push('/paywall')} />
         </View>
       ))}
 

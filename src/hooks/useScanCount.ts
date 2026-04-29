@@ -10,6 +10,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { useFocusEffect } from '@react-navigation/native';
 import { supabase } from '@/lib/supabase';
 import { getDeviceId } from '@/lib/deviceId';
+import { useProStore } from '@/src/stores/useProStore';
 
 export const TOTAL_SCAN_LIMIT = 10;
 export const GUEST_SCAN_LIMIT = 5;
@@ -29,6 +30,12 @@ export function useScanCount(): ScanCountState {
   const [count, setCount] = useState<number | null>(null);
   const [isAnonymous, setIsAnonymous] = useState<boolean | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  // Pro entitlement is the override — Pro users have unlimited identifications.
+  // Treat as Pro until hydration completes so we never show the gate during the
+  // AsyncStorage rehydrate window on cold start.
+  const isPro = useProStore((s) => s.isPro);
+  const hasHydrated = useProStore((s) => s.hasHydrated);
+  const treatAsPro = !hasHydrated || isPro;
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -62,14 +69,21 @@ export function useScanCount(): ScanCountState {
   }, [refresh]);
 
   const effectiveLimit = isAnonymous ? GUEST_SCAN_LIMIT : TOTAL_SCAN_LIMIT;
+  // Pro users bypass both gates entirely. Free users still hit the
+  // TOTAL_SCAN_LIMIT cap; anonymous guests hit the GUEST_SCAN_LIMIT cap first.
   const guestLimitReached =
+    !treatAsPro &&
     isAnonymous === true && count !== null && count >= GUEST_SCAN_LIMIT;
-  const limitReached = count !== null && count >= TOTAL_SCAN_LIMIT;
+  const limitReached =
+    !treatAsPro && count !== null && count >= TOTAL_SCAN_LIMIT;
 
   return {
     count,
     isAnonymous,
     limit: effectiveLimit,
+    // remaining is only meaningful for free users; Pro users never see it
+    // because the home screen already gates the "X free remaining" copy on
+    // !treatAsPro. Returning the raw math is fine — it just won't be rendered.
     remaining: count !== null ? Math.max(0, effectiveLimit - count) : null,
     limitReached,
     guestLimitReached,

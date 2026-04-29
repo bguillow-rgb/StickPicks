@@ -114,9 +114,7 @@ export default function QuizScreen() {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      {/* Hero — SP monogram placeholder. Zero tobacco imagery per Apple 1.4.3.
-          TODO: swap to a humidor-interior photo in a post-launch update by
-          bundling assets/images/quiz-hero.jpg and updating this require(). */}
+      {/* Hero — SP monogram only. Zero tobacco imagery per Apple 1.4.3. */}
       <Image
         source={require('../../assets/images/splash-icon.png')}
         style={styles.hero}
@@ -162,7 +160,7 @@ export default function QuizScreen() {
           <View style={styles.multiFooter}>
             <Text style={styles.hint}>Selected {answers.flavors.length} of {q.max ?? 3}</Text>
             <Button
-              title={isLast ? (computing ? 'Finding...' : 'See Matches') : 'Next'}
+              title={isLast ? (computing ? 'Searching...' : 'View Catalog Matches') : 'Next'}
               onPress={() => isLast ? navigateToResults(answers) : setStep((s) => s + 1)}
               disabled={!canContinueMulti || computing}
               loading={computing}

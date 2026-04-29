@@ -41,7 +41,7 @@ export default function JournalScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + SPACING.sm }]}>
-      <Text style={styles.title}>Smoking Journal</Text>
+      <Text style={styles.title}>Tasting Notes</Text>
 
       <FlatList
         ref={listRef}
@@ -56,8 +56,8 @@ export default function JournalScreen() {
         contentContainerStyle={{ paddingBottom: insets.bottom + 80, flexGrow: 1 }}
         ListEmptyComponent={
           <EmptyState
-            title="No smokes logged yet"
-            subtitle="Log cigars you've smoked here with a rating and review."
+            title="No tasting notes yet"
+            subtitle="Add tasting notes and ratings for cigars in your collection."
             actionLabel="Browse Cigars"
             onAction={() => router.push('/(tabs)/browse')}
           />

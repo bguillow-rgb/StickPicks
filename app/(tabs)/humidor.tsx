@@ -34,7 +34,7 @@ const FILTER_LABELS: Record<Filter, string> = {
   all: 'All',
   wishlist: 'Wishlist',
   owned: 'Owned',
-  smoked: 'Smoked',
+  smoked: 'Logged',
 };
 
 export default function HumidorScreen() {
@@ -405,7 +405,7 @@ export default function HumidorScreen() {
       {!treatAsPro && (
         <Pressable onPress={() => router.push('/paywall')} style={styles.upgradeBanner}>
           <Ionicons name="star-outline" size={16} color={COLORS.accent} />
-          <Text style={styles.upgradeBannerText}>Upgrade to Pro for Wishlist, Smoked, Reviews & more</Text>
+          <Text style={styles.upgradeBannerText}>Upgrade to Pro for Wishlist, Logged, Reviews & more</Text>
         </Pressable>
       )}
 
@@ -436,7 +436,7 @@ export default function HumidorScreen() {
           ListEmptyComponent={
             <EmptyState
               title="Your humidor is empty"
-              subtitle="Save cigars from recommendations or browse to build your collection."
+              subtitle="Save catalog entries to track in your collection."
               actionLabel="Browse Cigars"
               onAction={() => router.push('/(tabs)/browse')}
             />
@@ -691,11 +691,11 @@ export default function HumidorScreen() {
           contentContainerStyle={{ paddingBottom: insets.bottom + 80, flexGrow: 1 }}
           ListEmptyComponent={
             <EmptyState
-              title={filter === 'wishlist' ? 'Your wishlist is empty' : 'No smokes logged yet'}
+              title={filter === 'wishlist' ? 'Your wishlist is empty' : 'Nothing logged here yet'}
               subtitle={
                 filter === 'wishlist'
-                  ? 'Browse cigars and add ones you want to try.'
-                  : 'Mark cigars here after you\u2019ve smoked them.'
+                  ? 'Save catalog entries you want to add to your collection.'
+                  : 'Cigars you mark as logged will appear here with your notes.'
               }
               actionLabel="Browse Cigars"
               onAction={() => router.push('/(tabs)/browse')}
@@ -722,7 +722,7 @@ export default function HumidorScreen() {
                     })()}
                   </View>
                   <Badge
-                    label={item.status}
+                    label={item.status === 'smoked' ? 'logged' : item.status}
                     color={
                       item.status === 'smoked' ? COLORS.accent :
                       COLORS.info

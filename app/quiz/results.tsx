@@ -107,7 +107,7 @@ export default function QuizResultsScreen() {
         </Pressable>
       </View>
 
-      <Text style={styles.header}>Your Match</Text>
+      <Text style={styles.header}>Catalog Match</Text>
       {loading ? (
         <View style={{ alignItems: 'center', paddingTop: SPACING.lg }}>
           <Image
@@ -116,11 +116,11 @@ export default function QuizResultsScreen() {
             resizeMode="contain"
           />
           <ActivityIndicator color={COLORS.accent} size="large" style={{ marginTop: SPACING.md }} />
-          <Text style={[styles.subheader, { marginTop: SPACING.md }]}>Finding your perfect cigar...</Text>
+          <Text style={[styles.subheader, { marginTop: SPACING.md }]}>Searching the catalog...</Text>
         </View>
       ) : (
       <Text style={styles.subheader}>
-        {top ? 'A confident pick based on your preferences.' : 'No matches found. Try different preferences.'}
+        {top ? 'A close match in the catalog based on your profile.' : 'No catalog matches found. Try different preferences.'}
       </Text>
       )}
 
@@ -137,7 +137,7 @@ export default function QuizResultsScreen() {
       {top && (
         <Card style={styles.heroCard} onPress={() => router.push(`/(tabs)/cigar/${top.cigar.id}`)}>
           <CigarImage cigar={top.cigar} style={styles.heroImg} />
-          <Text style={styles.kicker}>BEST MATCH</Text>
+          <Text style={styles.kicker}>CATALOG MATCH</Text>
           <Text style={styles.heroName}>{top.cigar.line ?? top.cigar.name}</Text>
           <Text style={styles.heroBrand}>{top.cigar.brand}</Text>
           <View style={{ marginTop: SPACING.sm }}>
@@ -159,7 +159,7 @@ export default function QuizResultsScreen() {
           })()}
           {top.reasons.length > 0 && (
             <View style={styles.reasons}>
-              <Text style={styles.reasonsTitle}>Why this match</Text>
+              <Text style={styles.reasonsTitle}>Why this catalog match</Text>
               {top.reasons.map((r, i) => (
                 <Text key={i} style={styles.reason}>{r}</Text>
               ))}
@@ -184,7 +184,7 @@ export default function QuizResultsScreen() {
 
       {alts.length > 0 && (
         <>
-          <Text style={styles.sectionTitle}>More Picks</Text>
+          <Text style={styles.sectionTitle}>More Catalog Matches</Text>
           {alts.map((item, i) => (
             <Card
               key={item.cigar.id}
@@ -219,9 +219,9 @@ export default function QuizResultsScreen() {
       {/* Pro upsell for basic quiz users — hide if user is already Pro */}
       {!isAdvanced && !treatAsPro && (
         <Card style={styles.proCard}>
-          <Text style={styles.proTitle}>Want better matches?</Text>
+          <Text style={styles.proTitle}>Want more precise catalog matches?</Text>
           <Text style={styles.proSub}>
-            Unlock the Advanced Quiz with 9 questions, wrapper and origin preferences, top 10 results, and your personal humidor.
+            Unlock the Detailed Match with 9 questions, wrapper and origin preferences, top 10 catalog results, and your personal humidor.
           </Text>
           <Button
             title="Upgrade to Pro"

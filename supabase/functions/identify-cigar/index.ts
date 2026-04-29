@@ -125,16 +125,25 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Missing device_id" }, 400);
     }
 
-    const { count: deviceScans } = await supabase
-      .from("scan_images")
-      .select("id", { count: "exact", head: true })
-      .eq("device_id", deviceId);
+    // Pro users bypass the device-scoped free-scan cap. NOTE: `body.isPro` is
+    // a client-claimed flag (security finding #1: spoofable). Acceptable for
+    // the resubmission cycle so Pro users aren't hard-capped at 10 scans —
+    // post-approval hardening replaces this with a server-side Pro entitlement
+    // check via a RevenueCat webhook + entitlements table.
+    const claimedPro = body.isPro === true;
 
-    if ((deviceScans ?? 0) >= TOTAL_SCAN_LIMIT) {
-      return jsonResponse(
-        { error: "You've hit the free-scan limit. Upgrade to Pro for unlimited scans." },
-        429
-      );
+    if (!claimedPro) {
+      const { count: deviceScans } = await supabase
+        .from("scan_images")
+        .select("id", { count: "exact", head: true })
+        .eq("device_id", deviceId);
+
+      if ((deviceScans ?? 0) >= TOTAL_SCAN_LIMIT) {
+        return jsonResponse(
+          { error: "You've hit the free-scan limit. Upgrade to Pro for unlimited scans." },
+          429
+        );
+      }
     }
 
     // --- Per-user rate limit (abuse prevention) ---

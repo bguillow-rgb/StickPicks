@@ -26,7 +26,7 @@ export default function PrivacyScreen() {
         <Text style={styles.effective}>Effective Date: April 14, 2026</Text>
 
         <Text style={styles.body}>
-          Stick Picks ("we", "our", or "the app") is a cigar recommendation and identification app published by the Stick Picks team. This policy explains how we collect, use, and protect your information.
+          Stick Picks ("we", "our", or "the app") is a cigar catalog and identification reference app published by the Stick Picks team. This policy explains how we collect, use, and protect your information.
         </Text>
 
         <Text style={styles.h2}>1. Information We Collect</Text>
@@ -44,7 +44,7 @@ export default function PrivacyScreen() {
         </Text>
 
         <Text style={styles.h2}>2. How We Use Your Information</Text>
-        <Text style={styles.bullet}>•  To provide cigar identification, recommendations, and personalized results</Text>
+        <Text style={styles.bullet}>•  To provide cigar identification, catalog matching, and personalized reference results</Text>
         <Text style={styles.bullet}>•  To sync your humidor, journal, and scan history across devices</Text>
         <Text style={styles.bullet}>•  To improve our cigar identification accuracy using anonymized scan data</Text>
         <Text style={styles.bullet}>•  To manage your subscription and account</Text>
@@ -63,6 +63,16 @@ export default function PrivacyScreen() {
         <Text style={styles.bullet}>•  <Text style={styles.bold}>Google</Text> (authentication)</Text>
         <Text style={styles.body}>
           Community ratings and reviews you submit are visible to other users. Your display name is shown alongside reviews; your email is never displayed.
+        </Text>
+
+        <Text style={styles.h2}>4a. Analytics & Crash Reporting</Text>
+        <Text style={styles.body}>
+          To improve app stability and understand how the app is used, we use the following services:
+        </Text>
+        <Text style={styles.bullet}>•  <Text style={styles.bold}>Sentry</Text> (error and crash reporting; receives device metadata such as OS version and device model, an internal user ID, and stack traces when an error occurs)</Text>
+        <Text style={styles.bullet}>•  <Text style={styles.bold}>PostHog</Text> (product analytics; receives event names, basic event properties, and an internal user ID to measure feature usage)</Text>
+        <Text style={styles.body}>
+          Neither service receives the IDFA (Identifier for Advertisers) or other persistent device identifiers beyond what is necessary for the stated purpose. Both services are configured to keep collected data limited to the diagnostic and analytics use cases above.
         </Text>
 
         <Text style={styles.h2}>5. Data Retention</Text>

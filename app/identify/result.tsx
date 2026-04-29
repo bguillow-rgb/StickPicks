@@ -367,7 +367,7 @@ export default function IdentifyResultScreen() {
         >
         <View style={[styles.modalContainer, { paddingTop: insets.top + SPACING.md }]}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Find the Right Cigar</Text>
+            <Text style={styles.modalTitle}>Find in Catalog</Text>
             <Pressable onPress={() => setShowCorrection(false)} hitSlop={12}>
               <Text style={styles.modalClose}>Cancel</Text>
             </Pressable>

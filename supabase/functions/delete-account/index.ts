@@ -47,29 +47,86 @@ Deno.serve(async (req) => {
 
     const userId = user.id;
 
-    // 2. Delete user-owned rows. Best-effort — if any single delete fails we still
+    // 2a. Pull cigar_image_submissions BEFORE deleting them so we can also
+    // clean up the underlying storage objects. Submissions are stored at
+    // `{cigarId}/{userId}/{filename}.jpg` per src/hooks/useCigarImageUpload.ts,
+    // so we need each submission's path (recoverable by listing the user's
+    // folder under each cigar) — but the simpler approach is to extract paths
+    // from the stored image_url, which already encodes the full path.
+    let submissionPaths: string[] = [];
+    try {
+      const { data: submissions } = await admin
+        .from("cigar_image_submissions")
+        .select("image_url")
+        .eq("user_id", userId);
+      if (submissions) {
+        submissionPaths = submissions
+          .map((s: { image_url: string | null }) => s.image_url)
+          .filter((u): u is string => !!u)
+          // The public URL ends in `/storage/v1/object/public/cigar-images/{path}`;
+          // strip everything up to and including the bucket name to get the path.
+          .map((u) => {
+            const marker = "/cigar-images/";
+            const idx = u.indexOf(marker);
+            return idx >= 0 ? u.slice(idx + marker.length) : null;
+          })
+          .filter((p): p is string => !!p);
+      }
+    } catch (err) {
+      // Non-fatal — proceed with row deletion even if path extraction fails.
+      // Log so silent failures are visible in Supabase function logs and the
+      // operator can spot drift if storage paths get orphaned for one user.
+      console.warn(
+        `delete-account: submission path extraction failed for ${userId}:`,
+        err,
+      );
+    }
+
+    // 2b. Delete user-owned rows. Best-effort — if any single delete fails we still
     // attempt the others so we don't leave the account in a half-deleted state.
+    // Apple Guideline 5.1.1(v) requires complete removal of personal data on
+    // user-initiated account deletion. Two of these tables (cigar_submissions
+    // and cigar_image_submissions) have ON DELETE SET NULL on profiles(id),
+    // which would orphan rows instead of removing them — so we delete explicitly.
     const tables = [
       "humidor_items",
       "journal_entries",
       "scan_images",
       "quiz_results",
       "cigar_reviews",
+      "cigar_submissions",
+      "cigar_image_submissions",
     ];
     await Promise.all(
       tables.map((t) =>
         admin.from(t).delete().eq("user_id", userId).then(
           () => null,
-          () => null,
+          (err) => {
+            console.warn(
+              `delete-account: row delete failed for ${t}/${userId}:`,
+              err,
+            );
+            return null;
+          },
         )
       ),
     );
     await admin.from("profiles").delete().eq("id", userId).then(
       () => null,
-      () => null,
+      (err) => {
+        console.warn(
+          `delete-account: profiles row delete failed for ${userId}:`,
+          err,
+        );
+        return null;
+      },
     );
 
-    // 3. Best-effort: clear user's storage objects (avatars, scan uploads, journal photos)
+    // 3. Best-effort: clear user's storage objects.
+    // - cigar-images, scan-uploads, journal-photos: legacy {userId}/* layout
+    //   used by avatar/scan/journal uploads. List + delete that prefix.
+    // - cigar-images additionally holds community submissions at
+    //   {cigarId}/{userId}/* — those paths come from submissionPaths above.
     const buckets = ["cigar-images", "scan-uploads", "journal-photos"];
     for (const bucket of buckets) {
       try {
@@ -81,8 +138,24 @@ Deno.serve(async (req) => {
             .from(bucket)
             .remove(files.map((f) => `${userId}/${f.name}`));
         }
-      } catch {
-        // Ignore — storage may not have any files for this user.
+      } catch (err) {
+        // Storage may simply have no files for this user; still log so we can
+        // tell the no-files case from a real auth/RLS failure post-mortem.
+        console.warn(
+          `delete-account: storage cleanup failed for bucket ${bucket}/${userId}:`,
+          err,
+        );
+      }
+    }
+    if (submissionPaths.length > 0) {
+      try {
+        await admin.storage.from("cigar-images").remove(submissionPaths);
+      } catch (err) {
+        // Submission rows are already gone; storage cleanup is best-effort.
+        console.warn(
+          `delete-account: submission storage cleanup failed for ${userId}:`,
+          err,
+        );
       }
     }
 

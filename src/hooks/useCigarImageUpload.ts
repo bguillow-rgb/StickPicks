@@ -25,8 +25,88 @@ export interface UseCigarImageUpload {
 export function useCigarImageUpload(): UseCigarImageUpload {
   const [uploading, setUploading] = useState(false);
 
-  const pickAndSubmit = useCallback(async (cigarId: string) => {
-    try {
+  // Shared upload + DB-insert path. Called by both the camera and library
+  // entry points below so the storage path, mime type, and submissions row
+  // stay identical regardless of source.
+  const uploadAndSubmit = useCallback(
+    async (cigarId: string, uri: string): Promise<{ submitted: boolean }> => {
+      setUploading(true);
+      try {
+        const [{ data: authData }, deviceId] = await Promise.all([
+          supabase.auth.getUser(),
+          getDeviceId(),
+        ]);
+        const user = authData?.user ?? null;
+        const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
+        // Storage path: group by cigar so a moderator can audit all submissions
+        // for a given stick without combing by user. Anonymous uploads go under
+        // the `anon/` prefix to keep them separable.
+        const filePath = `${cigarId}/${user?.id ?? 'anon'}/${fileName}`;
+
+        const imgRes = await fetch(uri);
+        const blob = await imgRes.blob();
+
+        const { error: uploadErr } = await supabase.storage
+          .from('cigar-images')
+          .upload(filePath, blob, { contentType: 'image/jpeg' });
+        if (uploadErr) throw uploadErr;
+
+        const { data: urlData } = supabase.storage
+          .from('cigar-images')
+          .getPublicUrl(filePath);
+
+        const { error: insertErr } = await supabase.from('cigar_image_submissions').insert({
+          cigar_id: cigarId,
+          user_id: user?.id ?? null,
+          device_id: deviceId,
+          image_url: urlData.publicUrl,
+        });
+        if (insertErr) throw insertErr;
+
+        Alert.alert(
+          'Thanks',
+          "Your photo's been submitted. If this cigar doesn't have an image, it'll appear for everyone shortly.",
+        );
+        return { submitted: true };
+      } catch (e: any) {
+        Alert.alert('Upload failed', e?.message ?? 'Could not submit that photo. Try again.');
+        return { submitted: false };
+      } finally {
+        setUploading(false);
+      }
+    },
+    [],
+  );
+
+  const launchCamera = useCallback(
+    async (cigarId: string): Promise<{ submitted: boolean }> => {
+      const perm = await ImagePicker.requestCameraPermissionsAsync();
+      if (!perm.granted) {
+        Alert.alert(
+          'Camera access needed',
+          'Enable camera access in Settings so you can take a photo.',
+          [
+            { text: 'Cancel', style: 'cancel' },
+            { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          ],
+        );
+        return { submitted: false };
+      }
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        // Square crop matches the display aspect everywhere we render cigar art.
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+      if (result.canceled || !result.assets?.[0]?.uri) return { submitted: false };
+      return uploadAndSubmit(cigarId, result.assets[0].uri);
+    },
+    [uploadAndSubmit],
+  );
+
+  const launchLibrary = useCallback(
+    async (cigarId: string): Promise<{ submitted: boolean }> => {
       const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
       if (!perm.granted) {
         Alert.alert(
@@ -35,67 +115,52 @@ export function useCigarImageUpload(): UseCigarImageUpload {
           [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Open Settings', onPress: () => Linking.openSettings() },
-          ]
+          ],
         );
         return { submitted: false };
       }
-
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
-        // Square crop matches the display aspect everywhere we render cigar art.
         aspect: [1, 1],
         quality: 0.85,
         selectionLimit: 1,
       });
       if (result.canceled || !result.assets?.[0]?.uri) return { submitted: false };
-      const uri = result.assets[0].uri;
+      return uploadAndSubmit(cigarId, result.assets[0].uri);
+    },
+    [uploadAndSubmit],
+  );
 
-      setUploading(true);
-
-      const [{ data: authData }, deviceId] = await Promise.all([
-        supabase.auth.getUser(),
-        getDeviceId(),
-      ]);
-      const user = authData?.user ?? null;
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.jpg`;
-      // Storage path: group by cigar so a moderator can audit all submissions
-      // for a given stick without combing by user. Anonymous uploads go under
-      // the `anon/` prefix to keep them separable.
-      const filePath = `${cigarId}/${user?.id ?? 'anon'}/${fileName}`;
-
-      const imgRes = await fetch(uri);
-      const blob = await imgRes.blob();
-
-      const { error: uploadErr } = await supabase.storage
-        .from('cigar-images')
-        .upload(filePath, blob, { contentType: 'image/jpeg' });
-      if (uploadErr) throw uploadErr;
-
-      const { data: urlData } = supabase.storage
-        .from('cigar-images')
-        .getPublicUrl(filePath);
-
-      const { error: insertErr } = await supabase.from('cigar_image_submissions').insert({
-        cigar_id: cigarId,
-        user_id: user?.id ?? null,
-        device_id: deviceId,
-        image_url: urlData.publicUrl,
+  // Source picker — surfaces both the camera and library paths via Alert
+  // (StyledAlert handles iOS-style action presentation). Tap "Cancel" to back
+  // out without granting any permission.
+  const pickAndSubmit = useCallback(
+    (cigarId: string): Promise<{ submitted: boolean }> => {
+      return new Promise((resolve) => {
+        Alert.alert(
+          'Add a photo',
+          'Take a new photo of the cigar or band, or pick one from your library.',
+          [
+            {
+              text: 'Take Photo',
+              onPress: async () => resolve(await launchCamera(cigarId)),
+            },
+            {
+              text: 'Choose from Library',
+              onPress: async () => resolve(await launchLibrary(cigarId)),
+            },
+            {
+              text: 'Cancel',
+              style: 'cancel',
+              onPress: () => resolve({ submitted: false }),
+            },
+          ],
+        );
       });
-      if (insertErr) throw insertErr;
-
-      Alert.alert(
-        'Thanks',
-        "Your photo's been submitted. If this cigar doesn't have an image, it'll appear for everyone shortly.",
-      );
-      return { submitted: true };
-    } catch (e: any) {
-      Alert.alert('Upload failed', e?.message ?? 'Could not submit that photo. Try again.');
-      return { submitted: false };
-    } finally {
-      setUploading(false);
-    }
-  }, []);
+    },
+    [launchCamera, launchLibrary],
+  );
 
   return { uploading, pickAndSubmit };
 }
