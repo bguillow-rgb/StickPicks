@@ -1,0 +1,90 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Footer from '../components/Footer.astro';
+import BreadcrumbSchema from '../components/schema/BreadcrumbSchema.astro';
+import { SITE } from '../consts';
+---
+<BaseLayout
+  title="Features"
+  description="A closer look at Stick Picks: humidor catalog, smoking journal, cigar identification, palate-matching quiz, and curated browse."
+  path="/features"
+>
+  <Fragment slot="head">
+    <BreadcrumbSchema crumbs={[{ name: 'Features', url: `${SITE.url}/features` }]} />
+    <link rel="apple-touch-icon" href="/icon.png" />
+  </Fragment>
+
+  <p class="brand">{SITE.name}</p>
+  <h1>Features</h1>
+  <p class="effective">Everything Stick Picks does, in one place.</p>
+
+  <section class="feature-row">
+    <div class="feature-row-copy">
+      <h3>Your humidor, organized</h3>
+      <p>Track every stick by brand, vitola, and rest time. Mark cigars Owned, Wishlist, or Smoked, and capture your own ratings the moment you put one down.</p>
+      <p>Filter by status, search by name, and see at a glance what's resting and what's earned a place on the wishlist.</p>
+    </div>
+    <div class="feature-row-shot">
+      <img
+        src="/assets/screenshots/01-humidor.png"
+        alt="myHumidor screen showing cigars tagged Owned, Wishlist, and Smoked with star ratings"
+        loading="lazy"
+      />
+    </div>
+  </section>
+
+  <section class="feature-row feature-row--reverse">
+    <div class="feature-row-shot">
+      <img
+        src="/assets/screenshots/04-browse-medium.png"
+        alt="Browse Cigars filtered by Medium strength, showing cigars with flavor tags like cedar, pepper, and cream"
+        loading="lazy"
+      />
+    </div>
+    <div class="feature-row-copy">
+      <h3>A catalog built for discovery</h3>
+      <p>Browse a curated database of premium handmade cigars. Filter by strength, search by brand or name, and explore by flavor &mdash; cedar, pepper, cream, baking spice, and dozens more.</p>
+      <p>Every entry is curated with notes, pairings, and a path back to your humidor.</p>
+    </div>
+  </section>
+
+  <section class="feature-row">
+    <div class="feature-row-copy">
+      <h3>Find your next stick</h3>
+      <p>Profile Match asks three questions and matches your palate to the right catalog entries. The Detailed Match goes nine deep for precision picks.</p>
+      <p>Or skip the questions entirely &mdash; point your camera at any cigar band and Identify by Band handles the lookup on the spot.</p>
+    </div>
+    <div class="feature-row-shot">
+      <img
+        src="/assets/screenshots/02-home.png"
+        alt="Stick Picks home screen with Profile Match, Detailed Match, and Identify by Band"
+        loading="lazy"
+      />
+    </div>
+  </section>
+
+  <section class="feature-row feature-row--reverse">
+    <div class="feature-row-shot">
+      <img
+        src="/assets/screenshots/05-profile.png"
+        alt="Profile screen showing humidor stats and engagement, scanning, and matchmaker streaks"
+        loading="lazy"
+      />
+    </div>
+    <div class="feature-row-copy">
+      <h3>Build the habit</h3>
+      <p>Your profile keeps a running tally &mdash; cigars in your humidor, smokes logged, scans completed.</p>
+      <p>Streaks reward the rituals that matter: opening the app, identifying a cigar, taking the quiz. A small nudge to keep your collection alive.</p>
+    </div>
+  </section>
+
+  <section class="cta">
+    <h2 class="section-title">Ready when you are</h2>
+    <p class="cta-body">
+      Stick Picks lands on the App Store soon. Questions, feedback, or want a heads-up at launch? Email
+      <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
+    </p>
+  </section>
+
+  <Footer />
+</BaseLayout>

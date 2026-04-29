@@ -1,0 +1,98 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import QuickAnswer from '../components/QuickAnswer.astro';
+import Footer from '../components/Footer.astro';
+import PersonSchema from '../components/schema/PersonSchema.astro';
+import AboutPageSchema from '../components/schema/AboutPageSchema.astro';
+import BreadcrumbSchema from '../components/schema/BreadcrumbSchema.astro';
+import { SITE } from '../consts';
+
+const quickAnswer =
+  'Stick Picks is an iOS journal and humidor catalog for adult cigar collectors, ' +
+  'built and operated by an independent developer. The app does not sell tobacco, ' +
+  'show tobacco ads, or promote tobacco use. It is a private reference for tracking ' +
+  'what you own, what you smoke, and what your collection is worth.';
+---
+<BaseLayout
+  title="About"
+  description="About Stick Picks — who runs it, what it is, what it isn't, and how it makes money."
+  path="/about"
+>
+  <Fragment slot="head">
+    <AboutPageSchema />
+    <PersonSchema />
+    <BreadcrumbSchema crumbs={[{ name: 'About', url: `${SITE.url}/about` }]} />
+  </Fragment>
+
+  <p class="brand">{SITE.name}</p>
+  <h1>About Stick Picks</h1>
+  <p class="effective">A cigar collector's journal — built and run by one person.</p>
+
+  <QuickAnswer text={quickAnswer} />
+
+  <h2>Who runs Stick Picks?</h2>
+  <p>
+    Stick Picks is built and operated by <strong>{SITE.founder.name}</strong>,
+    an independent developer. There is no investor, no parent company, and no
+    advertising network behind the app. Decisions about features, privacy, and
+    direction are made by one person, and that person answers the email at
+    <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
+  </p>
+
+  <h2>What is Stick Picks?</h2>
+  <p>
+    Stick Picks is an iOS app that does four things for adult cigar collectors:
+    catalogs the contents of your humidor, scans cigar bands to identify what
+    you own, tracks the value of your collection over time, and gives you a
+    private journal for every cigar you smoke. The reference catalog grows
+    over time and is corrected by users when something is missing or wrong.
+  </p>
+
+  <h2>What Stick Picks is not</h2>
+  <ul>
+    <li>It is <strong>not a retailer</strong>. The app does not sell cigars or any tobacco product.</li>
+    <li>It is <strong>not a marketplace</strong>. There are no listings, no buy/sell flows, no auctions.</li>
+    <li>It does <strong>not show tobacco ads</strong>. There are no ads of any kind in the app.</li>
+    <li>It is <strong>not a recommendation engine for tobacco use</strong>. The app exists to help people who already collect cigars keep their collection organized.</li>
+    <li>It does <strong>not collect health, location, or financial data</strong>. See the <a href="/privacy">privacy policy</a> for the full breakdown.</li>
+  </ul>
+
+  <h2>How Stick Picks makes money</h2>
+  <p>
+    The core app is free. A Pro subscription unlocks advanced collection
+    tracking and journaling features. That is the entire revenue model.
+    Subscriptions are managed through Apple, so payment information never
+    touches Stick Picks' servers.
+  </p>
+
+  <h2>Editorial standards</h2>
+  <p>
+    Articles published on this site are written by {SITE.founder.name} based
+    on first-hand experience as a collector and on cited primary sources
+    (manufacturer catalogs, industry reference books, the FDA, the IRS for
+    valuation context, and other public sources). When a fact comes from
+    somewhere other than direct experience, it is linked. When something is
+    an opinion, it is labeled.
+  </p>
+  <p>
+    Articles are dated, and the date is updated only when the content
+    actually changes — not just to make the page look fresh.
+  </p>
+
+  <h2>Health notice</h2>
+  <p>
+    Cigar smoking carries significant and well-documented health risks. Stick
+    Picks does not promote tobacco use. The U.S. Surgeon General's warnings
+    apply to every product referenced in the catalog. The app's full health
+    disclaimer is in the <a href="/terms">Terms of Service</a>.
+  </p>
+
+  <h2>Contact</h2>
+  <p>
+    Press, partnership, or product feedback:
+    <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
+    There is no DM channel — email is the canonical contact.
+  </p>
+
+  <Footer />
+</BaseLayout>

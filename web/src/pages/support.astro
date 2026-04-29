@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FAQ from '../components/FAQ.astro';
+import Footer from '../components/Footer.astro';
+import BreadcrumbSchema from '../components/schema/BreadcrumbSchema.astro';
+import { SITE } from '../consts';
+
+// Support FAQs migrated from the legacy docs/support.html. Same content,
+// now emitted with FAQPage schema and structured as question H2s so AI
+// engines can extract them cleanly.
+const faqs = [
+  {
+    q: 'How do I delete my Stick Picks account?',
+    a:
+      'Open the app, go to the Profile tab, scroll to the bottom, and tap Delete Account, then confirm. This permanently deletes your humidor, journal, scan history, ratings, and reviews. The action cannot be undone. If you have lost access to the app, email support@stickpicks.app from the address on your account with the subject "Delete My Account" and we will remove your data within 7 days.',
+  },
+  {
+    q: 'How do I cancel my Stick Picks Pro subscription?',
+    a:
+      'Subscriptions are managed by Apple, not by Stick Picks. On your iPhone or iPad, open Settings, tap your name at the top, tap Subscriptions, then tap Stick Picks Pro and Cancel Subscription. Cancellation takes effect at the end of the current billing period. Deleting your account in the app does not automatically cancel an active subscription — you must cancel it separately in iOS Settings.',
+  },
+  {
+    q: 'The cigar band scanner can not identify my cigar — what can I try?',
+    a:
+      'Hold the band so the brand and line text are clearly legible. Shoot in good light and avoid glare or motion blur. If one side of the band is obscured, rotate and re-shoot — multiple frames help. Tap "Enhance and retry" after a failure to re-analyze with an OCR-biased prompt. If it still cannot identify the cigar, use Find It Manually or Suggest a Cigar and the catalog team will add it.',
+  },
+  {
+    q: 'How old do I have to be to use Stick Picks?',
+    a:
+      'Stick Picks is intended for adults aged 21 and older, matching the United States federal minimum legal age to purchase tobacco. A 21+ age gate is enforced on first launch.',
+  },
+  {
+    q: 'Is Stick Picks a retailer?',
+    a:
+      'No. Stick Picks is a reference and journal app for cigar collectors. It does not sell cigars, distribute tobacco products, or promote tobacco consumption. Its focus is on cataloging, organizing, and tracking the value of a collection.',
+  },
+];
+---
+<BaseLayout
+  title="Support"
+  description="Stick Picks support — account deletion, subscription cancellation, scanner tips, and contact information."
+  path="/support"
+>
+  <Fragment slot="head">
+    <BreadcrumbSchema crumbs={[{ name: 'Support', url: `${SITE.url}/support` }]} />
+  </Fragment>
+
+  <p class="brand">{SITE.name}</p>
+  <h1>Support</h1>
+  <p class="effective">We answer every email. Usually within a day.</p>
+
+  <h2>Contact</h2>
+  <p>
+    For any question, bug report, feature request, or feedback:
+    <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
+  </p>
+  <p>
+    Please include your account email, your iOS version, and your app version
+    (found at the bottom of the Profile tab) — it helps trace issues faster.
+  </p>
+
+  <FAQ faqs={faqs} heading="Common Questions" />
+
+  <Footer />
+</BaseLayout>
