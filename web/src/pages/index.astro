@@ -1,10 +1,19 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import QuickAnswer from '../components/QuickAnswer.astro';
 import FAQ from '../components/FAQ.astro';
 import Footer from '../components/Footer.astro';
 import SoftwareApplicationSchema from '../components/schema/SoftwareApplicationSchema.astro';
 import { SITE } from '../consts';
+
+// Latest 3 published articles for the homepage "From the Blog" teaser.
+// Drafts are excluded automatically because they have published:false.
+const latestArticles = (
+  await getCollection('articles', ({ data }) => data.published)
+)
+  .sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf())
+  .slice(0, 3);
 
 const quickAnswer =
   'Stick Picks is a hobby and lifestyle iOS app for adult cigar collectors. ' +
@@ -126,6 +135,21 @@ const faqs = [
       <span class="cta cta--disabled">App Store — Coming Soon</span>
     )}
   </div>
+
+  {latestArticles.length > 0 && (
+    <section class="blog-teaser">
+      <h2 class="section-title">From the Blog</h2>
+      <ul class="blog-list">
+        {latestArticles.map((a) => (
+          <li>
+            <a href={`/articles/${a.slug}`}>{a.data.title}</a>
+            <p>{a.data.description}</p>
+          </li>
+        ))}
+      </ul>
+      <p class="features-link"><a href="/articles">All articles &rarr;</a></p>
+    </section>
+  )}
 
   <FAQ faqs={faqs} />
 

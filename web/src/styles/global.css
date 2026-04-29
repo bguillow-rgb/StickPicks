@@ -216,6 +216,39 @@ strong { color: var(--text); font-weight: 700; }
 }
 .cta-body { max-width: 520px; margin: 0 auto; }
 
+/* Homepage "From the Blog" teaser. */
+.blog-teaser {
+  margin: 56px 0 0;
+}
+.blog-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0;
+}
+.blog-list li {
+  border-top: 1px solid var(--border);
+  padding: 18px 0;
+  margin: 0;
+}
+.blog-list li:last-child {
+  border-bottom: 1px solid var(--border);
+}
+.blog-list li a {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--accent);
+  border-bottom: none;
+  display: inline-block;
+  margin-bottom: 6px;
+}
+.blog-list li a:hover {
+  border-bottom: 1px solid var(--accent);
+}
+.blog-list li p {
+  margin: 0;
+  font-size: 15px;
+}
+
 /* Mobile: stack hero + feature grid + feature rows. */
 @media (max-width: 720px) {
   .feature-grid { grid-template-columns: 1fr; }
