@@ -21,21 +21,30 @@ Output is in `web/dist`.
 
 ## Deploy
 
-The site auto-deploys to **Cloudflare Pages** on every push to `main`.
-CF Pages runs `cd web && npm install && npm run build` and serves
-`web/dist/` at `https://stickpicks.app`.
+GitHub Pages serves `/docs` from `main`. Day-to-day deploy is one
+script + one push:
 
-One-time setup walkthrough: [docs/CLOUDFLARE-PAGES-SETUP.md](./docs/CLOUDFLARE-PAGES-SETUP.md).
+```bash
+cd web
+npm run build
+bash scripts/deploy-to-docs.sh
+cd ..
+git add docs && git commit -m "publish: <what changed>" && git push
+```
 
-Day-to-day workflow:
-1. Edit content / pages.
-2. `git push origin main`.
-3. CF Pages builds + deploys in ~60 sec.
-4. (When publishing new content) ping IndexNow:
-   `PUBLIC_INDEXNOW_KEY=<key> bash scripts/indexnow-ping.sh`
+GitHub Pages picks up the change and rebuilds in ~60 sec.
 
-The legacy `bash scripts/deploy-to-docs.sh` (build → replace `/docs/` →
-commit) is kept as a fallback but is no longer the primary deploy path.
+The repo must be **public** OR on a paid GitHub plan for Pages to
+work. After the first publish, verify Pages is configured at:
+Settings → Pages → Source = "Deploy from a branch", Branch = `main`,
+Folder = `/docs`.
+
+(Optional, after publishing new articles) ping IndexNow so search
+engines re-crawl quickly:
+
+```bash
+PUBLIC_INDEXNOW_KEY=<your-key> bash scripts/indexnow-ping.sh
+```
 
 ## Structure
 

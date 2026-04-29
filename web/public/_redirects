@@ -1,7 +1,0 @@
-# Cloudflare Pages redirects.
-# Format: <source>  <destination>  <status>
-# Documentation: https://developers.cloudflare.com/pages/configuration/redirects/
-
-# Reserve this file for future redirects. Currently empty because Astro
-# generates .html files at clean paths and Cloudflare Pages handles
-# extension fallback automatically (/about → /about.html).
