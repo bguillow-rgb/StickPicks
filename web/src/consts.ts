@@ -53,7 +53,9 @@ export const SITE = {
 };
 
 export const NAV = [
+  { label: 'Home', href: '/' },
   { label: 'Features', href: '/features' },
+  { label: 'Blog', href: '/articles' },
   { label: 'About', href: '/about' },
   { label: 'Support', href: '/support' },
   { label: 'Privacy', href: '/privacy' },
