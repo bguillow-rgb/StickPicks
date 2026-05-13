@@ -17,6 +17,27 @@ const TOTAL_SCAN_LIMIT = 10;
 const RATE_LIMIT_HOURLY = 30;
 const RATE_LIMIT_DAILY = 100;
 
+// Per-image and aggregate payload bounds (post-Build-16 finding #4).
+// Without these, identify-cigar is a DoS + cost amplifier: a client can
+// post a 50 MB base64 blob, the server decodes it, ships it to Anthropic
+// Vision, and we pay both edge function CPU and per-image API cost before
+// the request returns. Caps below: ~1.5 MB decoded per frame is well
+// above a typical band shot; 10 MB aggregate covers an 8-frame burst.
+const MAX_IMAGE_BASE64_BYTES = 2_000_000;
+const MAX_TOTAL_BASE64_BYTES = 10_000_000;
+const ALLOWED_MEDIA_TYPES = new Set([
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/heic",
+  "image/heif",
+  "image/webp",
+]);
+
+// Hard timeout on the Anthropic call. Without it, a hung upstream
+// exhausts our edge function CPU budget while the user sees a spinner.
+const ANTHROPIC_TIMEOUT_MS = 30_000;
+
 const IDENTIFY_PROMPT = `You are a cigar identification expert. You may receive ONE OR MORE photos of the same cigar, taken from different rotation angles while the user rotates it. Use ALL of them together.
 
 STRATEGY when multiple images are given:
@@ -84,6 +105,10 @@ Deno.serve(async (req) => {
 
   try {
     if (!ANTHROPIC_API_KEY) {
+      // Log loudly so a key-rotation misconfig is visible in function logs
+      // without needing to redeploy to add diagnostics. Client sees a
+      // neutral message; operator sees the cause.
+      console.error("identify-cigar: ANTHROPIC_API_KEY missing — edge function misconfigured");
       return jsonResponse({ error: "Identification temporarily unavailable" }, 503);
     }
 
@@ -117,6 +142,28 @@ Deno.serve(async (req) => {
     }
     if (images.length > 8) {
       return jsonResponse({ error: "Too many frames (max 8)" }, 400);
+    }
+
+    // Per-image and aggregate payload bounds + media-type allowlist.
+    // Reject early so we never decode an oversized blob or ship an
+    // unsupported MIME to Anthropic (which would silently consume API
+    // cost and return a useless reply). All checks pre-trim base64.
+    let totalBytes = 0;
+    for (const img of images) {
+      if (typeof img.base64 !== "string" || img.base64.length === 0) {
+        return jsonResponse({ error: "Invalid image payload" }, 400);
+      }
+      if (img.base64.length > MAX_IMAGE_BASE64_BYTES) {
+        return jsonResponse({ error: "Image too large (max ~1.5 MB per frame)" }, 413);
+      }
+      totalBytes += img.base64.length;
+      if (totalBytes > MAX_TOTAL_BASE64_BYTES) {
+        return jsonResponse({ error: "Total upload too large" }, 413);
+      }
+      const mt = (img.mediaType ?? "image/jpeg").toLowerCase();
+      if (!ALLOWED_MEDIA_TYPES.has(mt)) {
+        return jsonResponse({ error: "Unsupported image type" }, 415);
+      }
     }
 
     // --- Free-scan quota enforcement (device-scoped, not user-scoped) ---
@@ -173,39 +220,56 @@ Deno.serve(async (req) => {
       );
     }
 
+    // After the allowlist gate above, media_type is trusted; no fallback.
     const imageContent = images.map((img) => ({
       type: "image" as const,
       source: {
         type: "base64" as const,
-        media_type: img.mediaType || "image/jpeg",
+        media_type: (img.mediaType ?? "image/jpeg").toLowerCase(),
         data: img.base64,
       },
     }));
 
-    const anthropicResponse = await fetch(
-      "https://api.anthropic.com/v1/messages",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
+    let anthropicResponse: Response;
+    try {
+      anthropicResponse = await fetch(
+        "https://api.anthropic.com/v1/messages",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 500,
+            messages: [
+              {
+                role: "user",
+                content: [
+                  ...imageContent,
+                  { type: "text", text: IDENTIFY_PROMPT },
+                ],
+              },
+            ],
+          }),
+          signal: AbortSignal.timeout(ANTHROPIC_TIMEOUT_MS),
+        }
+      );
+    } catch (err: any) {
+      // AbortError when timeout fires, TypeError on network failure.
+      const isTimeout = err?.name === "TimeoutError" || err?.name === "AbortError";
+      console.error("identify-cigar: anthropic fetch failed", { isTimeout, err });
+      return jsonResponse(
+        {
+          error: isTimeout
+            ? "Scanner timed out — please try again."
+            : "Cigar identification temporarily unavailable",
         },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 500,
-          messages: [
-            {
-              role: "user",
-              content: [
-                ...imageContent,
-                { type: "text", text: IDENTIFY_PROMPT },
-              ],
-            },
-          ],
-        }),
-      }
-    );
+        isTimeout ? 504 : 502,
+      );
+    }
 
     if (!anthropicResponse.ok) {
       const errorText = await anthropicResponse.text();

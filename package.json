@@ -9,6 +9,7 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "check:functions": "deno check supabase/functions/*/index.ts",
+    "check:all": "npm run typecheck && npm run check:functions",
     "postinstall": "bash scripts/patch-vision-camera-text-recognition.sh",
     "eas-build-post-install": "bash scripts/patch-vision-camera-text-recognition.sh"
   },
