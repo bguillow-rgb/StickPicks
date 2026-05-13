@@ -19,7 +19,7 @@ const FEATURES = [
   {
     icon: 'wine-outline' as const,
     title: 'Curated Drink Pairings',
-    desc: 'Three curated pours per cigar — including one deep cut no other app surfaces.',
+    desc: 'Three curated pours per match — including one deep cut no other app surfaces.',
   },
   {
     icon: 'sparkles-outline' as const,
@@ -29,7 +29,7 @@ const FEATURES = [
   {
     icon: 'flask-outline' as const,
     title: 'Detailed Humidor Builder',
-    desc: '9 questions, top 10 cigars for your collection, scored to your collecting profile. Free is 3 questions, 3 results.',
+    desc: '9 questions, top 10 matches for your collection, scored to your collecting profile. Free is 3 questions, 3 results.',
   },
   {
     icon: 'archive-outline' as const,
@@ -170,14 +170,14 @@ export default function PaywallScreen() {
 
       {/* Header */}
       <Text style={styles.header}>Stick Picks Pro</Text>
-      <Text style={styles.subheader}>Your personal cigar reference</Text>
+      <Text style={styles.subheader}>Your personal collection reference</Text>
 
       {/* Pitch — one sentence, named differentiators only. Users scan paywalls
           rather than read them; we frontload the two claims no competitor can
           make and let the bullets do the rest. */}
       <View style={styles.pitchCard}>
         <Text style={styles.pitchHeadline}>
-          The only cigar reference with AI band identification and curated drink pairings.
+          The only humidor reference with AI band identification and curated drink pairings.
         </Text>
       </View>
 

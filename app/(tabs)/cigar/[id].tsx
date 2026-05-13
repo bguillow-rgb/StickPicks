@@ -254,14 +254,14 @@ export default function CigarDetailScreen() {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        Alert.alert('Sign In Required', 'Sign in to save cigars to your humidor.');
+        Alert.alert('Sign In Required', 'Sign in to save items to your humidor.');
         return;
       }
 
       // Check if this status already exists
       const existing = humidorItems.find((i) => i.status === status);
       if (existing) {
-        Alert.alert('Already saved', `This cigar is already in your ${status} list.`);
+        Alert.alert('Already saved', `Already in your ${status} list.`);
         return;
       }
 
@@ -313,7 +313,7 @@ export default function CigarDetailScreen() {
   if (!cigar) {
     return (
       <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
-        <Text style={styles.errorText}>Cigar not found</Text>
+        <Text style={styles.errorText}>Not found</Text>
         <Button title="Go Back" variant="ghost" onPress={() => router.back()} style={{ marginTop: SPACING.md }} />
       </View>
     );
@@ -555,7 +555,7 @@ export default function CigarDetailScreen() {
                 style={styles.reviewInput}
                 value={reviewText}
                 onChangeText={setReviewText}
-                placeholder="Share your thoughts on this cigar..."
+                placeholder="Share your thoughts..."
                 placeholderTextColor={COLORS.subtle}
                 multiline
                 textAlignVertical="top"
@@ -647,9 +647,9 @@ export default function CigarDetailScreen() {
                             await supabase.from('humidor_items').delete().eq('id', item.id);
                           }
                           setHumidorItems([]);
-                          Alert.alert('Removed', 'Cigar removed from your humidor.');
+                          Alert.alert('Removed', 'Removed from your humidor.');
                         } catch {
-                          Alert.alert('Error', 'Failed to remove cigar');
+                          Alert.alert('Error', 'Failed to remove');
                         }
                       },
                     },
@@ -672,7 +672,7 @@ export default function CigarDetailScreen() {
       {/* Similar cigars */}
       {similar.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Similar Cigars</Text>
+          <Text style={styles.sectionTitle}>Similar</Text>
           {similar.slice(0, 4).map((s) => (
             <Card key={s.id} style={styles.similarCard} onPress={() => router.push(`/(tabs)/cigar/${s.id}`)}>
               <Text style={styles.similarName}>{s.line ?? s.name}</Text>
@@ -699,7 +699,7 @@ export default function CigarDetailScreen() {
           { opacity: undoOpacity, bottom: insets.bottom + 92 },
         ]}
       >
-        <Text style={styles.undoText}>Wrong cigar?</Text>
+        <Text style={styles.undoText}>Wrong match?</Text>
         <Pressable onPress={handleUndo} hitSlop={12} style={styles.undoAction}>
           <Ionicons name="arrow-undo" size={16} color={COLORS.accent} />
           <Text style={styles.undoActionText}>Undo</Text>

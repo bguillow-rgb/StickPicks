@@ -113,7 +113,7 @@ export default function HumidorScreen() {
   );
 
   const handleDelete = (item: HumidorItem) => {
-    const cigarName = item.cigar?.line ?? item.cigar?.name ?? 'this cigar';
+    const cigarName = item.cigar?.line ?? item.cigar?.name ?? 'this item';
     Alert.alert(
       'Remove from Humidor',
       `Are you sure you want to remove ${cigarName}?`,
@@ -127,7 +127,7 @@ export default function HumidorScreen() {
               await supabase.from('humidor_items').delete().eq('id', item.id);
               setItems((prev) => prev.filter((i) => i.id !== item.id));
             } catch {
-              Alert.alert('Error', 'Failed to remove cigar');
+              Alert.alert('Error', 'Failed to remove item');
             }
           },
         },
@@ -436,8 +436,8 @@ export default function HumidorScreen() {
           ListEmptyComponent={
             <EmptyState
               title="Your humidor is empty"
-              subtitle="Save cigars to track in your collection."
-              actionLabel="Browse Cigars"
+              subtitle="Save items to track in your collection."
+              actionLabel="Browse"
               onAction={() => router.push('/(tabs)/browse')}
             />
           }
@@ -506,9 +506,9 @@ export default function HumidorScreen() {
           contentContainerStyle={{ paddingBottom: insets.bottom + 80, flexGrow: 1 }}
           ListEmptyComponent={
             <EmptyState
-              title="No cigars owned yet"
-              subtitle="Mark cigars you have on hand as owned."
-              actionLabel="Browse Cigars"
+              title="Nothing owned yet"
+              subtitle="Mark what you have on hand as owned."
+              actionLabel="Browse"
               onAction={() => router.push('/(tabs)/browse')}
             />
           }
@@ -694,10 +694,10 @@ export default function HumidorScreen() {
               title={filter === 'wishlist' ? 'Your wishlist is empty' : 'Nothing logged here yet'}
               subtitle={
                 filter === 'wishlist'
-                  ? 'Save cigars you want to add to your collection.'
-                  : 'Cigars you mark as logged will appear here with your notes.'
+                  ? 'Save what you want to add to your collection.'
+                  : 'Items you mark as logged will appear here with your notes.'
               }
-              actionLabel="Browse Cigars"
+              actionLabel="Browse"
               onAction={() => router.push('/(tabs)/browse')}
             />
           }

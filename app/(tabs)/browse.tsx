@@ -191,10 +191,10 @@ export default function BrowseScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + SPACING.sm }]}>
-      <Text style={styles.title}>Browse Cigars</Text>
+      <Text style={styles.title}>Browse</Text>
       <TextInput
         style={styles.search}
-        placeholder="Search cigars by brand or name..."
+        placeholder="Search by brand or name..."
         placeholderTextColor={COLORS.subtle}
         value={query}
         onChangeText={handleQueryChange}
@@ -259,7 +259,7 @@ export default function BrowseScreen() {
           onContentSizeChange={() => listRef.current?.flashScrollIndicators()}
           ListEmptyComponent={
             <View style={styles.noResults}>
-              <Text style={styles.noResultsTitle}>No cigars found</Text>
+              <Text style={styles.noResultsTitle}>No matches found</Text>
               <Text style={styles.noResultsSub}>Try a different search term</Text>
               <Pressable onPress={handleClearSearch} style={styles.clearBtn}>
                 <Text style={styles.clearBtnText}>Clear Search</Text>

@@ -70,7 +70,7 @@ export default function CameraScreen() {
     if (!granted) {
       Alert.alert(
         'Camera access needed',
-        'Enable camera access in Settings to scan cigars.',
+        'Enable camera access in Settings to scan bands.',
         [
           { text: 'Cancel', style: 'cancel' },
           { text: 'Open Settings', onPress: () => Linking.openSettings() },
@@ -161,7 +161,7 @@ export default function CameraScreen() {
       if (!perm.granted) {
         Alert.alert(
           'Photo library access needed',
-          'Enable photos access in Settings to pick a cigar photo from your library.',
+          'Enable photos access in Settings to pick a band photo from your library.',
           [
             { text: 'Cancel', style: 'cancel' },
             { text: 'Open Settings', onPress: () => Linking.openSettings() },
@@ -235,7 +235,7 @@ export default function CameraScreen() {
       <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
         <Ionicons name="camera-outline" size={48} color={COLORS.muted} style={{ marginBottom: SPACING.md }} />
         <Text style={styles.permTitle}>Camera access needed</Text>
-        <Text style={styles.permText}>Stick Picks uses the camera to identify cigars.</Text>
+        <Text style={styles.permText}>Stick Picks uses the camera to identify bands.</Text>
         <Button title="Grant Permission" onPress={handlePermission} style={{ marginTop: SPACING.md }} />
         <Button title="Go Back" variant="ghost" onPress={() => router.back()} style={{ marginTop: SPACING.sm }} />
       </View>
@@ -314,7 +314,7 @@ export default function CameraScreen() {
             <Text style={styles.tip}>• Use even, bright light — avoid glare</Text>
             <Text style={styles.tip}>• Hold steady, keep text in focus</Text>
             <Text style={styles.tipHint}>
-              Tap Cigar Concierge to scan — AI handles the rest.
+              Tap AI Concierge to scan — the model handles the rest.
             </Text>
           </View>
 
@@ -330,7 +330,7 @@ export default function CameraScreen() {
               ) : (
                 <>
                   <Ionicons name="sparkles" size={20} color={COLORS.bg} />
-                  <Text style={styles.conciergeText}>Cigar Concierge</Text>
+                  <Text style={styles.conciergeText}>AI Concierge</Text>
                 </>
               )}
             </Pressable>

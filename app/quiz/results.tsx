@@ -125,7 +125,7 @@ export default function QuizResultsScreen() {
       )}
 
       <View style={styles.cubanToggle}>
-        <Text style={styles.cubanLabel}>Include Cuban Cigars</Text>
+        <Text style={styles.cubanLabel}>Include Cuban</Text>
         <Switch
           value={includeCubans}
           onValueChange={setIncludeCubans}

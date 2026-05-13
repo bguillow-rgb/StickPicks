@@ -25,7 +25,7 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
   {
     key: 'strength',
     title: 'What strength range belongs in your humidor?',
-    subtitle: 'From mild everyday picks to full-power statement cigars',
+    subtitle: 'From mild everyday picks to full-power statement profiles',
     type: 'scale',
     tier: 'basic',
     options: [
@@ -39,7 +39,7 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
   {
     key: 'flavors',
     title: 'Which flavor profiles do you want in your collection?',
-    subtitle: "Pick up to 3 — we'll find cigars to add to your humidor",
+    subtitle: "Pick up to 3 — we'll find matches to add to your humidor",
     type: 'multi',
     max: 3,
     tier: 'basic',
@@ -61,7 +61,7 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
   {
     key: 'price',
     title: 'What price tier are you collecting at?',
-    subtitle: 'From everyday cigars to top-shelf collectibles',
+    subtitle: 'From everyday picks to top-shelf collectibles',
     type: 'scale',
     tier: 'basic',
     options: [

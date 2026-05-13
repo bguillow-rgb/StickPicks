@@ -41,6 +41,7 @@
     },
     "production": {
       "autoIncrement": true,
+      "channel": "production",
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://nwxnympcfwydxzjkmmas.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53eG55bXBjZnd5ZHh6amttbWFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTk5NTMsImV4cCI6MjA5MTA5NTk1M30.msEHOoSd8eLZj-oP9aKTT3S71_eA9u2u8ayEBkmt85E",

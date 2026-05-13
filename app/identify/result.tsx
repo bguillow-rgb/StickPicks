@@ -173,9 +173,9 @@ export default function IdentifyResultScreen() {
         setConfidence(result.confidence);
         setReasoning(result.reasoning);
       } catch (e: any) {
-        const msg = e?.message ?? 'Failed to identify cigar';
+        const msg = e?.message ?? 'Failed to identify';
         if (msg.includes('credit balance') || msg.includes('billing')) {
-          setError('Cigar scanning is temporarily unavailable. Please try again later.');
+          setError('Scanning is temporarily unavailable. Please try again later.');
         } else {
           setError(msg);
         }
@@ -472,7 +472,7 @@ export default function IdentifyResultScreen() {
           {!correcting && (
             <View style={[styles.correctionFooter, { paddingBottom: insets.bottom + SPACING.md }]}>
               <Pressable onPress={openSuggest} style={styles.suggestLink}>
-                <Text style={styles.suggestLinkText}>Can't find it? Suggest a cigar</Text>
+                <Text style={styles.suggestLinkText}>Can't find it? Make a suggestion</Text>
               </Pressable>
               <Pressable
                 onPress={() => {
@@ -526,7 +526,7 @@ export default function IdentifyResultScreen() {
           </View>
         )}
 
-        <Text style={styles.loadingTitle}>Identifying your cigar</Text>
+        <Text style={styles.loadingTitle}>Identifying...</Text>
         <Text style={styles.loadingSubtitle}>
           {allUris.length > 1
             ? `Reading frame ${frameIndex + 1} of ${allUris.length}…`
@@ -548,14 +548,14 @@ export default function IdentifyResultScreen() {
             <Ionicons name="close" size={24} color={COLORS.muted} />
           </Pressable>
           <View style={[styles.center, { flex: 1 }]}>
-            <Text style={styles.errorTitle}>Couldn't identify this cigar</Text>
+            <Text style={styles.errorTitle}>Couldn't identify this band</Text>
             <Text style={styles.errorSubtitle}>{error ?? 'No match found in our database'}</Text>
             <Text style={styles.tips}>
               Tip: hold the band centered with good light. Glare and motion blur make it tough.
             </Text>
             <Button title="Find It Manually" onPress={handleCorrect} style={{ marginTop: SPACING.md }} />
             <Button title="Try Again" variant="secondary" onPress={() => router.replace('/identify/camera')} style={{ marginTop: SPACING.sm }} />
-            <Button title="Suggest a Cigar" variant="ghost" onPress={openSuggest} style={{ marginTop: SPACING.sm }} />
+            <Button title="Make a Suggestion" variant="ghost" onPress={openSuggest} style={{ marginTop: SPACING.sm }} />
             <Button title="Go Home" variant="ghost" onPress={() => router.replace('/(tabs)')} style={{ marginTop: SPACING.xs }} />
           </View>
         </View>

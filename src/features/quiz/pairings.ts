@@ -71,7 +71,7 @@ const FLAVOR_DRINK_MAP: Record<string, DrinkPairing[]> = {
   // Nutty
   nut: [
     { drink: 'Amaretto', category: 'other', reason: 'Almond liqueur amplifies the nuttiness' },
-    { drink: 'Sherry (Oloroso)', category: 'wine', reason: 'Nutty sherry is a textbook cigar pairing' },
+    { drink: 'Sherry (Oloroso)', category: 'wine', reason: 'Nutty sherry — a textbook pairing' },
   ],
   almond: [
     { drink: 'Amaretto Sour', category: 'other', reason: 'Almond on almond — it just works' },
@@ -131,7 +131,7 @@ const DEEP_CUT_FLAVOR_DRINK_MAP: Record<string, DrinkPairing[]> = {
   ],
   cocoa: [
     { drink: 'Amaro Nonino', category: 'other', reason: 'Bittersweet Italian — cocoa with orange peel' },
-    { drink: 'Xocolatl Stout', category: 'beer', reason: 'Spiced cocoa stout made for a cigar' },
+    { drink: 'Xocolatl Stout', category: 'beer', reason: 'Spiced cocoa stout — bold and complementary' },
   ],
   earth: [
     { drink: 'Mezcal', category: 'other', reason: 'Smoky agave mirrors an earthy, loamy wrapper' },
@@ -198,20 +198,20 @@ const DEEP_CUT_FLAVOR_DRINK_MAP: Record<string, DrinkPairing[]> = {
 // Strength-based defaults when flavor matching is sparse
 const STRENGTH_DEFAULTS: Record<number, DrinkPairing[]> = {
   1: [
-    { drink: 'Champagne', category: 'wine', reason: 'Light and celebratory — lets a mild cigar shine' },
+    { drink: 'Champagne', category: 'wine', reason: 'Light and celebratory — lets a mild profile shine' },
     { drink: 'Café Latte', category: 'coffee', reason: 'Smooth and milky — won\'t overpower a mild stick' },
   ],
   2: [
-    { drink: 'Sauvignon Blanc', category: 'wine', reason: 'Crisp white wine complements a lighter cigar' },
+    { drink: 'Sauvignon Blanc', category: 'wine', reason: 'Crisp white wine complements a lighter profile' },
     { drink: 'Light Rum & Cola', category: 'rum', reason: 'Easy-going and approachable' },
   ],
   3: [
-    { drink: 'Bourbon', category: 'whiskey', reason: 'A versatile match for a medium-bodied cigar' },
+    { drink: 'Bourbon', category: 'whiskey', reason: 'A versatile match for a medium-bodied profile' },
     { drink: 'Medium Roast Coffee', category: 'coffee', reason: 'Balanced body pairs with balanced coffee' },
   ],
   4: [
-    { drink: 'Single Malt Scotch', category: 'whiskey', reason: 'Complex whisky for a complex cigar' },
-    { drink: 'Espresso', category: 'coffee', reason: 'Bold enough to stand up to a strong cigar' },
+    { drink: 'Single Malt Scotch', category: 'whiskey', reason: 'Complex whisky for a complex profile' },
+    { drink: 'Espresso', category: 'coffee', reason: 'Bold enough to stand up to a strong profile' },
   ],
   5: [
     { drink: 'Barrel-Proof Bourbon', category: 'whiskey', reason: 'Full power meets full power' },

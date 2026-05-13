@@ -57,8 +57,8 @@ export default function JournalScreen() {
         ListEmptyComponent={
           <EmptyState
             title="No tasting notes yet"
-            subtitle="Add tasting notes and ratings for cigars in your collection."
-            actionLabel="Browse Cigars"
+            subtitle="Add tasting notes and ratings for items in your collection."
+            actionLabel="Browse"
             onAction={() => router.push('/(tabs)/browse')}
           />
         }
@@ -69,7 +69,7 @@ export default function JournalScreen() {
           >
             <View style={styles.entryHeader}>
               <View style={{ flex: 1 }}>
-                <Text style={styles.entryName}>{item.cigar?.line ?? item.cigar?.name ?? 'Unknown Cigar'}</Text>
+                <Text style={styles.entryName}>{item.cigar?.line ?? item.cigar?.name ?? 'Unknown'}</Text>
                 <Text style={styles.entryBrand}>{item.cigar?.brand ?? ''}</Text>
               </View>
               <StarRating value={item.rating} size={14} />

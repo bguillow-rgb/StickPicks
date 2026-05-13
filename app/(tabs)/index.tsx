@@ -139,7 +139,7 @@ export default function HomeScreen() {
               <Text style={styles.ctaSubtitle}>
                 {!treatAsPro && remaining !== null
                   ? `${remaining} free identification${remaining !== 1 ? 's' : ''} remaining`
-                  : 'Point your camera at any cigar band to find it in the catalog'}
+                  : 'Point your camera at any band to find it in the catalog'}
               </Text>
             </View>
           </LinearGradient>

@@ -61,7 +61,7 @@ export function SuggestCigarSheet({ visible, onClose, onSubmitted, scanId }: Pro
       });
       track(EVENTS.SCAN_SUGGEST_CIGAR_SUBMITTED, { brand: b, line: l });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert('Thanks!', "We'll add this cigar after a quick review.");
+      Alert.alert('Thanks!', "We'll add it to the catalog after a quick review.");
       reset();
       onClose();
       onSubmitted?.();
@@ -81,13 +81,13 @@ export function SuggestCigarSheet({ visible, onClose, onSubmitted, scanId }: Pro
     >
       <View style={[styles.screen, { paddingTop: insets.top + SPACING.md }]}>
         <View style={styles.header}>
-          <Text style={styles.title}>Suggest a Cigar</Text>
+          <Text style={styles.title}>Make a Suggestion</Text>
           <Pressable onPress={onClose} hitSlop={12}>
             <Text style={styles.close}>Cancel</Text>
           </Pressable>
         </View>
         <Text style={styles.subtitle}>
-          Tell us what this cigar is and we'll add it to the catalog after a quick review.
+          Tell us what this is and we'll add it to the catalog after a quick review.
         </Text>
 
         <Text style={styles.label}>Brand *</Text>
