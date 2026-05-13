@@ -281,31 +281,34 @@ export default function RootLayout() {
     });
   }, []);
 
-  // OTA force-apply check on launch. Build 18 was the first build with a
-  // channel binding, but its default expo-updates behavior is to download
-  // updates in background and only apply them on the NEXT cold start — so
-  // every OTA needs two launches before the user sees it. That confused
-  // testing during the rejection cycle. This hook runs once per app start:
-  // checks for an update, downloads it if found, and reloads the bundle
-  // immediately so the user sees the new content on this very launch
-  // instead of the next.
+  // OTA update check on launch.
   //
-  // Guards:
-  //   - __DEV__: skip in dev (no update server attached)
-  //   - Errors swallowed: a flaky network shouldn't crash the app boot
-  //   - Only fires once on mount (empty dep array)
+  // Build 20 attempt: this hook called Updates.reloadAsync() inline as
+  // soon as a new bundle was available. That crashed the app — calling
+  // reloadAsync during React hydration / before the navigator was
+  // mounted left the app in an inconsistent state on cold start.
   //
-  // Cost: a single network round-trip during launch. Embedded bundle
-  // still loads first, so render isn't blocked.
+  // Build 21 fix: split download from apply. Always fetch the update if
+  // there is one (so the next natural launch picks it up — Expo's
+  // default safe behavior), but never reloadAsync mid-session. Each
+  // step is independently try/caught so any one failure can't crash
+  // the boot path. Skipped in __DEV__ (no update server attached).
+  //
+  // Trade-off: a new OTA still needs two launches to fully apply
+  // (launch 1 downloads, launch 2 applies). Slower than a forced
+  // reload, but stable. Apple's reviewer only sees the embedded
+  // binary on their first launch anyway, so the two-launch dance is
+  // a user experience issue, not a review-pass issue.
   useEffect(() => {
     if (__DEV__) return;
     (async () => {
       try {
         const result = await Updates.checkForUpdateAsync();
-        if (result.isAvailable) {
-          await Updates.fetchUpdateAsync();
-          await Updates.reloadAsync();
-        }
+        if (!result.isAvailable) return;
+        await Updates.fetchUpdateAsync();
+        // Intentionally NOT calling Updates.reloadAsync() here.
+        // The downloaded bundle is staged and will apply on the
+        // next cold launch.
       } catch {
         // Non-blocking — fall through to whatever bundle is currently active.
       }
