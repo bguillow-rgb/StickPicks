@@ -45,6 +45,17 @@ export default function BrowseScreen() {
   const ratingsMap = useCommunityRatings(displayedCigars.map((c) => c.id));
   const humidorMap = useHumidorStatuses(displayedCigars.map((c) => c.id));
 
+  // Per-fetch row cap. Pre-2026-05-13 this was 100, which capped the
+  // strength-chip filters at 100 of ~700 Mild cigars / ~1100 Medium /
+  // ~290 Full at current catalog size (~2,089 total). 500 covers each
+  // band with headroom; the FlatList virtualization handles render
+  // cost. Full server-side pagination (per the Pour Picks port
+  // template at ee5321b) is the proper long-term fix once the catalog
+  // grows past ~1,500 rows in any single facet — until then this
+  // bump removes 100% of the user-visible browse ceiling without the
+  // refactor risk during an in-flight App Review cycle.
+  const ROW_CAP = 500;
+
   const fetchByBrand = useCallback(async (brand: string) => {
     setLoading(true);
     setHasSearched(true);
@@ -54,7 +65,7 @@ export default function BrowseScreen() {
         .select('*')
         .eq('brand', brand)
         .order('name')
-        .limit(100);
+        .limit(ROW_CAP);
       setCigars((data as Cigar[]) ?? []);
     } catch {
       setCigars([]);
@@ -75,7 +86,7 @@ export default function BrowseScreen() {
         .gte('strength', min)
         .lte('strength', max)
         .order('brand')
-        .limit(100);
+        .limit(ROW_CAP);
       setCigars((data as Cigar[]) ?? []);
     } catch {
       setCigars([]);
@@ -94,13 +105,33 @@ export default function BrowseScreen() {
     setLoading(true);
     setHasSearched(true);
     try {
-      // Search brand as exact start-of-string match, name as contains
-      const { data } = await supabase
-        .from('cigars')
-        .select('*')
-        .or(`brand.ilike.${search}%,name.ilike.%${search}%`)
-        .order('brand')
-        .limit(100);
+      // Token-AND search: each whitespace-separated token must match
+      // somewhere in brand OR name. Pre-fix used a single .or() against
+      // the full multi-word phrase as a substring, which required the
+      // user's word order to exactly match the row's brand/name. That
+      // missed queries like "padron 1964 anniversary" because the
+      // literal substring "padron 1964" never appears (brand="Padron"
+      // doesn't include "1964"). The new pattern AND-chains one OR
+      // clause per token, so word order no longer matters and tokens
+      // can come from either column. Tokens <2 chars are dropped to
+      // keep PostgREST URL length manageable, with a fallback to the
+      // raw string for single-char searches. Ported from Pour Picks
+      // 72772ea (2026-05-12) and adapted from Pour Picks' search_text
+      // denorm column to Stick Picks' brand+name pair.
+      const normalized = search.trim().toLowerCase();
+      const tokens = normalized.split(/\s+/).filter((t) => t.length >= 2);
+
+      let q = supabase.from('cigars').select('*');
+      if (tokens.length === 0) {
+        const safe = normalized.replace(/[%_]/g, '');
+        q = q.or(`brand.ilike.%${safe}%,name.ilike.%${safe}%`);
+      } else {
+        for (const token of tokens) {
+          const safe = token.replace(/[%_]/g, '');
+          q = q.or(`brand.ilike.%${safe}%,name.ilike.%${safe}%`);
+        }
+      }
+      const { data } = await q.order('brand').limit(ROW_CAP);
       setCigars((data as Cigar[]) ?? []);
     } catch {
       setCigars([]);

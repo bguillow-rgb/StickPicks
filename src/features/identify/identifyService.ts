@@ -1,3 +1,4 @@
+import { decode as decodeBase64 } from 'base64-arraybuffer';
 import { File } from 'expo-file-system/next';
 import { supabase } from '@/lib/supabase';
 import { getDeviceId } from '@/lib/deviceId';
@@ -208,12 +209,19 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.jpg`;
     const filePath = user ? `${user.id}/${fileName}` : `anonymous/${fileName}`;
 
-    const imageResponse = await fetch(primaryUri);
-    const imageBlob = await imageResponse.blob();
+    // React Native's `fetch(uri).then(r => r.blob())` returns a Blob that
+    // is silently empty to Supabase Storage — every scan saved 0 bytes
+    // even though the upload returned success. Fix ported from Pour Picks
+    // (7d2db25, 2026-05-12): reuse the base64 we already computed for the
+    // Anthropic Vision call (line 86), decode it to an ArrayBuffer, and
+    // upload that. ArrayBuffer is the shape Supabase's RN upload path
+    // actually handles correctly.
+    const primaryBase64 = images[0]?.base64 ?? '';
+    const arrayBuffer = decodeBase64(primaryBase64);
 
     await supabase.storage
       .from('scan-uploads')
-      .upload(filePath, imageBlob, { contentType: primaryMediaType });
+      .upload(filePath, arrayBuffer, { contentType: primaryMediaType });
 
     const { data: urlData } = supabase.storage
       .from('scan-uploads')
