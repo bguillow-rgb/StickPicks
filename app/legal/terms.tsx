@@ -22,11 +22,11 @@ export default function TermsScreen() {
         indicatorStyle="white"
       >
         <Text style={styles.brand}>STICK PICKS</Text>
-        <Text style={styles.title}>Terms of Service</Text>
+        <Text style={styles.title}>Terms of Use</Text>
         <Text style={styles.effective}>Effective Date: April 14, 2026</Text>
 
         <Text style={styles.body}>
-          These Terms of Service ("Terms") govern your use of Stick Picks ("the app"), published by the Stick Picks team. By using the app, you agree to these Terms.
+          These Terms of Use ("Terms") govern your use of Stick Picks ("the app"), published by the Stick Picks team. By using the app, you agree to these Terms.
         </Text>
 
         <Text style={styles.h2}>1. Eligibility</Text>

@@ -68,16 +68,22 @@ export default function CameraScreen() {
   const handlePermission = useCallback(async () => {
     const granted = await requestPermission();
     if (!granted) {
+      // Apple §5.1.1(iv): no explicit exit BUTTON allowed on a pre-
+      // permission screen (Pour Picks ddcb15cf rejection). But silently
+      // redirecting after a denied request is fine — and is the only
+      // sane UX, since iOS only fires the system prompt ONCE and re-
+      // tapping Continue does nothing after a deny. Port from Pour
+      // Picks f3957f5.
       Alert.alert(
         'Camera access needed',
         'Enable camera access in Settings to scan bands.',
         [
-          { text: 'Cancel', style: 'cancel' },
           { text: 'Open Settings', onPress: () => Linking.openSettings() },
+          { text: 'Not now', onPress: () => router.replace('/(tabs)') },
         ]
       );
     }
-  }, [requestPermission]);
+  }, [requestPermission, router]);
 
   const handleFocus = useCallback(async (x: number, y: number) => {
     if (!cameraRef.current) return;
@@ -231,13 +237,23 @@ export default function CameraScreen() {
   }
 
   if (!hasPermission) {
+    // Apple §5.1.1(iv): pre-permission screen requirements (Pour Picks
+    // ddcb15cf rejection cycle):
+    //   - Primary button labeled "Continue" or "Next" (NOT "Grant
+    //     Permission" or "Allow")
+    //   - NO secondary exit button on this screen. Once the user
+    //     lands here, the only path forward is the OS prompt.
+    //
+    // If the user denies, handlePermission's Alert routes them back
+    // to home with a "Not now" option (allowed — that's after the
+    // user took action, not a passive exit affordance on the screen
+    // itself).
     return (
       <View style={[styles.screen, styles.center, { paddingTop: insets.top }]}>
         <Ionicons name="camera-outline" size={48} color={COLORS.muted} style={{ marginBottom: SPACING.md }} />
         <Text style={styles.permTitle}>Camera access needed</Text>
         <Text style={styles.permText}>Stick Picks uses the camera to identify bands.</Text>
-        <Button title="Grant Permission" onPress={handlePermission} style={{ marginTop: SPACING.md }} />
-        <Button title="Go Back" variant="ghost" onPress={() => router.back()} style={{ marginTop: SPACING.sm }} />
+        <Button title="Continue" onPress={handlePermission} style={{ marginTop: SPACING.md }} />
       </View>
     );
   }

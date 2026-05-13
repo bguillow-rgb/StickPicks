@@ -255,7 +255,7 @@ export default function ProfileScreen() {
         </Pressable>
         <Text style={styles.legalDot}>{'\u00B7'}</Text>
         <Pressable onPress={() => router.push('/legal/terms')}>
-          <Text style={styles.legalLink}>Terms of Service</Text>
+          <Text style={styles.legalLink}>Terms of Use</Text>
         </Pressable>
       </View>
 

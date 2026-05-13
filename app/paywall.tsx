@@ -95,24 +95,22 @@ export default function PaywallScreen() {
     : '$2.08/month billed annually';
 
   async function handlePurchase() {
-    if (isGuest) {
-      Alert.alert(
-        'Account Required',
-        'Create an account or sign in to subscribe to Pro. Your purchase will be linked to your account.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Sign In', onPress: () => router.push('/auth/login') },
-        ]
-      );
-      return;
-    }
-
+    // Apple §5.1.1(v): subscriptions for non-account-based content must be
+    // purchasable WITHOUT requiring sign-in first. Registration is allowed
+    // only as an optional add-on for cross-device sync, never as a
+    // precondition. Pour Picks was rejected for this exact pattern
+    // (rejection ddcb15cf, build #17) and fixed in a118d8a.
+    //
+    // RevenueCat anonymous purchases bind to $RCAnonymousID:* on the
+    // device; the entitlement still grants Pro features. If the user
+    // later signs in, identifyUser() in app/_layout.tsx ties the
+    // existing entitlement to their account.
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     const pkg = selectedPlan === 'yearly' ? yearlyPackage : monthlyPackage;
 
     if (pkg) {
-      // Real RevenueCat purchase
+      // Real RevenueCat purchase — works for guests + signed-in users.
       const success = await buy(pkg);
       if (success) router.back();
     } else {
@@ -122,18 +120,9 @@ export default function PaywallScreen() {
   }
 
   async function handleRestore() {
-    if (isGuest) {
-      Alert.alert(
-        'Account Required',
-        'Sign in to restore a previous purchase.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Sign In', onPress: () => router.push('/auth/login') },
-        ]
-      );
-      return;
-    }
-
+    // §5.1.1(v): restore must be available to guests too. RevenueCat
+    // restores anonymous purchases tied to the same Apple ID without
+    // requiring app-side accounts.
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
 
     if (yearlyPackage || monthlyPackage) {
@@ -159,14 +148,11 @@ export default function PaywallScreen() {
         <Ionicons name="close" size={24} color={COLORS.muted} />
       </Pressable>
 
-      {/* Guest banner */}
-      {isGuest && (
-        <Pressable onPress={() => router.push('/auth/login')} style={styles.guestBanner}>
-          <Ionicons name="person-outline" size={16} color={COLORS.accent} />
-          <Text style={styles.guestBannerText}>Sign in or create an account to subscribe</Text>
-          <Ionicons name="chevron-forward" size={14} color={COLORS.accent} />
-        </Pressable>
-      )}
+      {/* No more guest banner here. Pour Picks ddcb15cf rejection
+          (#5.1.1(v)) made it clear: any banner that implies sign-in is
+          required to subscribe is itself a gate, even if the button
+          below it works for guests. Guests now see an OPTIONAL
+          sign-in link below the purchase CTA, framed around sync. */}
 
       {/* Header */}
       <Text style={styles.header}>Stick Picks Pro</Text>
@@ -227,14 +213,32 @@ export default function PaywallScreen() {
             </Pressable>
           </View>
 
-          {/* Pre-purchase disclosure — Apple 3.1.2(a) requires this BEFORE the CTA. */}
+          {/* Apple §3.1.2(c) point-of-purchase disclosure block. Pour
+              Picks ddcb15cf re-rejection forced this layout: title +
+              auto-renew disclosure + Terms of Use + Privacy Policy
+              must all be visible TOGETHER at the point of purchase.
+              Bottom-of-page legal links don't count, and Apple's
+              exact wording is "Terms of Use" (not "Terms of
+              Service"). Apple §3.1.2(a) per-month equivalent for
+              annual plans is satisfied by the plan card layout
+              above. */}
+          <Text style={styles.preCtaTitle}>STICK PICKS PRO</Text>
           <Text style={styles.preCtaDisclosure}>
             {selectedPlan === 'yearly'
               ? `Auto-renews at ${yearlyPrice}/year until canceled.`
               : `Auto-renews at ${monthlyPrice}/month until canceled.`}
           </Text>
+          <View style={styles.preCtaLegalRow}>
+            <Pressable onPress={() => router.push('/legal/terms')}>
+              <Text style={styles.preCtaLegalLink}>Terms of Use</Text>
+            </Pressable>
+            <Text style={styles.preCtaLegalDot}>{'\u00B7'}</Text>
+            <Pressable onPress={() => router.push('/legal/privacy')}>
+              <Text style={styles.preCtaLegalLink}>Privacy Policy</Text>
+            </Pressable>
+          </View>
 
-          {/* CTA */}
+          {/* CTA — visible + tappable for guests too. Apple §5.1.1(v) */}
           <Button
             title={purchasing
               ? 'Processing...'
@@ -245,6 +249,17 @@ export default function PaywallScreen() {
             loading={purchasing}
             style={{ marginTop: SPACING.xs }}
           />
+
+          {/* Optional sync sign-in for guests (Pour Picks a118d8a pattern).
+              Demoted to a small text link BELOW the CTA so it never reads
+              as a precondition for purchase. */}
+          {isGuest && (
+            <Pressable onPress={() => router.push('/auth/login')} style={styles.syncLinkBtn}>
+              <Text style={styles.syncLinkText}>
+                Sign in to sync your humidor across devices (optional)
+              </Text>
+            </Pressable>
+          )}
         </>
       )}
 
@@ -257,16 +272,6 @@ export default function PaywallScreen() {
         Subscription automatically renews unless canceled at least 24 hours before the end of the current period.
         Subscriptions may be managed and auto-renewal may be turned off in your Account Settings after purchase.
       </Text>
-
-      <View style={styles.legalLinks}>
-        <Pressable onPress={() => router.push('/legal/privacy')}>
-          <Text style={styles.legalLink}>Privacy Policy</Text>
-        </Pressable>
-        <Text style={styles.legalDot}>{'\u00B7'}</Text>
-        <Pressable onPress={() => router.push('/legal/terms')}>
-          <Text style={styles.legalLink}>Terms of Service</Text>
-        </Pressable>
-      </View>
     </ScrollView>
   );
 }
@@ -394,31 +399,58 @@ const styles = StyleSheet.create({
     marginTop: 2,
     textAlign: 'center',
   },
+  // Point-of-purchase disclosure block (Apple §3.1.2(c)). Title +
+  // auto-renew + Terms of Use + Privacy must all read as ONE block
+  // immediately above the Start Pro CTA. Pour Picks ddcb15cf was
+  // re-rejected because legal links lived at the bottom of the
+  // scroll content; moved them up here to fix it for Stick Picks
+  // pre-emptively.
+  preCtaTitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1.4,
+    textAlign: 'center',
+    color: COLORS.accent,
+    marginTop: SPACING.md,
+  },
   preCtaDisclosure: {
     fontFamily: 'Cormorant',
     fontSize: 11,
     color: COLORS.subtle,
     textAlign: 'center',
-    marginTop: SPACING.md,
+    marginTop: 4,
   },
-  guestBanner: {
+  preCtaLegalRow: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.accent,
-    borderRadius: RADIUS.md,
-    paddingVertical: 10,
-    paddingHorizontal: SPACING.md,
-    marginBottom: SPACING.md,
+    alignItems: 'center',
+    gap: SPACING.sm,
+    marginTop: 4,
+    marginBottom: SPACING.xs,
   },
-  guestBannerText: {
+  preCtaLegalLink: {
     fontFamily: 'Cormorant',
-    fontSize: 13,
-    fontWeight: '700',
+    fontSize: 11,
     color: COLORS.accent,
+    textDecorationLine: 'underline',
+  },
+  preCtaLegalDot: {
+    color: COLORS.subtle,
+    fontSize: 11,
+  },
+  // Optional sync link for guests, sits below the Start Pro CTA.
+  // Demoted styling so it never reads as a precondition.
+  syncLinkBtn: {
+    alignItems: 'center',
+    marginTop: SPACING.sm,
+    paddingVertical: 8,
+  },
+  syncLinkText: {
+    fontFamily: 'Cormorant',
+    fontSize: 12,
+    color: COLORS.muted,
+    textDecorationLine: 'underline',
   },
   restoreBtn: {
     alignItems: 'center',
@@ -437,24 +469,7 @@ const styles = StyleSheet.create({
     color: COLORS.subtle,
     textAlign: 'center',
     marginTop: SPACING.sm,
+    marginBottom: SPACING.lg,
     lineHeight: 16,
-  },
-  legalLinks: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: SPACING.sm,
-    gap: SPACING.sm,
-    marginBottom: SPACING.md,
-  },
-  legalLink: {
-    fontFamily: 'Cormorant',
-    fontSize: 11,
-    color: COLORS.muted,
-    textDecorationLine: 'underline',
-  },
-  legalDot: {
-    color: COLORS.subtle,
-    fontSize: 11,
   },
 });
