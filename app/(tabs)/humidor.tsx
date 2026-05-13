@@ -507,10 +507,12 @@ export default function HumidorScreen() {
 
       {/* Sort chip row (Build 19, per humidor-sort-planning memory).
           Newest / Longest Resting / A-Z. Applies to all filter views
-          via compareForSort helper. */}
+          via compareForSort helper. Same flexGrow:0 trick as the
+          filter ScrollView above so the row doesn't expand to fill. */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.sortScroll}
         contentContainerStyle={styles.sortRow}
       >
         {HUMIDOR_SORT_KEYS.map((k) => {
@@ -968,12 +970,18 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   // Sort chip row (Build 19) — smaller than filter chips so the hierarchy
-  // reads correctly. Filter is primary, sort is secondary.
+  // reads correctly. Filter is primary, sort is secondary. flexGrow:0 on
+  // the ScrollView is essential — without it the horizontal ScrollView
+  // expands to fill remaining vertical space inside the column flex
+  // parent and the chips render as enormous vertical pills.
+  sortScroll: {
+    flexGrow: 0,
+    marginBottom: SPACING.sm,
+  },
   sortRow: {
     flexDirection: 'row',
     gap: 6,
-    paddingHorizontal: SPACING.md,
-    paddingBottom: SPACING.sm,
+    paddingRight: SPACING.md,
   },
   sortChip: {
     paddingVertical: 5,

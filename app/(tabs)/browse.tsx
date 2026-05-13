@@ -322,10 +322,13 @@ export default function BrowseScreen() {
                 </Pressable>
               </View>
               {/* Sort chip row (Build 19) — client-side sort over the
-                  already-fetched/deduped list. Cheap at 500-row cap. */}
+                  already-fetched/deduped list. Cheap at 500-row cap.
+                  flexGrow:0 on the ScrollView keeps it from expanding
+                  vertically inside the FlatList header. */}
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                style={styles.sortScroll}
                 contentContainerStyle={styles.sortRow}
               >
                 {SORT_KEYS.map((k) => {
@@ -442,10 +445,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.sm,
   },
+  // flexGrow:0 is critical — same lesson as humidor.tsx: a horizontal
+  // ScrollView inside a column flex parent expands to fill if not
+  // constrained, rendering its children as floor-to-ceiling pills.
+  sortScroll: {
+    flexGrow: 0,
+    marginBottom: SPACING.sm,
+  },
   sortRow: {
     flexDirection: 'row',
     gap: 8,
-    paddingBottom: SPACING.sm,
+    paddingRight: SPACING.md,
   },
   sortChip: {
     paddingVertical: 6,
