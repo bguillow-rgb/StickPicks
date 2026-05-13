@@ -28,8 +28,8 @@ const FEATURES = [
   },
   {
     icon: 'flask-outline' as const,
-    title: '9-Question Detailed Match',
-    desc: 'Top 10 catalog matches, scored to your profile. Free is 3 questions, 3 results.',
+    title: 'Detailed Humidor Builder',
+    desc: '9 questions, top 10 cigars for your collection, scored to your collecting profile. Free is 3 questions, 3 results.',
   },
   {
     icon: 'archive-outline' as const,

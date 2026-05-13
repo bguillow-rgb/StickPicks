@@ -14,12 +14,18 @@ export interface QuizQuestion {
 }
 
 // ── BASIC QUIZ (Free) — 3 questions, 30 seconds ─────────────────────────────
+//
+// Build 17 reframe (post-1.4.3 rejection of Build 16): questions are written
+// as collection-building prompts, not consumption-preference prompts. The app
+// is positioned as a hobby app for cigar collectors — Vivino for wine
+// cellars, Reverb for guitars, this for humidors. Every question asks "what
+// belongs in your collection," never "what should you smoke."
 
 export const BASIC_QUESTIONS: QuizQuestion[] = [
   {
     key: 'strength',
-    title: 'How strong do you like it?',
-    subtitle: 'From light and easy to full power',
+    title: 'What strength range belongs in your humidor?',
+    subtitle: 'From mild everyday picks to full-power statement cigars',
     type: 'scale',
     tier: 'basic',
     options: [
@@ -32,8 +38,8 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
   },
   {
     key: 'flavors',
-    title: 'Select flavor preferences',
-    subtitle: 'Pick up to 3 — this drives your catalog match',
+    title: 'Which flavor profiles do you want in your collection?',
+    subtitle: "Pick up to 3 — we'll find cigars to add to your humidor",
     type: 'multi',
     max: 3,
     tier: 'basic',
@@ -54,8 +60,8 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
   },
   {
     key: 'price',
-    title: "What's your budget?",
-    subtitle: 'From everyday cigars to special occasions',
+    title: 'What price tier are you collecting at?',
+    subtitle: 'From everyday cigars to top-shelf collectibles',
     type: 'scale',
     tier: 'basic',
     options: [
@@ -69,12 +75,17 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
 ];
 
 // ── ADVANCED QUIZ (Pro) — additional questions after the basic 3 ─────────────
+//
+// Build 17: the legacy `time` question ("Typical occasion?") was the only
+// remaining smoking-adjacent prompt. Replaced with `collector_style`, which
+// asks what kind of humidor the user is building. Maps cleanly onto popularity
+// and price tiers in scoring without leaking consumption language.
 
 export const ADVANCED_QUESTIONS: QuizQuestion[] = [
   {
     key: 'body',
-    title: 'What body do you prefer?',
-    subtitle: 'The weight and richness in the catalog profile',
+    title: 'What body range should your humidor cover?',
+    subtitle: 'The weight profile your collection should span',
     type: 'scale',
     tier: 'advanced',
     options: [
@@ -87,7 +98,7 @@ export const ADVANCED_QUESTIONS: QuizQuestion[] = [
   },
   {
     key: 'smoothness',
-    title: "What's your smoothness preference?",
+    title: 'What smoothness profile do you collect?',
     subtitle: 'Smooth and creamy or bold and robust?',
     type: 'choice',
     tier: 'advanced',
@@ -124,16 +135,16 @@ export const ADVANCED_QUESTIONS: QuizQuestion[] = [
     ],
   },
   {
-    key: 'time',
-    title: 'Typical occasion?',
-    subtitle: 'Different catalog profiles suit different times of day',
+    key: 'collector_style',
+    title: 'What kind of collector are you?',
+    subtitle: 'Different collectors want different humidors',
     type: 'choice',
     tier: 'advanced',
     options: [
-      { label: 'Morning / Coffee', value: 'morning' },
-      { label: 'Afternoon', value: 'midday' },
-      { label: 'Evening', value: 'evening' },
-      { label: 'Late Night', value: 'late' },
+      { label: 'Starter (focused selection)', value: 'starter' },
+      { label: 'Variety Builder (broad range)', value: 'variety' },
+      { label: 'Specialist (one origin or style)', value: 'specialist' },
+      { label: 'Connoisseur (rare and aged)', value: 'connoisseur' },
     ],
   },
   {

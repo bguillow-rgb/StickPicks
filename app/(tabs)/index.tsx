@@ -66,11 +66,13 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
-      {/* Welcome copy — pure reference/catalog framing. Apple's App Review
-          Guideline 1.4.3 flags copy that encourages tobacco consumption,
-          including daily nudges ("today!") and acquisition language. This
-          frames the app as a catalog reference, not a buying assistant. */}
-      <Text style={styles.welcome}>Your cigar reference</Text>
+      {/* Welcome copy — Build 17 pivot from passive "catalog reference"
+          framing (which Apple still rejected under 1.4.3 in Build 16) to
+          active hobby/collection framing. Positions the app like Vivino
+          for wine cellars or Reverb for guitars — a hobby app for
+          collectors curating a humidor. No daily-use nudges ("today!"),
+          no consumption verbs; the action verb is curation. */}
+      <Text style={styles.welcome}>Curate your humidor.</Text>
 
       {/* CTA Cards */}
       <View style={styles.cards}>
@@ -91,11 +93,11 @@ export default function HomeScreen() {
             <View style={styles.ctaTextBlock}>
               <View style={styles.ctaLabelRow}>
                 <View style={styles.ctaDot} />
-                <Text style={styles.ctaLabel}>CATALOG MATCH</Text>
+                <Text style={styles.ctaLabel}>HUMIDOR BUILDER</Text>
               </View>
-              <Text style={styles.ctaTitle}>Profile Match</Text>
+              <Text style={styles.ctaTitle}>Build Your Humidor</Text>
               <Text style={styles.ctaSubtitle}>
-                3 questions to surface catalog entries with similar profiles
+                3 questions to find cigars worth adding to your collection
               </Text>
             </View>
           </LinearGradient>
@@ -108,8 +110,8 @@ export default function HomeScreen() {
         >
           <Ionicons name="flask-outline" size={20} color={COLORS.accent} />
           <View style={{ flex: 1 }}>
-            <Text style={styles.ctaSmallTitle}>Detailed Match{!treatAsPro ? ' · Pro' : ''}</Text>
-            <Text style={styles.ctaSmallSub}>9 questions for precise catalog matching</Text>
+            <Text style={styles.ctaSmallTitle}>Detailed Humidor Builder{!treatAsPro ? ' · Pro' : ''}</Text>
+            <Text style={styles.ctaSmallSub}>9 questions for a precision collection match</Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={COLORS.muted} />
         </Pressable>
@@ -148,7 +150,7 @@ export default function HomeScreen() {
           Showing "2,089 cigars" reads small next to competitors like Cigar
           Scanner (~13k) and plants a stale-catalog impression before the
           user has even tried the app. */}
-      <Text style={styles.footer}>Reference catalog · updated weekly</Text>
+      <Text style={styles.footer}>For cigar collectors · curated weekly</Text>
     </View>
   );
 }

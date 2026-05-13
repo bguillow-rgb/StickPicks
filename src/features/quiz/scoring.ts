@@ -112,36 +112,59 @@ export function scoreQuiz(answers: QuizAnswers, cigars: Cigar[]): ScoredCigar[] 
       }
     }
 
-    // Time of day adjustment (bonus for advanced quiz)
-    if (answers.time) {
-      const isMild = (cigar.strength ?? 3) <= 2;
-      const isFull = (cigar.strength ?? 3) >= 4;
+    // Collector style adjustment (Build 17 — replaces legacy `time` axis).
+    // Different collectors want different humidors; we bias the recommendation
+    // mix using popularity_tier (1=deep cut, 5=iconic) and price_tier.
+    //
+    //   starter      → favors recognized names at accessible prices, so a
+    //                  first-time collector ends up with a humidor full of
+    //                  cigars they can actually find at any local shop.
+    //   variety      → no bias (broad humidor).
+    //   specialist   → amplifies the wrapper/origin match the user already
+    //                  picked (handled below in the wrapper/origin blocks).
+    //   connoisseur  → favors deep cuts at premium prices, biased toward
+    //                  rarer collection-worthy entries.
+    if (answers.collector_style) {
+      const pop = cigar.popularity_tier ?? 3;
+      const price = cigar.price_tier ?? 3;
 
-      if (answers.time === 'morning' && isMild) score += 3;
-      if (answers.time === 'late' && isFull) score += 3;
-      if (answers.time === 'evening' && isFull) score += 2;
-      if (answers.time === 'midday') score += 1; // slight boost for any cigar midday
+      if (answers.collector_style === 'starter') {
+        if (pop >= 4) score += 2;
+        if (price <= 2) score += 2;
+        if (pop >= 4 && price <= 3) reasons.push('Accessible starter pick');
+      } else if (answers.collector_style === 'connoisseur') {
+        if (pop <= 2) score += 2;
+        if (price >= 4) score += 2;
+        if (pop <= 2 && price >= 4) reasons.push('Rare connoisseur pick');
+      }
+      // 'variety' and 'specialist' get no popularity/price bias here —
+      // specialist's amplification lives in the wrapper/origin blocks.
     }
 
-    // Wrapper preference (bonus for advanced quiz, max 5 points)
+    // Specialist collectors care more than anyone about wrapper/origin
+    // fidelity — they're building a focused collection around one style.
+    // Apply a multiplier to the wrapper and origin bonuses below.
+    const specialistMult = answers.collector_style === 'specialist' ? 2 : 1;
+
+    // Wrapper preference (bonus for advanced quiz, max 5 points base)
     if (answers.wrapper && answers.wrapper !== 'any' && cigar.wrapper) {
       const w = cigar.wrapper.toLowerCase();
       if (answers.wrapper === 'connecticut' && w.includes('connecticut')) {
-        score += 5;
+        score += 5 * specialistMult;
         reasons.push('Connecticut wrapper match');
       } else if (answers.wrapper === 'habano' && (w.includes('habano') || w.includes('corojo'))) {
-        score += 5;
+        score += 5 * specialistMult;
         reasons.push('Habano wrapper match');
       } else if (answers.wrapper === 'maduro' && (w.includes('maduro') || w.includes('oscuro') || w.includes('broadleaf'))) {
-        score += 5;
+        score += 5 * specialistMult;
         reasons.push('Maduro wrapper match');
       }
     }
 
-    // Origin preference (bonus for advanced quiz, max 5 points)
+    // Origin preference (bonus for advanced quiz, max 5 points base)
     if (answers.origin && answers.origin !== 'any' && cigar.origin) {
       if (cigar.origin.toLowerCase() === answers.origin.toLowerCase()) {
-        score += 5;
+        score += 5 * specialistMult;
         reasons.push(`Made in ${cigar.origin}`);
       }
     }

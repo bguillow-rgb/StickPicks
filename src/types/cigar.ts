@@ -74,7 +74,13 @@ export interface QuizAnswers {
   strength: number | null;
   smoothness: string | null;
   body: number | null;
-  time: string | null;
+  // Build 17: legacy `time` ("Typical occasion?") removed because it was the
+  // only smoking-adjacent question after the Build 16 1.4.3 reframe failed.
+  // Replaced with `collector_style` which expresses what kind of humidor the
+  // user is building. Old QuizAnswers rows stored in `profiles.taste_profile`
+  // may still carry a `time` value — TS is structural so the runtime ignores
+  // it; scoring no longer reads it.
+  collector_style: string | null;
   price: number | null;
   flavors: string[];
   adventure: string | null;

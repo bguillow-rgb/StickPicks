@@ -23,7 +23,7 @@ export default function QuizScreen() {
     strength: null,
     smoothness: null,
     body: null,
-    time: null,
+    collector_style: null,
     price: null,
     flavors: [],
     adventure: null,
@@ -160,7 +160,7 @@ export default function QuizScreen() {
           <View style={styles.multiFooter}>
             <Text style={styles.hint}>Selected {answers.flavors.length} of {q.max ?? 3}</Text>
             <Button
-              title={isLast ? (computing ? 'Searching...' : 'View Catalog Matches') : 'Next'}
+              title={isLast ? (computing ? 'Curating...' : 'View Humidor Picks') : 'Next'}
               onPress={() => isLast ? navigateToResults(answers) : setStep((s) => s + 1)}
               disabled={!canContinueMulti || computing}
               loading={computing}

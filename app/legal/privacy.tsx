@@ -44,7 +44,7 @@ export default function PrivacyScreen() {
         </Text>
 
         <Text style={styles.h2}>2. How We Use Your Information</Text>
-        <Text style={styles.bullet}>•  To provide cigar identification, catalog matching, and personalized reference results</Text>
+        <Text style={styles.bullet}>•  To provide cigar identification, humidor recommendations, and personalized collection results</Text>
         <Text style={styles.bullet}>•  To sync your humidor, journal, and scan history across devices</Text>
         <Text style={styles.bullet}>•  To improve our cigar identification accuracy using anonymized scan data</Text>
         <Text style={styles.bullet}>•  To manage your subscription and account</Text>

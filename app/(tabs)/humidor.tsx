@@ -436,7 +436,7 @@ export default function HumidorScreen() {
           ListEmptyComponent={
             <EmptyState
               title="Your humidor is empty"
-              subtitle="Save catalog entries to track in your collection."
+              subtitle="Save cigars to track in your collection."
               actionLabel="Browse Cigars"
               onAction={() => router.push('/(tabs)/browse')}
             />
@@ -694,7 +694,7 @@ export default function HumidorScreen() {
               title={filter === 'wishlist' ? 'Your wishlist is empty' : 'Nothing logged here yet'}
               subtitle={
                 filter === 'wishlist'
-                  ? 'Save catalog entries you want to add to your collection.'
+                  ? 'Save cigars you want to add to your collection.'
                   : 'Cigars you mark as logged will appear here with your notes.'
               }
               actionLabel="Browse Cigars"
