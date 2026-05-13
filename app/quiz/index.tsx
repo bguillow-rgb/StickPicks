@@ -115,19 +115,17 @@ export default function QuizScreen() {
       </View>
 
       {/* Hero — humidor photography reinforcing the hobby/collection
-          framing. Basic quiz: closed humidor corner with gold inlay
-          (no cigars in frame). Pro quiz: open premium humidor showing
-          curated inventory. Both photos are by Considerate Agency on
-          Unsplash (same shoot — visual family across the two tiers),
-          shipped under the Unsplash License. Per Apple 1.4.3: imagery
-          shows the humidor as collector furniture, never lit cigars,
-          smoke, ash, or consumption activity. */}
+          framing. Same image used for both Free and Pro quiz tiers
+          because the original closed-humidor macro for Free read as
+          an unrecognizable corner zoom on a real device. The open
+          premium humidor (Considerate Agency on Unsplash, shipped
+          under the Unsplash License) reads as a humidor at any size.
+          Per Apple 1.4.3: imagery shows the humidor as collector
+          furniture, never lit cigars, smoke, ash, or consumption
+          activity. The unused humidor-quiz-basic.jpg asset is
+          retained for a future re-source if we want tier variation. */}
       <Image
-        source={
-          isAdvanced
-            ? require('../../assets/images/humidor-quiz-advanced.jpg')
-            : require('../../assets/images/humidor-quiz-basic.jpg')
-        }
+        source={require('../../assets/images/humidor-quiz-advanced.jpg')}
         style={styles.hero}
         resizeMode="cover"
       />
