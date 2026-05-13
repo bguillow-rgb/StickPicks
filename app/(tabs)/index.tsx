@@ -97,7 +97,7 @@ export default function HomeScreen() {
               </View>
               <Text style={styles.ctaTitle}>Build Your Humidor</Text>
               <Text style={styles.ctaSubtitle}>
-                3 questions to find cigars worth adding to your collection
+                3 questions to expand your humidor
               </Text>
             </View>
           </LinearGradient>
