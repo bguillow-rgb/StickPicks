@@ -13,13 +13,14 @@ export interface QuizQuestion {
   tier: 'basic' | 'advanced';
 }
 
-// ── BASIC QUIZ (Free) — 3 questions, 30 seconds ─────────────────────────────
+// ── BASIC QUIZ (Free) — 5 questions ──────────────────────────────────────────
 //
-// Build 17 reframe (post-1.4.3 rejection of Build 16): questions are written
-// as collection-building prompts, not consumption-preference prompts. The app
-// is positioned as a hobby app for cigar collectors — Vivino for wine
-// cellars, Reverb for guitars, this for humidors. Every question asks "what
-// belongs in your collection," never "what should you smoke."
+// Pour Picks pattern (commit c433f8b, 2026-05-12): basic = first 5 of a 10-
+// question deck; advanced = the full 10. Both tiers fill the same scoring
+// shape, advanced just gets more axes. Stick Picks port: promoted Wrapper +
+// Adventure from advanced to basic — both are vocab-light, no consumption
+// verbs, and reshape ranking meaningfully (wrapper is a hard filter signal,
+// adventure controls classics-vs-deep-cut bias).
 
 export const BASIC_QUESTIONS: QuizQuestion[] = [
   {
@@ -72,14 +73,40 @@ export const BASIC_QUESTIONS: QuizQuestion[] = [
       { label: 'Top-Shelf', value: 5 },
     ],
   },
+  {
+    key: 'wrapper',
+    title: 'Wrapper preference?',
+    subtitle: 'The outer leaf shapes the whole experience',
+    type: 'choice',
+    tier: 'basic',
+    options: [
+      { label: 'Connecticut (mild, creamy)', value: 'connecticut' },
+      { label: 'Habano (spicy, complex)', value: 'habano' },
+      { label: 'Maduro (dark, sweet)', value: 'maduro' },
+      { label: 'No Preference', value: 'any' },
+    ],
+  },
+  {
+    key: 'adventure',
+    title: 'How adventurous are you?',
+    subtitle: 'Limit results to classics or open them up?',
+    type: 'choice',
+    tier: 'basic',
+    options: [
+      { label: 'Stick to Classics', value: 'classic' },
+      { label: 'Open to Suggestions', value: 'middle' },
+      { label: 'Surprise Me', value: 'surprise' },
+    ],
+  },
 ];
 
-// ── ADVANCED QUIZ (Pro) — additional questions after the basic 3 ─────────────
+// ── ADVANCED QUIZ (Pro) — additional 5 questions after the basic 5 ───────────
 //
-// Build 17: the legacy `time` question ("Typical occasion?") was the only
-// remaining smoking-adjacent prompt. Replaced with `collector_style`, which
-// asks what kind of humidor the user is building. Maps cleanly onto popularity
-// and price tiers in scoring without leaking consumption language.
+// Build 19: vitola added as the 10th question to round out the deck. Real
+// signal — different vitolas suit different occasions in a collection (a
+// connoisseur might want a mix of formats, a starter might want robusto-
+// only). Scoring boost is small (±2) to keep flavor/strength the dominant
+// signals.
 
 export const ADVANCED_QUESTIONS: QuizQuestion[] = [
   {
@@ -109,19 +136,6 @@ export const ADVANCED_QUESTIONS: QuizQuestion[] = [
     ],
   },
   {
-    key: 'wrapper',
-    title: 'Wrapper preference?',
-    subtitle: 'The outer leaf shapes the whole experience',
-    type: 'choice',
-    tier: 'advanced',
-    options: [
-      { label: 'Connecticut (mild, creamy)', value: 'connecticut' },
-      { label: 'Habano (spicy, complex)', value: 'habano' },
-      { label: 'Maduro (dark, sweet)', value: 'maduro' },
-      { label: 'No Preference', value: 'any' },
-    ],
-  },
-  {
     key: 'origin',
     title: 'Origin preference?',
     subtitle: 'Where the tobacco is grown matters',
@@ -148,15 +162,17 @@ export const ADVANCED_QUESTIONS: QuizQuestion[] = [
     ],
   },
   {
-    key: 'adventure',
-    title: 'How adventurous are you?',
-    subtitle: 'Limit results to classics or open them up?',
+    key: 'vitola',
+    title: 'Vitola preference?',
+    subtitle: 'The size and shape that fits your collection',
     type: 'choice',
     tier: 'advanced',
     options: [
-      { label: 'Stick to Classics', value: 'classic' },
-      { label: 'Open to Suggestions', value: 'middle' },
-      { label: 'Surprise Me', value: 'surprise' },
+      { label: 'Robusto (compact, balanced)', value: 'robusto' },
+      { label: 'Toro (longer, steady burn)', value: 'toro' },
+      { label: 'Torpedo (tapered, focused)', value: 'torpedo' },
+      { label: 'Churchill (long, formal)', value: 'churchill' },
+      { label: 'No Preference', value: 'any' },
     ],
   },
 ];

@@ -97,7 +97,7 @@ export default function HomeScreen() {
               </View>
               <Text style={styles.ctaTitle}>Build Your Humidor</Text>
               <Text style={styles.ctaSubtitle}>
-                3 questions to expand your humidor
+                5 questions to expand your humidor
               </Text>
             </View>
           </LinearGradient>
@@ -111,7 +111,7 @@ export default function HomeScreen() {
           <Ionicons name="flask-outline" size={20} color={COLORS.accent} />
           <View style={{ flex: 1 }}>
             <Text style={styles.ctaSmallTitle}>Detailed Humidor Builder{!treatAsPro ? ' · Pro' : ''}</Text>
-            <Text style={styles.ctaSmallSub}>9 questions for a precision collection match</Text>
+            <Text style={styles.ctaSmallSub}>10 questions for a precision collection match</Text>
           </View>
           <Ionicons name="chevron-forward" size={16} color={COLORS.muted} />
         </Pressable>

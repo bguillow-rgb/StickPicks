@@ -15,6 +15,7 @@ import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
+import * as Updates from 'expo-updates';
 import { StatusBar } from 'expo-status-bar';
 import Animated, {
   useSharedValue,
@@ -278,6 +279,37 @@ export default function RootLayout() {
     initRevenueCat().catch((e) => {
       if (__DEV__) console.warn('[RevenueCat] Init failed:', e);
     });
+  }, []);
+
+  // OTA force-apply check on launch. Build 18 was the first build with a
+  // channel binding, but its default expo-updates behavior is to download
+  // updates in background and only apply them on the NEXT cold start — so
+  // every OTA needs two launches before the user sees it. That confused
+  // testing during the rejection cycle. This hook runs once per app start:
+  // checks for an update, downloads it if found, and reloads the bundle
+  // immediately so the user sees the new content on this very launch
+  // instead of the next.
+  //
+  // Guards:
+  //   - __DEV__: skip in dev (no update server attached)
+  //   - Errors swallowed: a flaky network shouldn't crash the app boot
+  //   - Only fires once on mount (empty dep array)
+  //
+  // Cost: a single network round-trip during launch. Embedded bundle
+  // still loads first, so render isn't blocked.
+  useEffect(() => {
+    if (__DEV__) return;
+    (async () => {
+      try {
+        const result = await Updates.checkForUpdateAsync();
+        if (result.isAvailable) {
+          await Updates.fetchUpdateAsync();
+          await Updates.reloadAsync();
+        }
+      } catch {
+        // Non-blocking — fall through to whatever bundle is currently active.
+      }
+    })();
   }, []);
 
   // Listen for auth state changes + sync RevenueCat user

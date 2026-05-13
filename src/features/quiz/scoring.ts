@@ -169,6 +169,22 @@ export function scoreQuiz(answers: QuizAnswers, cigars: Cigar[]): ScoredCigar[] 
       }
     }
 
+    // Vitola preference (Build 19 — small ±2 boost when format matches).
+    // Match against cigar.vitola (which is sometimes null on unenriched
+    // rows). Substring match because vitola fields in the catalog include
+    // qualifiers ("Robusto Gordo", "Toro Grande"). Skip entirely on 'any'
+    // or when cigar.vitola is null — never punishes unenriched rows.
+    if (answers.vitola && answers.vitola !== 'any' && cigar.vitola) {
+      const v = cigar.vitola.toLowerCase();
+      if (v.includes(answers.vitola.toLowerCase())) {
+        score += 2;
+        // Title-case the user's choice for the reason line ("Robusto",
+        // "Toro" etc. — never the raw lowercase enum value).
+        const label = answers.vitola.charAt(0).toUpperCase() + answers.vitola.slice(1);
+        reasons.push(`${label} vitola match`);
+      }
+    }
+
     return { cigar, score, reasons };
   });
 

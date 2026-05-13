@@ -37,6 +37,44 @@ const FILTER_LABELS: Record<Filter, string> = {
   smoked: 'Logged',
 };
 
+// Humidor sort options (Build 19, per memory plan
+// project_humidor_sort_planning.md). Applied to grouped, ownedGroups, and
+// the items array used by wishlist/logged filters.
+type HumidorSortKey = 'newest' | 'oldest_acquired' | 'az';
+const HUMIDOR_SORT_LABELS: Record<HumidorSortKey, string> = {
+  newest: 'Newest',
+  oldest_acquired: 'Longest Resting',
+  az: 'A–Z',
+};
+const HUMIDOR_SORT_KEYS: HumidorSortKey[] = ['newest', 'oldest_acquired', 'az'];
+
+// Helper: shared comparator factory. Returns a comparator function for
+// items/groups exposing `latest_updated_at`-style + acquired_at + brand/line.
+// Used by grouped, ownedGroups, and the raw items array.
+function compareForSort<T extends {
+  brand?: string;
+  line?: string;
+  acquired_at?: string | null;
+  newest_at: string;
+}>(a: T, b: T, key: HumidorSortKey): number {
+  if (key === 'newest') {
+    return b.newest_at.localeCompare(a.newest_at);
+  }
+  if (key === 'oldest_acquired') {
+    // Nulls last — items without acquired_at sort after items with it.
+    const aA = a.acquired_at ?? '';
+    const bA = b.acquired_at ?? '';
+    if (!aA && !bA) return 0;
+    if (!aA) return 1;
+    if (!bA) return -1;
+    return aA.localeCompare(bA); // oldest first = longest resting
+  }
+  // 'az'
+  const ba = (a.brand ?? '').localeCompare(b.brand ?? '');
+  if (ba !== 0) return ba;
+  return (a.line ?? '').localeCompare(b.line ?? '');
+}
+
 export default function HumidorScreen() {
   const router = useRouter();
   const { filter: filterParam } = useLocalSearchParams<{ filter?: string }>();
@@ -47,6 +85,7 @@ export default function HumidorScreen() {
   const [items, setItems] = useState<HumidorItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [myReviews, setMyReviews] = useState<Map<string, CigarReview>>(new Map());
+  const [sortKey, setSortKey] = useState<HumidorSortKey>('newest');
   const listRef = useRef<FlatList>(null);
 
   // Treat user as Pro until the persisted state has rehydrated. Otherwise Pro users
@@ -195,9 +234,35 @@ export default function HumidorScreen() {
         });
       }
     }
-    return Array.from(map.values()).sort(
-      (a, b) => b.latest_updated_at.localeCompare(a.latest_updated_at)
-    );
+    return Array.from(map.values()).sort((a, b) => {
+      // Build 19: respect the user-chosen humidor sort. Map grouped fields
+      // onto the comparator's expected shape — `newest_at` from
+      // `latest_updated_at`, brand/line/acquired_at from the cigar + the
+      // most recent humidor item in the group.
+      const groupAcquired = a.items.reduce<string | null>(
+        (acc, it) => (it.acquired_at && (!acc || it.acquired_at < acc) ? it.acquired_at : acc),
+        null,
+      );
+      const groupBAcquired = b.items.reduce<string | null>(
+        (acc, it) => (it.acquired_at && (!acc || it.acquired_at < acc) ? it.acquired_at : acc),
+        null,
+      );
+      return compareForSort(
+        {
+          brand: a.cigar?.brand ?? '',
+          line: a.cigar?.line ?? a.cigar?.name ?? '',
+          acquired_at: groupAcquired,
+          newest_at: a.latest_updated_at,
+        },
+        {
+          brand: b.cigar?.brand ?? '',
+          line: b.cigar?.line ?? b.cigar?.name ?? '',
+          acquired_at: groupBAcquired,
+          newest_at: b.latest_updated_at,
+        },
+        sortKey,
+      );
+    });
   })();
 
   // Owned-card redesign: group by brand+line so "Padrón 1964 Torpedo" and
@@ -233,10 +298,48 @@ export default function HumidorScreen() {
         });
       }
     }
-    return Array.from(map.values()).sort((a, b) =>
-      b.latest_updated_at.localeCompare(a.latest_updated_at)
+    return Array.from(map.values()).sort((a, b) => {
+      // Same shape adaptation as `grouped` above.
+      const aAcquired = a.items.reduce<string | null>(
+        (acc, it) => (it.acquired_at && (!acc || it.acquired_at < acc) ? it.acquired_at : acc),
+        null,
+      );
+      const bAcquired = b.items.reduce<string | null>(
+        (acc, it) => (it.acquired_at && (!acc || it.acquired_at < acc) ? it.acquired_at : acc),
+        null,
+      );
+      return compareForSort(
+        { brand: a.brand, line: a.line, acquired_at: aAcquired, newest_at: a.latest_updated_at },
+        { brand: b.brand, line: b.line, acquired_at: bAcquired, newest_at: b.latest_updated_at },
+        sortKey,
+      );
+    });
+  }, [filter, items, sortKey]);
+
+  // Sorted items for the wishlist + logged filters (non-grouped views).
+  // The grouped + ownedGroups paths above handle their own sort; this
+  // covers the plain-list filters.
+  const sortedItems: HumidorItem[] = useMemo(() => {
+    if (filter === 'all' || filter === 'owned') return items;
+    const arr = items.slice();
+    return arr.sort((a, b) =>
+      compareForSort(
+        {
+          brand: a.cigar?.brand ?? '',
+          line: a.cigar?.line ?? a.cigar?.name ?? '',
+          acquired_at: a.acquired_at,
+          newest_at: a.updated_at,
+        },
+        {
+          brand: b.cigar?.brand ?? '',
+          line: b.cigar?.line ?? b.cigar?.name ?? '',
+          acquired_at: b.acquired_at,
+          newest_at: b.updated_at,
+        },
+        sortKey,
+      ),
     );
-  }, [filter, items]);
+  }, [items, filter, sortKey]);
 
   // Inline-edit / modal state for owned rows.
   const [editingPriceItemId, setEditingPriceItemId] = useState<string | null>(null);
@@ -361,7 +464,7 @@ export default function HumidorScreen() {
     return days >= 0 ? days : null;
   };
 
-  const filtered = items;
+  const filtered = sortedItems;
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + SPACING.sm }]}>
@@ -396,6 +499,30 @@ export default function HumidorScreen() {
                 style={[styles.chipText, filter === f && styles.chipTextActive, locked && styles.chipTextLocked]}
               >
                 {locked ? `${FILTER_LABELS[f]} 🔒` : FILTER_LABELS[f]}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      {/* Sort chip row (Build 19, per humidor-sort-planning memory).
+          Newest / Longest Resting / A-Z. Applies to all filter views
+          via compareForSort helper. */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.sortRow}
+      >
+        {HUMIDOR_SORT_KEYS.map((k) => {
+          const isActive = k === sortKey;
+          return (
+            <Pressable
+              key={k}
+              onPress={() => setSortKey(k)}
+              style={[styles.sortChip, isActive && styles.sortChipActive]}
+            >
+              <Text style={[styles.sortChipText, isActive && styles.sortChipTextActive]}>
+                {HUMIDOR_SORT_LABELS[k]}
               </Text>
             </Pressable>
           );
@@ -839,6 +966,35 @@ const styles = StyleSheet.create({
   chipLocked: {
     borderColor: COLORS.border,
     opacity: 0.5,
+  },
+  // Sort chip row (Build 19) — smaller than filter chips so the hierarchy
+  // reads correctly. Filter is primary, sort is secondary.
+  sortRow: {
+    flexDirection: 'row',
+    gap: 6,
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.sm,
+  },
+  sortChip: {
+    paddingVertical: 5,
+    paddingHorizontal: 11,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.card,
+  },
+  sortChipActive: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+  sortChipText: {
+    fontFamily: 'Cormorant',
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.muted,
+  },
+  sortChipTextActive: {
+    color: COLORS.bg,
   },
   chipTextLocked: {
     color: COLORS.muted,

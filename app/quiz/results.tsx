@@ -42,9 +42,9 @@ export default function QuizResultsScreen() {
   try {
     answers = params.answers
       ? JSON.parse(params.answers)
-      : { strength: null, smoothness: null, body: null, collector_style: null, price: null, flavors: [], adventure: null, wrapper: null, origin: null };
+      : { strength: null, smoothness: null, body: null, collector_style: null, price: null, flavors: [], adventure: null, wrapper: null, origin: null, vitola: null };
   } catch {
-    answers = { strength: null, smoothness: null, body: null, collector_style: null, price: null, flavors: [], adventure: null, wrapper: null, origin: null };
+    answers = { strength: null, smoothness: null, body: null, collector_style: null, price: null, flavors: [], adventure: null, wrapper: null, origin: null, vitola: null };
   }
 
   useEffect(() => {
@@ -82,7 +82,10 @@ export default function QuizResultsScreen() {
   })();
 
   const top = deduped[0];
-  const maxAlts = isAdvanced ? 9 : 2; // basic: top 3 total, advanced: top 10
+  // Build 19: basic returns top 10 total now (was 3). Mirrors Pour Picks
+  // c433f8b — quick-match user gets the same browseable result set as
+  // advanced. Quality differs in ranking, not count.
+  const maxAlts = 9; // 1 hero + 9 alts = 10 total for both basic and advanced
   const alts = deduped.slice(1, maxAlts + 1);
 
   return (
@@ -139,7 +142,12 @@ export default function QuizResultsScreen() {
           <CigarImage cigar={top.cigar} style={styles.heroImg} />
           <Text style={styles.kicker}>HUMIDOR PICK</Text>
           <Text style={styles.heroName}>{top.cigar.line ?? top.cigar.name}</Text>
-          <Text style={styles.heroBrand}>{top.cigar.brand}</Text>
+          <View style={styles.heroBrandRow}>
+            <Text style={styles.heroBrand}>{top.cigar.brand}</Text>
+            {top.cigar.price_tier != null && top.cigar.price_tier >= 1 && top.cigar.price_tier <= 5 && (
+              <Text style={styles.heroPriceTier}>{'$'.repeat(top.cigar.price_tier)}</Text>
+            )}
+          </View>
           <View style={{ marginTop: SPACING.sm }}>
             <Meter label="Strength" value={top.cigar.strength} />
             <Meter label="Body" value={top.cigar.body} />
@@ -195,7 +203,12 @@ export default function QuizResultsScreen() {
                 <CigarImage cigar={item.cigar} style={styles.altThumb} />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.altName}>{item.cigar.line ?? item.cigar.name}</Text>
-                  <Text style={styles.altBrand}>{item.cigar.brand}</Text>
+                  <View style={styles.altBrandRow}>
+                    <Text style={styles.altBrand}>{item.cigar.brand}</Text>
+                    {item.cigar.price_tier != null && item.cigar.price_tier >= 1 && item.cigar.price_tier <= 5 && (
+                      <Text style={styles.altPriceTier}>{'$'.repeat(item.cigar.price_tier)}</Text>
+                    )}
+                  </View>
                 </View>
                 <Text style={styles.altRank}>#{i + 2}</Text>
               </View>
@@ -221,7 +234,7 @@ export default function QuizResultsScreen() {
         <Card style={styles.proCard}>
           <Text style={styles.proTitle}>Want a more precise humidor match?</Text>
           <Text style={styles.proSub}>
-            Unlock the Detailed Humidor Builder — 9 questions, wrapper and origin preferences, collector-style tuning, and top 10 picks for your collection.
+            Unlock the Detailed Humidor Builder — 10 questions including origin, body, vitola, and collector-style tuning, scored to your full collecting profile.
           </Text>
           <Button
             title="Upgrade to Pro"
@@ -327,7 +340,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Cormorant',
     fontSize: 14,
     color: COLORS.muted,
+  },
+  heroBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
     marginBottom: SPACING.sm,
+  },
+  heroPriceTier: {
+    fontFamily: 'Cormorant',
+    fontSize: 13,
+    fontWeight: '700',
+    color: COLORS.accent,
+    letterSpacing: 1,
   },
   flavors: {
     flexDirection: 'row',
@@ -419,7 +444,19 @@ const styles = StyleSheet.create({
     fontFamily: 'Cormorant',
     fontSize: 13,
     color: COLORS.muted,
+  },
+  altBrandRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
     marginTop: 2,
+  },
+  altPriceTier: {
+    fontFamily: 'Cormorant',
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.accent,
+    letterSpacing: 1,
   },
   altRank: {
     fontFamily: 'Cormorant',

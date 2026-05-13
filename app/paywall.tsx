@@ -29,7 +29,7 @@ const FEATURES = [
   {
     icon: 'flask-outline' as const,
     title: 'Detailed Humidor Builder',
-    desc: '9 questions, top 10 matches for your collection, scored to your collecting profile. Free is 3 questions, 3 results.',
+    desc: '10 questions, top 10 matches for your collection, scored to your collecting profile. Free is 5 questions, 10 results.',
   },
   {
     icon: 'archive-outline' as const,

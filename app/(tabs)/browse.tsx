@@ -17,6 +17,17 @@ const POPULAR_BRANDS = [
   'Padron', 'Arturo Fuente', 'Oliva', 'My Father', 'Liga Privada', 'Davidoff',
 ];
 
+// Browse sort options (Build 19, ported pattern from Pour Picks c2bfaf2).
+// Applied client-side after dedupe — cheap since the row cap is 500.
+type SortKey = 'popular' | 'price_asc' | 'price_desc' | 'az';
+const SORT_LABELS: Record<SortKey, string> = {
+  popular: 'Popular',
+  price_asc: 'Price ↑',
+  price_desc: 'Price ↓',
+  az: 'A–Z',
+};
+const SORT_KEYS: SortKey[] = ['popular', 'price_asc', 'price_desc', 'az'];
+
 export default function BrowseScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -25,11 +36,17 @@ export default function BrowseScreen() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [activeBrand, setActiveBrand] = useState<string | null>(null);
+  const [sortKey, setSortKey] = useState<SortKey>('popular');
   const listRef = useRef<FlatList>(null);
   // Dedupe by (brand, line) so multiple vitolas of the same line collapse into
   // one card — users see "Padron 1964 Anniversary" once, not four times.
   // Tapping the card still routes to a specific SKU so detail works normally;
-  // we just hide the redundant list entries.
+  // we just hide the redundant list entries. After dedupe, apply the
+  // user-chosen sort. Sort axes:
+  //   popular    → popularity_tier desc (iconic first), nulls last
+  //   price_asc  → price_tier asc, nulls last
+  //   price_desc → price_tier desc, nulls last
+  //   az         → brand asc then line/name asc
   const displayedCigars = useMemo(() => {
     const seen = new Set<string>();
     const out: Cigar[] = [];
@@ -39,8 +56,28 @@ export default function BrowseScreen() {
       seen.add(key);
       out.push(c);
     }
+    // Sort copy in place — out is a fresh array, safe to mutate.
+    const nullsLast = (a: number | null | undefined, b: number | null | undefined, asc: boolean) => {
+      if (a == null && b == null) return 0;
+      if (a == null) return 1;
+      if (b == null) return -1;
+      return asc ? a - b : b - a;
+    };
+    if (sortKey === 'popular') {
+      out.sort((a, b) => nullsLast(a.popularity_tier, b.popularity_tier, false));
+    } else if (sortKey === 'price_asc') {
+      out.sort((a, b) => nullsLast(a.price_tier, b.price_tier, true));
+    } else if (sortKey === 'price_desc') {
+      out.sort((a, b) => nullsLast(a.price_tier, b.price_tier, false));
+    } else if (sortKey === 'az') {
+      out.sort((a, b) => {
+        const ba = (a.brand ?? '').localeCompare(b.brand ?? '');
+        if (ba !== 0) return ba;
+        return (a.line ?? a.name ?? '').localeCompare(b.line ?? b.name ?? '');
+      });
+    }
     return out;
-  }, [cigars]);
+  }, [cigars, sortKey]);
 
   const ratingsMap = useCommunityRatings(displayedCigars.map((c) => c.id));
   const humidorMap = useHumidorStatuses(displayedCigars.map((c) => c.id));
@@ -167,13 +204,23 @@ export default function BrowseScreen() {
   const renderCigar = useCallback(({ item }: { item: Cigar }) => {
     const rating = ratingsMap.get(item.id);
     const statuses = humidorMap.get(item.id);
+    // Price tier as $..$$$$$ glyphs (Build 19, ported from Pour Picks
+    // c433f8b). Hidden when price_tier is null/out-of-range — keeps the
+    // brand line clean for unenriched rows.
+    const priceGlyphs =
+      item.price_tier != null && item.price_tier >= 1 && item.price_tier <= 5
+        ? '$'.repeat(item.price_tier)
+        : null;
     return (
       <Card style={styles.cigarCard} onPress={() => router.push(`/(tabs)/cigar/${item.id}`)}>
         <View style={styles.cardRow}>
           <CigarImage cigar={item} style={styles.thumb} />
           <View style={styles.cardContent}>
             <Text style={styles.cigarName} numberOfLines={1}>{item.line ?? item.name}</Text>
-            <Text style={styles.cigarBrand}>{item.brand}</Text>
+            <View style={styles.brandRow}>
+              <Text style={styles.cigarBrand}>{item.brand}</Text>
+              {priceGlyphs && <Text style={styles.priceTier}>{priceGlyphs}</Text>}
+            </View>
             <View style={styles.flavors}>
               {item.flavors.slice(0, 3).map((f) => (
                 <Badge key={f} label={f} />
@@ -267,12 +314,36 @@ export default function BrowseScreen() {
             </View>
           }
           ListHeaderComponent={
-            <View style={styles.resultHeader}>
-              <Text style={styles.resultCount}>{cigars.length} result{cigars.length !== 1 ? 's' : ''}</Text>
-              <Pressable onPress={handleClearSearch} hitSlop={12}>
-                <Text style={styles.clearLink}>Clear</Text>
-              </Pressable>
-            </View>
+            <>
+              <View style={styles.resultHeader}>
+                <Text style={styles.resultCount}>{cigars.length} result{cigars.length !== 1 ? 's' : ''}</Text>
+                <Pressable onPress={handleClearSearch} hitSlop={12}>
+                  <Text style={styles.clearLink}>Clear</Text>
+                </Pressable>
+              </View>
+              {/* Sort chip row (Build 19) — client-side sort over the
+                  already-fetched/deduped list. Cheap at 500-row cap. */}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.sortRow}
+              >
+                {SORT_KEYS.map((k) => {
+                  const isActive = k === sortKey;
+                  return (
+                    <Pressable
+                      key={k}
+                      onPress={() => setSortKey(k)}
+                      style={[styles.sortChip, isActive && styles.sortChipActive]}
+                    >
+                      <Text style={[styles.sortChipText, isActive && styles.sortChipTextActive]}>
+                        {SORT_LABELS[k]}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+            </>
           }
         />
       )}
@@ -371,6 +442,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.sm,
   },
+  sortRow: {
+    flexDirection: 'row',
+    gap: 8,
+    paddingBottom: SPACING.sm,
+  },
+  sortChip: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: RADIUS.full,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.card,
+  },
+  sortChipActive: {
+    backgroundColor: COLORS.accent,
+    borderColor: COLORS.accent,
+  },
+  sortChipText: {
+    fontFamily: 'Cormorant',
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.muted,
+  },
+  sortChipTextActive: {
+    color: COLORS.bg,
+  },
   resultCount: {
     fontFamily: 'Cormorant',
     fontSize: 12,
@@ -426,8 +523,20 @@ const styles = StyleSheet.create({
     fontFamily: 'Cormorant',
     fontSize: 13,
     color: COLORS.muted,
+  },
+  brandRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
     marginTop: 2,
     marginBottom: 6,
+  },
+  priceTier: {
+    fontFamily: 'Cormorant',
+    fontSize: 12,
+    fontWeight: '700',
+    color: COLORS.accent,
+    letterSpacing: 1,
   },
   flavors: {
     flexDirection: 'row',

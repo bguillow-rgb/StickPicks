@@ -29,6 +29,7 @@ export default function QuizScreen() {
     adventure: null,
     wrapper: null,
     origin: null,
+    vitola: null,
   });
   const [computing, setComputing] = useState(false);
   const autoAdvanceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

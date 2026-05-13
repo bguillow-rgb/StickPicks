@@ -86,6 +86,10 @@ export interface QuizAnswers {
   adventure: string | null;
   wrapper: string | null;
   origin: string | null;
+  // Build 19: vitola (size/shape) added as the 10th advanced question. Maps
+  // to scoring.ts's vitola block which gives a small ±2 boost when the
+  // user's chosen format matches the cigar's vitola field.
+  vitola: string | null;
 }
 
 export interface QuizResult {
