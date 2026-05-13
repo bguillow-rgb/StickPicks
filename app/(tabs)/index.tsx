@@ -150,7 +150,7 @@ export default function HomeScreen() {
           Showing "2,089 cigars" reads small next to competitors like Cigar
           Scanner (~13k) and plants a stale-catalog impression before the
           user has even tried the app. */}
-      <Text style={styles.footer}>For cigar collectors · curated weekly</Text>
+      <Text style={styles.footer}>For Collectors · curated weekly</Text>
     </View>
   );
 }

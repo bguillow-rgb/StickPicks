@@ -114,11 +114,22 @@ export default function QuizScreen() {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      {/* Hero — SP monogram only. Zero tobacco imagery per Apple 1.4.3. */}
+      {/* Hero — humidor photography reinforcing the hobby/collection
+          framing. Basic quiz: closed humidor corner with gold inlay
+          (no cigars in frame). Pro quiz: open premium humidor showing
+          curated inventory. Both photos are by Considerate Agency on
+          Unsplash (same shoot — visual family across the two tiers),
+          shipped under the Unsplash License. Per Apple 1.4.3: imagery
+          shows the humidor as collector furniture, never lit cigars,
+          smoke, ash, or consumption activity. */}
       <Image
-        source={require('../../assets/images/splash-icon.png')}
+        source={
+          isAdvanced
+            ? require('../../assets/images/humidor-quiz-advanced.jpg')
+            : require('../../assets/images/humidor-quiz-basic.jpg')
+        }
         style={styles.hero}
-        resizeMode="contain"
+        resizeMode="cover"
       />
 
 
