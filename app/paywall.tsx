@@ -75,11 +75,17 @@ export default function PaywallScreen() {
   // the paywall vs. the Apple purchase sheet — only shown if RevenueCat
   // offerings are still loading or unavailable.
   //
-  // Current ASC prices (TestFlight-era): $2.99/mo, $24.99/yr. Plan is to bump
-  // to $4.99/$39.99 before public launch via Apple's Plan Subscription Price
-  // Change flow (only available once a subscription has been submitted for
-  // review at least once). Update the fallbacks in the same commit as the
-  // ASC price change so they stay in lockstep.
+  // Fallback prices LAST VERIFIED against App Store Connect on 2026-05-13
+  // (pre-Build-17 submission). Current ASC prices: $2.99/mo, $24.99/yr.
+  // Plan is to bump to $4.99/$39.99 before public launch via Apple's Plan
+  // Subscription Price Change flow (only available once a subscription has
+  // been submitted for review at least once).
+  //
+  // RELEASE CHECKLIST — if you change ASC pricing, you MUST update the two
+  // fallback literals on the next lines in the same commit. Otherwise users
+  // on a slow connection (or a misconfigured RevenueCat) will see a stale
+  // price here and an updated price in Apple's purchase sheet, which Apple
+  // 3.1.1 treats as inaccurate pricing.
   const yearlyPrice = yearlyPackage?.product.priceString ?? '$24.99';
   const monthlyPrice = monthlyPackage?.product.priceString ?? '$2.99';
   // Per-month equivalent of the annual plan — Apple 3.1.2(a) requires this
