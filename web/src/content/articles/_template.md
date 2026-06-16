@@ -1,5 +1,5 @@
 ---
-title: "Sample article title — phrase like a question?"
+title: "Sample article title, phrase like a question?"
 description: "One-sentence description used for meta description and AI extraction. Keep under ~155 characters."
 targetQuery: "exact target query this article ranks for"
 relatedQueries:
@@ -19,7 +19,7 @@ published: false
 
 ## What changes at hour 24?
 
-Body content. Use H2s phrased as questions — they are the AI extraction
+Body content. Use H2s phrased as questions, they are the AI extraction
 targets. Keep each H2 section to roughly 134 to 167 self-contained words
 that fully answer the question, then cite a primary source every 150 to
 200 words.

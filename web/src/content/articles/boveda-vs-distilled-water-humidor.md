@@ -1,6 +1,6 @@
 ---
 title: "Boveda vs Distilled Water: Which Humidor Method Is Better?"
-description: "Two humidification methods, two trade-offs — which is more precise, which is cheaper long-term, and which collectors actually use for what."
+description: "Two humidification methods, two trade-offs, which is more precise, which is cheaper long-term, and which collectors actually use for what."
 tier: detail
 targetQuery: "boveda vs distilled water humidor"
 relatedQueries:
@@ -42,27 +42,27 @@ Pack sizes: 8g (single cigar / travel), 60g (small humidor), 320g
 (large humidor / cabinet).
 
 How precision is maintained: the pack is sized so that as moisture
-exchanges, the sealed solution maintains target RH until depleted —
+exchanges, the sealed solution maintains target RH until depleted, 
 no mid-life drift like sponges. ]
 
 ## How do distilled-water humidifiers work?
 
 [ 200-300 words. Three sub-types:
-1. **Foam / sponge** — propylene-glycol-treated foam that holds
+1. **Foam / sponge**, propylene-glycol-treated foam that holds
    distilled water and releases vapor passively. Cheap, drifts most.
-2. **Crystal gel** — synthetic crystals that swell with water and
+2. **Crystal gel**, synthetic crystals that swell with water and
    release slowly. Better than foam, still drifts.
-3. **Electronic** — fan-driven, sensor-controlled. Best precision in
+3. **Electronic**, fan-driven, sensor-controlled. Best precision in
    the family but adds cost and a power dependency.
 
-All three require distilled water only — tap or filtered water
+All three require distilled water only, tap or filtered water
 introduces minerals that ruin the device and risk mold. Refill
 schedule: monthly for foam/gel, weekly for electronic. ]
 
 ## Which is more precise?
 
 [ 200-300 words. Boveda holds within plus or minus 1% of stated RH
-across its life. Foam humidifiers swing 5-10% over a refill cycle —
+across its life. Foam humidifiers swing 5-10% over a refill cycle, 
 overhumid right after a refill, underhumid before the next. Electronic
 units split the difference at 2-4% drift.
 
@@ -81,7 +81,7 @@ crystal, $80 electronic), plus distilled water at ~$1 per gallon
 lasting months. Annual cost after device: ~$5-15.
 
 Crossover point: distilled-water wins on pure cost. Boveda wins on
-total cost of attention — refill labor, monitoring, calibration, and
+total cost of attention, refill labor, monitoring, calibration, and
 mistake recovery. Most collectors decide based on time, not money. ]
 
 ## Which seasons a new humidor faster?
@@ -98,7 +98,7 @@ method is faster.
 
 ## Can you use both?
 
-[ 100-200 words. Yes — and many high-volume collectors do. The
+[ 100-200 words. Yes, and many high-volume collectors do. The
 combo: Boveda packs for precision baseline; distilled-water
 electronic humidifier for bulk vapor capacity in larger cabinets.
 Boveda absorbs the over-humidification spikes from the electronic

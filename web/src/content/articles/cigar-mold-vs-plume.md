@@ -1,6 +1,6 @@
 ---
 title: "Cigar Mold vs Plume: How to Tell the Difference"
-description: "The visual, textural, and smell tests that separate harmless plume from cigar-killing mold — with photos and what to do for each."
+description: "The visual, textural, and smell tests that separate harmless plume from cigar-killing mold, with photos and what to do for each."
 tier: detail
 targetQuery: "cigar mold vs plume"
 relatedQueries:
@@ -17,7 +17,7 @@ relatedSlugs:
   - "how-to-store-cigars"
 faqs:
   - q: "Is white stuff on a cigar mold or plume?"
-    a: "If it brushes off cleanly with a soft brush and the cigar smells normal, it is plume — keep smoking. If it smells musty, looks fuzzy or raised, or appears in concentrated patches, it is mold and the cigar should be removed."
+    a: "If it brushes off cleanly with a soft brush and the cigar smells normal, it is plume, keep smoking. If it smells musty, looks fuzzy or raised, or appears in concentrated patches, it is mold and the cigar should be removed."
   - q: "Can you smoke a cigar with plume?"
     a: "Yes. Plume is crystallized oils from the leaf and is considered a sign of a well-aged cigar. Brush it off lightly with a clean dry brush before smoking; flavor is unaffected."
   - q: "Can mold spread to other cigars in a humidor?"
@@ -28,7 +28,7 @@ published: false
 ---
 
 > **Status:** Skeleton. Detail target length is 1,000-1,300 words. First-hand
-> mold-or-plume judgment calls are gold here — photos welcome.
+> mold-or-plume judgment calls are gold here, photos welcome.
 
 ## What's the difference between mold and plume?
 
@@ -81,7 +81,7 @@ RH to 65% for 30 days as a hygiene cycle. ]
 ## How do you prevent mold?
 
 [ 150-250 words. The four guardrails:
-1. Keep RH below 75% — 70% is the safe target.
+1. Keep RH below 75%, 70% is the safe target.
 2. Calibrate hygrometers every 6 months (salt test).
 3. Rotate cigars; do not let the same stick sit in a corner for years.
 4. Quarantine new arrivals for 14 days before adding to the main
@@ -91,7 +91,7 @@ Track humidor RH over time so a slow drift is caught before it
 becomes a mold event. Soft mention of Stick Picks for per-cigar
 acquisition dates and rest tracking. ]
 
-## What about plume — is it desirable?
+## What about plume, is it desirable?
 
 [ 100-150 words. Yes. Plume on a 5+ year cigar is one of the visual
 markers that the leaf has aged well and the oils have crystallized.

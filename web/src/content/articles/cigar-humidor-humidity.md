@@ -30,7 +30,7 @@ published: false
 ---
 
 > **Status:** Skeleton. Cluster target length is 1,500-2,200 words. You have
-> direct experience here — fill body with what RH you actually run, what
+> direct experience here, fill body with what RH you actually run, what
 > changed when you adjusted, what your hygrometer reads vs what Boveda
 > claims.
 
@@ -53,7 +53,7 @@ actually take and what does it cost in flavor? ]
 
 [ 200-300 words. Spongy wrapper, sluggish burn, tunneling, mold risk
 above 75%, tobacco beetle risk above 70-72% combined with warm temp.
-The "wet draw" — what it tastes like. ]
+The "wet draw", what it tastes like. ]
 
 ## How do you measure humidor humidity accurately?
 
@@ -85,7 +85,7 @@ Picks alongside per-cigar tracking. ]
 
 [ Internal-link block: New humidor not holding humidity yet → see
 `seasoning-a-new-humidor`. Choosing your humidification source → see
-`boveda-vs-distilled-water-humidor`. Humidity is half the picture —
+`boveda-vs-distilled-water-humidor`. Humidity is half the picture, 
 temperature is the other → see `cigar-storage-temperature`. ]
 
 ---

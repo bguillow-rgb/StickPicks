@@ -1,6 +1,6 @@
 ---
 title: "How to Season a New Humidor: Boveda vs Distilled Water"
-description: "Step-by-step seasoning for a new Spanish cedar humidor — Boveda method, distilled-water method, how long it takes, and how to tell when it's done."
+description: "Step-by-step seasoning for a new Spanish cedar humidor, Boveda method, distilled-water method, how long it takes, and how to tell when it's done."
 tier: cluster
 targetQuery: "how to season a humidor"
 relatedQueries:
@@ -22,21 +22,21 @@ faqs:
   - q: "How long does it take to season a humidor?"
     a: "Boveda 84% method: 14 days untouched. Distilled-water wipe method: 7-10 days, with daily wiping and pack reloading. Larger humidors (100+ count) can take longer."
   - q: "Can you use tap water to season a humidor?"
-    a: "No. Tap water minerals and chlorine damage the cedar lining and can introduce mold. Distilled water only — never tap, spring, filtered, or alkaline."
+    a: "No. Tap water minerals and chlorine damage the cedar lining and can introduce mold. Distilled water only, never tap, spring, filtered, or alkaline."
   - q: "How do I know seasoning is complete?"
     a: "Hygrometer reads steady at 70-72% RH for at least 48 hours with the lid closed. The cedar smells slightly sweet, not raw or wet. The hygrometer no longer drifts down when the lid stays sealed overnight."
 published: false
 ---
 
 > **Status:** Skeleton. Cluster target length is 1,500-1,800 words. Your
-> first-hand seasoning experience goes here — which method you used, what
+> first-hand seasoning experience goes here, which method you used, what
 > went right, what you'd do differently.
 
 ## Why do you need to season a humidor?
 
 [ 200-300 words. The kiln-drying problem: new Spanish cedar arrives
 below 50% internal moisture and will absorb humidity aggressively
-from anything inside it — including your cigars. First-hand: what
+from anything inside it, including your cigars. First-hand: what
 happened the time you skipped or rushed seasoning. ]
 
 ## How do you season with Boveda packs?
@@ -48,14 +48,14 @@ happened the time you skipped or rushed seasoning. ]
 4. After 14 days, replace 84% packs with your maintenance packs (65/69/72%).
 5. Add cigars only after maintenance RH stabilizes for 48 hours.
 
-Why the 84% packs and not 72% — the cedar needs over-saturation to
+Why the 84% packs and not 72%, the cedar needs over-saturation to
 load enough moisture to buffer normal use. ]
 
 ## How do you season with distilled water?
 
 [ 350-450 words. Step-by-step:
 1. Wipe the cedar lining lightly with a clean cloth dampened with
-   distilled water — never wet, just damp. Avoid puddles.
+   distilled water, never wet, just damp. Avoid puddles.
 2. Charge your humidification device per instructions (distilled
    water only, never tap).
 3. Place the humidifier inside, close the lid, wait 24 hours.
@@ -72,7 +72,7 @@ faster, cheaper for big humidors. ]
 
 [ 200-300 words. Boveda method timing: 14 days minimum, more for big
 humidors. Distilled method: 7-10 days with daily attention. Why
-patience matters — half-seasoned humidors are the leading cause of
+patience matters, half-seasoned humidors are the leading cause of
 new-collector cigar damage. ]
 
 ## How do you know seasoning is complete?

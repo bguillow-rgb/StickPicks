@@ -1,6 +1,6 @@
 ---
 title: "How Long Do Cigars Survive a Power Outage?"
-description: "What happens to your humidor when the power goes out — passive vs electronic, hour-by-hour timeline, and what to do before and after."
+description: "What happens to your humidor when the power goes out, passive vs electronic, hour-by-hour timeline, and what to do before and after."
 tier: detail
 targetQuery: "cigars power outage how long"
 relatedQueries:
@@ -28,7 +28,7 @@ published: false
 ---
 
 > **Status:** Skeleton. Detail target length is 1,000-1,300 words. First-hand
-> outage stories belong here — what you've actually seen happen, what you
+> outage stories belong here, what you've actually seen happen, what you
 > wish you'd done differently.
 
 ## How long do cigars survive a power outage?
@@ -95,12 +95,12 @@ Tupperdor relocation by day 5 if power is not back. ]
 1. Top up your humidification source 24 hours before.
 2. Place a fresh 72% Boveda inside as a buffer.
 3. Pre-cool the room (run AC down to 65°F before the outage hits).
-4. Move the humidor to the most thermally stable spot — interior
+4. Move the humidor to the most thermally stable spot, interior
    closet, ground floor, away from windows.
 5. Keep the lid closed. Resist checking.
 
 The single most common mistake: opening the lid every few hours to
-"check" — each opening costs 1-2 hours of buffer. ]
+"check", each opening costs 1-2 hours of buffer. ]
 
 [ Internal-link block: Worried about heat specifically → see
 `cigar-storage-temperature`. RH targets and recovery → see

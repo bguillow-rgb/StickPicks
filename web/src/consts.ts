@@ -15,7 +15,7 @@ export const SITE = {
   appStoreUrl: '', // e.g. 'https://apps.apple.com/app/stick-picks/id0000000000'
   bundleId: 'com.bobguillow.stickpicks',
   appleTeamId: 'ZNS5TNLB2D',
-  // Founder / publisher \u2014 used for Person and Organization schema. The
+  // Founder / publisher, used for Person and Organization schema. The
   // /about page is the canonical entity anchor.
   founder: {
     name: 'Bob Guillow',
@@ -27,7 +27,7 @@ export const SITE = {
       // 'https://x.com/...',
     ],
   },
-  // Organization-level sameAs — canonical identifiers for the brand entity.
+  // Organization-level sameAs, canonical identifiers for the brand entity.
   // Used in OrganizationSchema. Wikidata QID closes the Knowledge-Graph chain.
   orgSameAs: [
     'https://www.wikidata.org/wiki/Q140083289',
@@ -41,7 +41,7 @@ export const SITE = {
     // Google Search Console verification token (the meta tag content
     // value). Set via PUBLIC_GSC_VERIFICATION at build time.
     gscVerification: import.meta.env.PUBLIC_GSC_VERIFICATION ?? '',
-    // IndexNow key. Public by design \u2014 it's verified by serving the
+    // IndexNow key. Public by design, it's verified by serving the
     // matching <key>.txt file at site root. See public/.
     indexNowKey: import.meta.env.PUBLIC_INDEXNOW_KEY ?? '',
   },

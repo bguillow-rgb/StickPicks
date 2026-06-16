@@ -17,12 +17,12 @@ const faqs = [
   {
     q: 'How do I cancel my Stick Picks Pro subscription?',
     a:
-      'Subscriptions are managed by Apple, not by Stick Picks. On your iPhone or iPad, open Settings, tap your name at the top, tap Subscriptions, then tap Stick Picks Pro and Cancel Subscription. Cancellation takes effect at the end of the current billing period. Deleting your account in the app does not automatically cancel an active subscription — you must cancel it separately in iOS Settings.',
+      'Subscriptions are managed by Apple, not by Stick Picks. On your iPhone or iPad, open Settings, tap your name at the top, tap Subscriptions, then tap Stick Picks Pro and Cancel Subscription. Cancellation takes effect at the end of the current billing period. Deleting your account in the app does not automatically cancel an active subscription, you must cancel it separately in iOS Settings.',
   },
   {
-    q: 'The cigar band scanner can not identify my cigar — what can I try?',
+    q: 'The cigar band scanner can not identify my cigar, what can I try?',
     a:
-      'Hold the band so the brand and line text are clearly legible. Shoot in good light and avoid glare or motion blur. If one side of the band is obscured, rotate and re-shoot — multiple frames help. Tap "Enhance and retry" after a failure to re-analyze with an OCR-biased prompt. If it still cannot identify the cigar, use Find It Manually or Suggest a Cigar and the catalog team will add it.',
+      'Hold the band so the brand and line text are clearly legible. Shoot in good light and avoid glare or motion blur. If one side of the band is obscured, rotate and re-shoot, multiple frames help. Tap "Enhance and retry" after a failure to re-analyze with an OCR-biased prompt. If it still cannot identify the cigar, use Find It Manually or Suggest a Cigar and the catalog team will add it.',
   },
   {
     q: 'How old do I have to be to use Stick Picks?',
@@ -38,7 +38,7 @@ const faqs = [
 ---
 <BaseLayout
   title="Support"
-  description="Stick Picks support — account deletion, subscription cancellation, scanner tips, and contact information."
+  description="Stick Picks support, account deletion, subscription cancellation, scanner tips, and contact information."
   path="/support"
 >
   <Fragment slot="head">
@@ -56,7 +56,7 @@ const faqs = [
   </p>
   <p>
     Please include your account email, your iOS version, and your app version
-    (found at the bottom of the Profile tab) — it helps trace issues faster.
+    (found at the bottom of the Profile tab), it helps trace issues faster.
   </p>
 
   <FAQ faqs={faqs} heading="Common Questions" />
