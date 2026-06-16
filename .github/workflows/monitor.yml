@@ -1,0 +1,21 @@
+name: Site health monitor
+
+# Checks the LIVE production site: sitemap reachability, every URL returns 200,
+# TLS cert expiry, and JSON-LD structured data on key pages. A red run emails
+# the repo owner automatically.
+on:
+  schedule:
+    - cron: '20 13 * * *' # staggered off the other Timberline sites
+  workflow_dispatch: {}
+
+jobs:
+  monitor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Run live-site health checks
+        working-directory: web
+        run: node scripts/monitor.mjs --url https://stickpicks.app

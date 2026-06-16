@@ -1,10 +1,8 @@
 name: IndexNow ping
 
-# After new content ships to /docs (GitHub Pages), submit the site's URLs to
-# IndexNow so Bing/Yandex/etc. re-crawl quickly. Google ignores IndexNow, but
-# Bing feeds ChatGPT/Copilot, so this matters for answer-engine visibility.
-# Builds first to populate dist/sitemap-0.xml, then pings. The key file at
-# public/<KEY>.txt must already be live (it ships with /docs).
+# After new content ships to /docs, submit the site's URLs to IndexNow so
+# Bing/Yandex/etc. re-crawl quickly. Builds first to populate dist/sitemap-0.xml,
+# then pings. The key file at public/<KEY>.txt ships with /docs.
 on:
   push:
     branches: [main]
@@ -39,8 +37,6 @@ jobs:
         run: npm run build
 
       - name: Ping IndexNow
-        # The IndexNow key is public by design (it's served at
-        # public/<KEY>.txt), so it lives here as a literal, not a secret.
         env:
           PUBLIC_INDEXNOW_KEY: 1ed03389477982730cdcd925db13c594
         run: bash scripts/indexnow-ping.sh || true

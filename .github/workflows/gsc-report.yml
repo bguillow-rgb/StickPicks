@@ -1,0 +1,30 @@
+name: Weekly GSC report
+
+# Pulls last-7d-vs-prior-7d Search Console performance and prints a prioritized
+# mover report into the job log. No-ops until GSC_SA_KEY is set as a repo secret.
+on:
+  schedule:
+    - cron: '0 15 * * 1' # Mondays (staggered off the other Timberline sites)
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: GSC weekly diff
+        env:
+          GSC_SA_KEY: ${{ secrets.GSC_SA_KEY }}
+          GSC_PROPERTY: ${{ secrets.GSC_PROPERTY }}
+        run: node scripts/gsc-report.mjs
