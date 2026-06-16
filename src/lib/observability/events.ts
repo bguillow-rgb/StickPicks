@@ -27,6 +27,19 @@ export const EVENTS = {
   SCAN_SUGGEST_CIGAR_OPENED: 'scan_suggest_cigar_opened',
   SCAN_SUGGEST_CIGAR_SUBMITTED: 'scan_suggest_cigar_submitted',
   SCAN_UNDO_TAPPED: 'scan_undo_tapped',
+  // Flagship-scanner telemetry (Phase 1). Lets us drive threshold tuning,
+  // matcher failure modes, and Phase-2 planning purely from data.
+  SCAN_CAPTURE_BURST_STARTED: 'scan_capture_burst_started',
+  SCAN_CAPTURE_BURST_COMPLETED: 'scan_capture_burst_completed',
+  SCAN_CAPTURE_FAILED: 'scan_capture_failed',
+  SCAN_FRAME_TOO_SMALL_REJECTED: 'scan_frame_too_small_rejected',
+  SCAN_CONFIDENCE_BUCKET: 'scan_confidence_bucket',
+  SCAN_MATCH_SCORE: 'scan_match_score',
+  SCAN_CANDIDATE_INDEX_CHOSEN: 'scan_candidate_index_chosen',
+  SCAN_ACCENT_FOLDED: 'scan_accent_folded',
+  SCAN_VITOLA_IN_LINE_STRIPPED: 'scan_vitola_in_line_stripped',
+  SCAN_RETRY_WITH_ENHANCE: 'scan_retry_with_enhance',
+  SCAN_ALTERNATIVE_TAPPED: 'scan_alternative_tapped',
 
   // Humidor & Journal
   HUMIDOR_ITEM_ADDED: 'humidor_item_added',
@@ -40,6 +53,17 @@ export const EVENTS = {
   PRO_PURCHASE_FAILED: 'pro_purchase_failed',
   PRO_RESTORE_STARTED: 'pro_restore_started',
   PRO_RESTORE_COMPLETED: 'pro_restore_completed',
+
+  // Gamification — streaks v1
+  // STREAK_TICKED fires on every tick_streak RPC call that mutated state
+  // (consecutive-day increment OR gap-reset). same-day no-ops don't fire.
+  // STREAK_TOASTED fires only when we actually rendered a toast (true
+  // increment + priority-winning + not a reset). Gap between the two is
+  // the abandonment signal for roadmap tuning.
+  STREAK_TICKED: 'streak_ticked',
+  STREAK_TOASTED: 'streak_toasted',
+  STREAK_VIEWED: 'streak_viewed',
+  ENGAGEMENT_ACTIVE: 'engagement_active',
 } as const;
 
 export type EventName = typeof EVENTS[keyof typeof EVENTS];

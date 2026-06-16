@@ -6,6 +6,8 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeInRight, FadeOutLeft } from 'react-native-reanimated';
 import { Button } from '@/src/components/ui/Button';
 import { COLORS, SPACING, RADIUS } from '@/src/constants/theme';
+import { track } from '@/src/lib/observability/analytics';
+import { EVENTS } from '@/src/lib/observability/events';
 
 import { BASIC_QUESTIONS, ALL_QUESTIONS } from '@/src/features/quiz/questions';
 import type { QuizAnswers } from '@/src/types/cigar';
@@ -40,12 +42,19 @@ export default function QuizScreen() {
     };
   }, []);
 
+  // QUIZ_STARTED — fire once per mount. Previously declared but never
+  // emitted; now populated as part of streak-roadmap telemetry.
+  useEffect(() => {
+    track(EVENTS.QUIZ_STARTED, { advanced: isAdvanced, question_count: questions.length });
+  }, [isAdvanced, questions.length]);
+
   const q = questions[step];
   const isLast = step === questions.length - 1;
   const progress = questions.length > 1 ? step / (questions.length - 1) : 1;
 
   function navigateToResults(ans: QuizAnswers) {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    track(EVENTS.QUIZ_COMPLETED, { advanced: isAdvanced, question_count: questions.length });
     setComputing(true);
     setTimeout(() => {
       setComputing(false);
@@ -114,13 +123,14 @@ export default function QuizScreen() {
         <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
-      {/* Hero — SP monogram placeholder. Zero tobacco imagery per Apple 1.4.3.
-          TODO: swap to a humidor-interior photo in a post-launch update by
-          bundling assets/images/quiz-hero.jpg and updating this require(). */}
+      {/* Hero — open humidor with cigars (Unsplash, license-clean for
+          commercial use). The app is already rated 17+ for tobacco context;
+          static humidor imagery with no smoking and no persons is in-bounds
+          for Apple 1.4.3. */}
       <Image
-        source={require('../../assets/images/splash-icon.png')}
+        source={require('../../assets/images/quiz-hero.jpg')}
         style={styles.hero}
-        resizeMode="contain"
+        resizeMode="cover"
       />
 
 
@@ -220,7 +230,6 @@ const styles = StyleSheet.create({
     height: 140,
     borderRadius: RADIUS.md,
     marginBottom: SPACING.md,
-    backgroundColor: COLORS.card,
   },
   progressFill: {
     height: '100%',

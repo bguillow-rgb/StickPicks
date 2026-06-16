@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TextInput, Pressable, Animated } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, ActivityIndicator, TextInput, Pressable, Animated, Switch } from 'react-native';
 import { Alert } from '@/src/components/ui/StyledAlert';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { track } from '@/src/lib/observability/analytics';
@@ -50,7 +50,26 @@ export default function CigarDetailScreen() {
     if (submitted) await refetchCigar();
   };
   const [loading, setLoading] = useState(true);
-  const [similar, setSimilar] = useState<Cigar[]>([]);
+  // Raw pool fetched from the server (60 rows). `similar` below is the
+  // filtered + deduped 4 we actually render. Split so the Cuban-toggle
+  // changes instantly without re-fetching.
+  const [similarRaw, setSimilarRaw] = useState<Cigar[]>([]);
+  const [includeCubansInSimilar, setIncludeCubansInSimilar] = useState(false);
+  const similar = useMemo(() => {
+    const source = includeCubansInSimilar
+      ? similarRaw
+      : similarRaw.filter((r) => !r.origin?.toLowerCase().includes('cuba'));
+    const seen = new Set<string>();
+    const deduped: Cigar[] = [];
+    for (const row of source) {
+      const key = `${row.brand}::${row.line ?? row.name}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      deduped.push(row);
+      if (deduped.length >= 4) break;
+    }
+    return deduped;
+  }, [similarRaw, includeCubansInSimilar]);
   // Reset scroll to top whenever the cigar id changes. Tapping a "Similar
   // Cigars" card at the bottom of the page otherwise leaves the user scrolled
   // past the hero of the new cigar.
@@ -147,18 +166,12 @@ export default function CigarDetailScreen() {
             .select('*')
             .neq('id', id)
             .or(`brand.eq.${c.brand},strength.eq.${c.strength}`)
-            .limit(30);
-          // Dedupe by (brand, line) so different vitolas of the same line collapse to one card.
-          const seen = new Set<string>();
-          const deduped: Cigar[] = [];
-          for (const row of (simData as Cigar[]) ?? []) {
-            const key = `${row.brand}::${row.line ?? row.name}`;
-            if (seen.has(key)) continue;
-            seen.add(key);
-            deduped.push(row);
-            if (deduped.length >= 4) break;
-          }
-          setSimilar(deduped);
+            .limit(60);
+          // Fetch a larger pool (60) so the Cuban-filter toggle still has
+          // enough rows to show 4 after filtering out Cuban matches. Dedup
+          // by (brand, line) and filtering are applied below at render
+          // time via useMemo so the toggle is instant.
+          setSimilarRaw((simData as Cigar[]) ?? []);
         }
 
         await fetchHumidorItems();
@@ -463,10 +476,13 @@ export default function CigarDetailScreen() {
         ))}
       </Card>
 
-      {/* Drink Pairings — treat as Pro pre-hydration to avoid locked-state flash */}
+      {/* Flavor Companions — beverages that share flavor notes with this
+          cigar. Intentionally NOT framed as consumption pairing for
+          App Store §1.4.3 compliance. Treat as Pro pre-hydration to
+          avoid locked-state flash. */}
       {(treatAsPro ? (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Pair It With</Text>
+          <Text style={styles.sectionTitle}>Flavor Companions</Text>
           {getDrinkPairings(cigar).map((p, i) => (
             <View key={i} style={styles.pairingRow}>
               <Text style={styles.pairingDrink}>{p.drink}</Text>
@@ -476,10 +492,10 @@ export default function CigarDetailScreen() {
         </View>
       ) : (
         <Pressable onPress={() => router.push('/paywall')} style={styles.section}>
-          <Text style={styles.sectionTitle}>Pair It With</Text>
+          <Text style={styles.sectionTitle}>Flavor Companions</Text>
           <View style={styles.proLockedRow}>
             <Ionicons name="lock-closed-outline" size={16} color={COLORS.accent} />
-            <Text style={styles.proLockedText}>Upgrade to Pro for drink pairings</Text>
+            <Text style={styles.proLockedText}>Upgrade to Pro for flavor companions</Text>
           </View>
         </Pressable>
       ))}
@@ -663,9 +679,24 @@ export default function CigarDetailScreen() {
       ))}
 
       {/* Similar cigars */}
-      {similar.length > 0 && (
+      {(similar.length > 0 || similarRaw.some((r) => r.origin?.toLowerCase().includes('cuba'))) && (
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Similar Cigars</Text>
+          {/* Cuban toggle — rendered only when the raw pool contains at
+              least one Cuban match, so non-Cuban-related cigars don't get
+              a noisy toggle they'd never interact with. Default off to
+              match Browse + Quiz Results. */}
+          {similarRaw.some((r) => r.origin?.toLowerCase().includes('cuba')) && (
+            <View style={styles.cubanToggle}>
+              <Text style={styles.cubanLabel}>Include Cuban Cigars</Text>
+              <Switch
+                value={includeCubansInSimilar}
+                onValueChange={setIncludeCubansInSimilar}
+                trackColor={{ false: COLORS.border, true: COLORS.accent }}
+                thumbColor={COLORS.text}
+              />
+            </View>
+          )}
           {similar.slice(0, 4).map((s) => (
             <Card key={s.id} style={styles.similarCard} onPress={() => router.push(`/(tabs)/cigar/${s.id}`)}>
               <Text style={styles.similarName}>{s.line ?? s.name}</Text>
@@ -870,7 +901,7 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   // Section titles get an uppercase gold-label treatment so they clearly
-  // outrank the bold serif item names inside each section (e.g. "Pair It With"
+  // outrank the bold serif item names inside each section (e.g. "Flavor Companions"
   // vs "Rye Whiskey" were previously the same visual weight and blended).
   sectionTitle: {
     fontFamily: 'Cormorant',
@@ -1026,6 +1057,21 @@ const styles = StyleSheet.create({
     marginTop: SPACING.sm,
   },
 
+  // Matches the Browse + Quiz Results toggle pattern.
+  cubanToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.xs,
+    paddingVertical: SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  cubanLabel: {
+    fontFamily: 'Cormorant',
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.muted,
+  },
   similarCard: {
     marginBottom: SPACING.sm,
   },

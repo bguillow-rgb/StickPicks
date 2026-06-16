@@ -18,8 +18,8 @@ type Plan = 'monthly' | 'yearly';
 const FEATURES = [
   {
     icon: 'wine-outline' as const,
-    title: 'Expert Drink Pairings',
-    desc: 'Three curated pours per cigar — including one deep cut no other app surfaces.',
+    title: 'Flavor Companions',
+    desc: 'Three beverages that share flavor notes with each cigar — including one deep-cut reference no other app surfaces.',
   },
   {
     icon: 'sparkles-outline' as const,
@@ -38,8 +38,13 @@ const FEATURES = [
   },
   {
     icon: 'star-outline' as const,
-    title: 'Tasting Reviews',
-    desc: 'Rate draw, burn, and flavor. Build a personal journal.',
+    title: 'Tasting Notes',
+    desc: 'Record flavor impressions and notes for each cigar. Build a personal journal.',
+  },
+  {
+    icon: 'flame-outline' as const,
+    title: 'Daily Streaks & Milestones',
+    desc: 'Track engagement, scan, and quiz streaks. Hit milestones, build the ritual.',
   },
   {
     icon: 'trending-up-outline' as const,
@@ -171,7 +176,7 @@ export default function PaywallScreen() {
           make and let the bullets do the rest. */}
       <View style={styles.pitchCard}>
         <Text style={styles.pitchHeadline}>
-          The only cigar app with AI band ID and expert drink pairings.
+          The only cigar app with AI band ID and flavor-matched companions.
         </Text>
       </View>
 

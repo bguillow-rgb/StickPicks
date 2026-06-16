@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, LogBox } from 'react-native';
+import { View, Text, StyleSheet, LogBox, AppState, type AppStateStatus } from 'react-native';
 
 // RevenueCat can't fetch offerings until the products are live in App Store
 // Connect, which only happens for release builds. In dev, the expected failure
@@ -21,17 +21,21 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   withSequence,
-  withDelay,
+  withRepeat,
   runOnJS,
   Easing,
-  withRepeat,
 } from 'react-native-reanimated';
 import 'react-native-reanimated';
 import { COLORS, FONTS } from '@/src/constants/theme';
 import { StyledAlertHost } from '@/src/components/ui/StyledAlert';
+import { ToastHost } from '@/src/components/ui/Toast';
 import { supabase } from '@/lib/supabase';
 import { Session } from '@supabase/supabase-js';
 import { initRevenueCat, identifyUser, getCustomerInfo, isProActive } from '@/src/lib/revenuecat';
+import { loadBrandLogos } from '@/src/lib/brandLogos';
+import { pullAllStreaks } from '@/src/features/streaks/streaksService';
+import { recordActivity } from '@/src/features/streaks/useStreakToast';
+import { useStreakStore } from '@/src/stores/useStreakStore';
 import { useProStore } from '@/src/stores/useProStore';
 import { useAgeGateStore, useHydrateAgeGate } from '@/src/stores/useAgeGateStore';
 import {
@@ -40,6 +44,7 @@ import {
   identify as identifyAnalytics,
   resetAnalytics,
   setErrorUser,
+  captureSilent,
 } from '@/src/lib/observability';
 
 export { ErrorBoundary } from 'expo-router';
@@ -110,29 +115,35 @@ function AnimatedSplash({
   onReady?: () => void;
   onFinish: () => void;
 }) {
-  const scale = useSharedValue(0.6);
-  const opacity = useSharedValue(0);
-  const textOpacity = useSharedValue(0);
-  const smokeOpacity = useSharedValue(0);
+  // Text-based SP-monogram splash — reliable across all device aspect
+  // ratios (no image scaling hazards). The earlier full-bleed photo
+  // splash cropped the wordmark on portrait phones; reverted to this
+  // pre-refresh version which uses an SP circle + wordmark text + two
+  // gold divider lines that subtly pulse while we hold.
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+  const textOpacity = useSharedValue(1);
+  const smokeOpacity = useSharedValue(0.4);
 
   useEffect(() => {
-    opacity.value = withTiming(1, { duration: 400 });
+    // Subtle scale-bounce gives the monogram a moment of life once React
+    // mounts, without a visible pop-in (opacity is already 1 on first
+    // paint since the native launch screen renders the same SP PNG).
     scale.value = withSequence(
-      withTiming(1.1, { duration: 600, easing: Easing.out(Easing.back(1.5)) }),
-      withTiming(0.95, { duration: 300 }),
+      withTiming(1.05, { duration: 400, easing: Easing.out(Easing.quad) }),
       withTiming(1, { duration: 300 }),
     );
 
-    smokeOpacity.value = withDelay(500, withRepeat(
+    // Thin gold lines above/below pulse opacity for the duration of the
+    // hold — that's the "throb" that signals "we're loading".
+    smokeOpacity.value = withRepeat(
       withSequence(
         withTiming(0.6, { duration: 800 }),
         withTiming(0.2, { duration: 800 }),
       ),
       3,
       true,
-    ));
-
-    textOpacity.value = withDelay(600, withTiming(1, { duration: 500 }));
+    );
 
     const timeout = setTimeout(() => {
       opacity.value = withTiming(0, { duration: 400 });
@@ -160,19 +171,19 @@ function AnimatedSplash({
   return (
     <View
       style={splashStyles.container}
-      // Fires once the splash view has been measured — a reliable signal that
-      // the first frame is about to be painted. Used to hide the native launch
-      // screen only AFTER this view is ready, eliminating the gap where the
-      // (tabs) screen could flash through.
+      // Fires once the splash view has been measured — a reliable signal
+      // that the first frame is about to be painted. Used to hide the
+      // native launch screen only AFTER this view is ready, eliminating
+      // the gap where (tabs) could flash through.
       onLayout={() => onReady?.()}
     >
       <Animated.View style={[splashStyles.topLine, smokeStyle]} />
 
-      {/* Text-only wordmark splash — the lit-cigar photo was removed so the
-          JS-side splash doesn't violate Apple's 1.4.3 "encourages tobacco use"
-          guideline. Note: the NATIVE launch screen (configured in
-          app.json -> splash.image) still renders splash-icon.png before React
-          mounts, so that PNG must also be replaced before store submission. */}
+      {/* Text-only wordmark splash — matches the native launch screen
+          (assets/images/splash-icon.png, which renders an SP monogram)
+          at its steady-state so the hand-off from iOS's pre-splash into
+          this animated view is invisible. Keeping all elements at
+          opacity 1 on first paint is load-bearing for that. */}
       <Animated.View style={[iconStyle, splashStyles.monogram]}>
         <Text style={splashStyles.monogramText}>SP</Text>
       </Animated.View>
@@ -204,8 +215,6 @@ const splashStyles = StyleSheet.create({
     backgroundColor: COLORS.accent,
     borderRadius: 1,
   },
-  // Replaced the cigarPhoto style with a text-based monogram to keep the
-  // splash on-brand without any tobacco imagery.
   monogram: {
     width: 160,
     height: 160,
@@ -278,6 +287,9 @@ export default function RootLayout() {
     initRevenueCat().catch((e) => {
       if (__DEV__) console.warn('[RevenueCat] Init failed:', e);
     });
+    // Warm the brand-logo cache so CigarImage can fall back synchronously.
+    // Never blocks boot — fire-and-forget, swallows its own errors.
+    loadBrandLogos();
   }, []);
 
   // Listen for auth state changes + sync RevenueCat user
@@ -297,17 +309,55 @@ export default function RootLayout() {
       }
     };
 
+    // Comped-user re-check on every session. Previously the comp flag was
+    // only consulted on fresh sign-in (app/auth/login.tsx), which meant a
+    // user already signed-in-from-earlier who got added to comped_users
+    // later would never flip to Pro. This re-check closes that gap — safe
+    // to run every session because the RPC only ever RETURNS a boolean
+    // and never writes. Silently no-ops on network error.
+    const maybeComp = async () => {
+      try {
+        const { data, error } = await supabase.rpc('is_current_user_comped');
+        if (error) return;
+        if (data === true) activate();
+      } catch {
+        // Transient / unreachable — retry on next session change.
+      }
+    };
+
     const onSession = (sess: Session | null) => {
       setSession(sess);
       setAuthLoading(false);
       if (sess?.user?.id) {
         syncRevenueCat(sess.user.id);
+        // Non-anon only: comp check requires a real auth.uid() to resolve.
+        if (!sess.user.is_anonymous) {
+          void maybeComp();
+        }
         identifyAnalytics(sess.user.id, { is_anonymous: !!sess.user.is_anonymous });
         setErrorUser({ id: sess.user.id, email: sess.user.email ?? null });
+        // Streak cache hydration — pull on sign-in (or app boot with an
+        // existing session) so the profile surface renders real numbers
+        // immediately instead of AsyncStorage leftovers. Non-blocking;
+        // if the network's down the cached values stay visible.
+        if (!sess.user.is_anonymous) {
+          pullAllStreaks(sess.user.id)
+            .then((rows) => useStreakStore.getState().hydrate(rows))
+            .catch(captureSilent('streak.hydrate'));
+          // Fire-and-forget engagement tick — the act of opening the
+          // app counts, and this handles the cold-boot case where the
+          // AppState listener below doesn't see a transition (already
+          // 'active' at mount).
+          void recordActivity('engagement');
+        }
       } else {
         resetAnalytics();
         setErrorUser(null);
         identifiedUserId = null;
+        // Clear streak cache so the next signed-in user (or a guest
+        // flow that ends at the signed-out state) doesn't see previous
+        // user's numbers bleed through.
+        useStreakStore.getState().reset();
       }
     };
 
@@ -321,6 +371,26 @@ export default function RootLayout() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // AppState → foreground: tick engagement streak with a 60s debounce so
+  // rapid background/foreground toggles (switching to Messages and back)
+  // don't spam the RPC. Gated on a signed-in, non-anonymous user so we
+  // never ping the server for guests.
+  useEffect(() => {
+    let lastFiredAt = 0;
+    const DEBOUNCE_MS = 60 * 1000;
+    const handler = (status: AppStateStatus) => {
+      if (status !== 'active') return;
+      const user = session?.user;
+      if (!user?.id || user.is_anonymous) return;
+      const now = Date.now();
+      if (now - lastFiredAt < DEBOUNCE_MS) return;
+      lastFiredAt = now;
+      void recordActivity('engagement');
+    };
+    const sub = AppState.addEventListener('change', handler);
+    return () => sub.remove();
+  }, [session]);
 
   useEffect(() => {
     if (error) throw error;
@@ -376,6 +446,11 @@ export default function RootLayout() {
           Sits above the stack so dialogs float over every route, including
           modal-presented ones like paywall and legal screens. */}
       <StyledAlertHost />
+      {/* Toast host for gamification feedback (streaks, future
+          micro-confirmations). Non-modal, non-blocking, lives above all
+          routes. See src/components/ui/Toast.tsx for the single-toast
+          replacement behavior. */}
+      <ToastHost />
     </ThemeProvider>
   );
 }

@@ -1,4 +1,4 @@
-import { View, Text, TextInput, StyleSheet, FlatList, ActivityIndicator, Image, Pressable, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, FlatList, ActivityIndicator, Image, Pressable, ScrollView, Switch } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
@@ -11,6 +11,7 @@ import { useCommunityRatings } from '@/src/hooks/useCommunityRating';
 import { useHumidorStatuses } from '@/src/hooks/useHumidorStatuses';
 import { StatusChips } from '@/src/components/ui/StatusChip';
 import { COLORS, SPACING, RADIUS, FONTS } from '@/src/constants/theme';
+import { useBrowseStore } from '@/src/stores/useBrowseStore';
 import type { Cigar } from '@/src/types/cigar';
 
 const POPULAR_BRANDS = [
@@ -20,27 +21,55 @@ const POPULAR_BRANDS = [
 export default function BrowseScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [query, setQuery] = useState('');
-  const [cigars, setCigars] = useState<Cigar[]>([]);
+  // Hydrate from the module-level store on first mount so returning
+  // from Cigar Detail (or tabbing away and back) doesn't wipe the
+  // user's in-progress search. Local useState still drives renders;
+  // we mirror changes back to the store via setState below.
+  const storeSnap = useBrowseStore.getState();
+  const [query, setQuery] = useState(storeSnap.query);
+  const [cigars, setCigars] = useState<Cigar[]>(storeSnap.cigars);
   const [loading, setLoading] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [activeBrand, setActiveBrand] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(storeSnap.hasSearched);
+  const [activeBrand, setActiveBrand] = useState<string | null>(storeSnap.activeBrand);
+  // Cuban-origin cigars are hidden by default (matches the quiz-results
+  // toggle). Flipping this on reveals the ~237 Habanos S.A. SKUs that
+  // seed-cuban-catalog.ts populated. Per-screen state (independent of
+  // Quiz Results) but persisted across Browse remounts so users don't
+  // re-flip it on every return.
+  const [includeCubans, setIncludeCubans] = useState(storeSnap.includeCubans);
   const listRef = useRef<FlatList>(null);
+
+  // Mirror state back to the store. Cheap — Zustand's setState is a
+  // single shallow merge and the store doesn't trigger re-renders here
+  // (we subscribe via getState, not useStore).
+  useEffect(() => {
+    useBrowseStore.getState().setState({
+      query,
+      cigars,
+      hasSearched,
+      activeBrand,
+      includeCubans,
+    });
+  }, [query, cigars, hasSearched, activeBrand, includeCubans]);
   // Dedupe by (brand, line) so multiple vitolas of the same line collapse into
   // one card — users see "Padron 1964 Anniversary" once, not four times.
   // Tapping the card still routes to a specific SKU so detail works normally;
-  // we just hide the redundant list entries.
+  // we just hide the redundant list entries. The Cuban filter runs BEFORE
+  // dedup so a Cuban line isn't represented by a non-Cuban sibling row.
   const displayedCigars = useMemo(() => {
+    const filtered = includeCubans
+      ? cigars
+      : cigars.filter((c) => !c.origin?.toLowerCase().includes('cuba'));
     const seen = new Set<string>();
     const out: Cigar[] = [];
-    for (const c of cigars) {
+    for (const c of filtered) {
       const key = `${c.brand}::${c.line ?? c.name}`.toLowerCase();
       if (seen.has(key)) continue;
       seen.add(key);
       out.push(c);
     }
     return out;
-  }, [cigars]);
+  }, [cigars, includeCubans]);
 
   const ratingsMap = useCommunityRatings(displayedCigars.map((c) => c.id));
   const humidorMap = useHumidorStatuses(displayedCigars.map((c) => c.id));
@@ -94,11 +123,21 @@ export default function BrowseScreen() {
     setLoading(true);
     setHasSearched(true);
     try {
-      // Search brand as exact start-of-string match, name as contains
+      // B3 fix: searches previously only matched brand prefix + name contains,
+      // so vitola-level searches (e.g. "Hyde Park" for Macanudo Hyde Park)
+      // returned nothing or wrong rows. Now also matches on `line` and
+      // `vitola` as contains-substrings, so users can search by any of the
+      // four identifier columns. Purely additive: existing matches still
+      // match, new matches added on top.
       const { data } = await supabase
         .from('cigars')
         .select('*')
-        .or(`brand.ilike.${search}%,name.ilike.%${search}%`)
+        .or(
+          `brand.ilike.${search}%,` +
+          `name.ilike.%${search}%,` +
+          `line.ilike.%${search}%,` +
+          `vitola.ilike.%${search}%`
+        )
         .order('brand')
         .limit(100);
       setCigars((data as Cigar[]) ?? []);
@@ -109,10 +148,21 @@ export default function BrowseScreen() {
     }
   }, []);
 
+  // Skip the initial debounced search on first mount if we already
+  // hydrated results from the store — this is the "return from detail"
+  // case where we want to show the existing list, not re-fetch.
+  const isInitialRenderRef = useRef(true);
   useEffect(() => {
     if (activeBrand) return; // Skip text search when a chip is active
+    if (isInitialRenderRef.current) {
+      isInitialRenderRef.current = false;
+      // If the hydrated query already has results, don't re-run the
+      // fetch — the user's view is already correct.
+      if (query && cigars.length > 0) return;
+    }
     const timer = setTimeout(() => fetchBySearch(query), 300);
     return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, fetchBySearch, activeBrand]);
 
   const handleBrandTap = (brand: string) => {
@@ -171,6 +221,20 @@ export default function BrowseScreen() {
         returnKeyType="search"
       />
 
+      {/* Cuban-origin toggle — mirrors the quiz-results pattern. Default
+          off; flip on to reveal the 237 Habanos rows in the catalog.
+          Applies to every fetch path on this screen (search, popular
+          brands, strength filter) via the `displayedCigars` memo. */}
+      <View style={styles.cubanToggle}>
+        <Text style={styles.cubanLabel}>Include Cuban Cigars</Text>
+        <Switch
+          value={includeCubans}
+          onValueChange={setIncludeCubans}
+          trackColor={{ false: COLORS.border, true: COLORS.accent }}
+          thumbColor={COLORS.text}
+        />
+      </View>
+
       {!hasSearched && !loading ? (
         /* Default state — no search yet */
         <ScrollView
@@ -182,15 +246,29 @@ export default function BrowseScreen() {
         >
           <Text style={styles.sectionLabel}>POPULAR BRANDS</Text>
           <View style={styles.brandGrid}>
-            {POPULAR_BRANDS.map((brand) => (
-              <Pressable
-                key={brand}
-                onPress={() => handleBrandTap(brand)}
-                style={({ pressed }) => [styles.brandChip, pressed && styles.brandChipPressed]}
-              >
-                <Text style={styles.brandChipText}>{brand}</Text>
-              </Pressable>
-            ))}
+            {POPULAR_BRANDS.map((brand) => {
+              const isActive = activeBrand === brand;
+              return (
+                <Pressable
+                  key={brand}
+                  onPress={() => handleBrandTap(brand)}
+                  style={({ pressed }) => [
+                    styles.brandChip,
+                    isActive && styles.brandChipActive,
+                    pressed && !isActive && styles.brandChipPressed,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.brandChipText,
+                      isActive && styles.brandChipTextActive,
+                    ]}
+                  >
+                    {brand}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
 
           <Text style={[styles.sectionLabel, { marginTop: SPACING.xl }]}>BROWSE BY STRENGTH</Text>
@@ -272,7 +350,23 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 16,
     color: COLORS.text,
-    marginBottom: SPACING.md,
+    marginBottom: SPACING.sm,
+  },
+  // Matches the quiz-results cubanToggle look so the pattern is
+  // recognisable across screens.
+  cubanToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: SPACING.xs,
+    paddingVertical: SPACING.xs,
+    marginBottom: SPACING.sm,
+  },
+  cubanLabel: {
+    fontFamily: 'Cormorant',
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.muted,
   },
 
   // Default state
@@ -298,6 +392,14 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.card,
   },
   brandChipPressed: {
+    backgroundColor: COLORS.card2 ?? COLORS.card,
+    borderColor: COLORS.accent,
+  },
+  // B5-adjacent UX Eyes P1: persistent active state so the user knows
+  // which popular-brand filter is currently applied. Differentiated
+  // from `brandChipPressed` (momentary, during touch) by being a gold
+  // fill rather than a bordered preview.
+  brandChipActive: {
     backgroundColor: COLORS.accent,
     borderColor: COLORS.accent,
   },
@@ -306,6 +408,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: COLORS.text,
+  },
+  brandChipTextActive: {
+    color: COLORS.bg,
   },
   browseOptions: {
     flexDirection: 'row',

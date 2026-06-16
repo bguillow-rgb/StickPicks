@@ -16,6 +16,9 @@ import { useCommunityRatings } from '@/src/hooks/useCommunityRating';
 import { useHumidorStatuses } from '@/src/hooks/useHumidorStatuses';
 import { StatusChips } from '@/src/components/ui/StatusChip';
 import { useProStore } from '@/src/stores/useProStore';
+import { track } from '@/src/lib/observability/analytics';
+import { EVENTS } from '@/src/lib/observability/events';
+import { recordActivity } from '@/src/features/streaks/useStreakToast';
 import type { Cigar, QuizAnswers } from '@/src/types/cigar';
 
 interface ScoredCigar {
@@ -60,6 +63,13 @@ export default function QuizResultsScreen() {
         setLoading(false);
       }
     })();
+    // QUIZ_RESULT_VIEWED — populated now that results actually render;
+    // streak tick fires alongside so the quiz streak advances once per
+    // day when the user completes + views a quiz. Fire-and-forget; the
+    // scoring UX above is independent.
+    track(EVENTS.QUIZ_RESULT_VIEWED, { advanced: isAdvanced });
+    void recordActivity('quiz');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filtered = includeCubans
@@ -111,9 +121,9 @@ export default function QuizResultsScreen() {
       {loading ? (
         <View style={{ alignItems: 'center', paddingTop: SPACING.lg }}>
           <Image
-            source={require('../../assets/images/splash-icon.png')}
+            source={require('../../assets/images/quiz-hero.jpg')}
             style={styles.loadingHero}
-            resizeMode="contain"
+            resizeMode="cover"
           />
           <ActivityIndicator color={COLORS.accent} size="large" style={{ marginTop: SPACING.md }} />
           <Text style={[styles.subheader, { marginTop: SPACING.md }]}>Finding your perfect cigar...</Text>
@@ -165,12 +175,14 @@ export default function QuizResultsScreen() {
               ))}
             </View>
           )}
-          {/* Pairings are a Pro feature — show to advanced-quiz takers AND
-              to Pro users who took the basic quiz. treatAsPro covers the
-              pre-hydration window so we don't flash "locked" on every render. */}
+          {/* Flavor companions are a Pro feature — show to advanced-quiz
+              takers AND to Pro users who took the basic quiz. treatAsPro
+              covers the pre-hydration window so we don't flash "locked"
+              on every render. Framing as shared-flavor reference (not
+              consumption pairing) keeps the copy App Store 1.4.3-safe. */}
           {(isAdvanced || treatAsPro) && (
             <View style={styles.pairings}>
-              <Text style={styles.pairingsTitle}>Pair it with</Text>
+              <Text style={styles.pairingsTitle}>Flavor companions</Text>
               {getDrinkPairings(top.cigar).map((p, i) => (
                 <View key={i} style={styles.pairingRow}>
                   <Text style={styles.pairingDrink}>{p.drink}</Text>
@@ -307,7 +319,6 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 140,
     borderRadius: 12,
-    backgroundColor: COLORS.card,
   },
   kicker: {
     fontFamily: 'Cormorant',

@@ -3,7 +3,27 @@ import { supabase } from '@/lib/supabase';
 import { getDeviceId } from '@/lib/deviceId';
 import { track } from '@/src/lib/observability/analytics';
 import { EVENTS } from '@/src/lib/observability/events';
+import { useProStore } from '@/src/stores/useProStore';
 import type { Cigar } from '@/src/types/cigar';
+
+// ---- Response contract ----
+
+// One ranked interpretation of the image, as the model returned it, plus the
+// DB row it mapped to (or null if no row cleared the scored-match threshold).
+// The result screen renders these as the winner card + alternatives strip,
+// so the field set matches what that UI needs.
+export interface CigarCandidate {
+  cigar: Cigar | null;
+  rawBrand: string | null;
+  rawLine: string | null;
+  rawVitola: string | null;
+  confidence: number;
+  reasoning: string;
+  vitolaConfident: boolean;
+  matchScore: number; // 0..1 from scoreCandidateAgainstRow — 0 when no match
+  displayName: string;
+  displayVitola: string | null;
+}
 
 interface IdentifyResult {
   cigar: Cigar | null;
@@ -14,6 +34,14 @@ interface IdentifyResult {
   confidence: number;
   reasoning: string;
   rawResponse: Record<string, unknown>;
+  // Top-3 ranked candidates (winner + up to 2 alternatives), already deduped
+  // on (brand, line) and matched against the DB. Result screen renders them
+  // as the alternatives strip. Always at least one entry when `cigar` is
+  // non-null.
+  candidates: CigarCandidate[];
+  // Which index in the model's original ranked list actually won the DB
+  // match (0/1/2), or -1 if all three failed. Emitted as telemetry.
+  chosenCandidateIndex: number;
 }
 
 // Known vitola words we strip from DB names when vitola is not confident
@@ -49,6 +77,57 @@ function isConfidentVitola(v: unknown): v is string {
   return true;
 }
 
+// NFD decompose + strip combining marks. "Padrón" → "Padron", "Café" → "Cafe".
+// Catches the dominant matcher failure mode where the model returns accented
+// Spanish brand names but the DB stores plain ASCII.
+function foldAccents(s: string): string {
+  return s.normalize('NFD').replace(/\p{M}+/gu, '');
+}
+
+function tokenize(s: string): string[] {
+  return foldAccents(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .split(' ')
+    .filter((t) => t.length > 1);
+}
+
+// Score a DB row against a model candidate's (line, vitola). Brand match is
+// enforced *before* calling this (hard gate), so we only reason about the
+// within-brand discrimination here.
+//
+// Scoring:
+//   - line token overlap as a fraction of the larger token set (0..1)
+//   - +0.15 when vitola is confident and exact
+//   - floor at 0 so the caller can threshold cleanly
+function scoreRowAgainstCandidate(
+  row: Cigar,
+  candidateLine: string,
+  candidateVitola: string | null,
+): number {
+  const rowTokens = new Set(tokenize(row.line ?? row.name ?? ''));
+  const candTokens = new Set(tokenize(candidateLine));
+  if (rowTokens.size === 0 || candTokens.size === 0) return 0;
+  let shared = 0;
+  for (const t of candTokens) if (rowTokens.has(t)) shared++;
+  const maxSize = Math.max(rowTokens.size, candTokens.size);
+  let score = shared / maxSize;
+  if (
+    candidateVitola &&
+    row.vitola &&
+    foldAccents(row.vitola).toLowerCase() === foldAccents(candidateVitola).toLowerCase()
+  ) {
+    score += 0.15;
+  }
+  return Math.min(score, 1);
+}
+
+// Minimum accepted line-token-overlap score. Below this we drop the DB row
+// entirely and fall through to the next ranked candidate. 0.5 = half of the
+// larger token set shared, which still rejects "1964" vs "1964 Anniversary
+// Edition Padron 35 Years" (1/8 = 0.125) as a stretch match.
+const MIN_MATCH_SCORE = 0.5;
+
 async function readFileAsBase64(uri: string): Promise<string> {
   try {
     const file = new File(uri);
@@ -75,7 +154,109 @@ function mediaTypeFor(uri: string): string {
   return ext === 'png' ? 'image/png' : 'image/jpeg';
 }
 
-export async function identifyCigar(imageUriOrUris: string | string[]): Promise<IdentifyResult> {
+// ---- Candidate extraction from Sonnet's response ----
+
+// Shape returned per candidate by the model after the prompt rewrite. Kept
+// optional everywhere so a legacy single-object response still parses cleanly
+// for clients still on the old build.
+interface RawCandidate {
+  brand?: string | null;
+  line?: string | null;
+  name?: string | null; // pre-prompt-rewrite legacy name field
+  vitola?: string | null;
+  confidence?: number;
+  reasoning?: string;
+}
+
+// Normalize either the new `{ candidates: [...] }` shape or the legacy
+// `{ brand, line, vitola, confidence, reasoning }` single-object shape into
+// an ordered array. Legacy clients keep working; new clients get top-3.
+function extractRawCandidates(parsed: any): RawCandidate[] {
+  if (Array.isArray(parsed?.candidates) && parsed.candidates.length > 0) {
+    return parsed.candidates.slice(0, 3);
+  }
+  // Legacy shape — treat as a single-candidate list.
+  if (parsed?.brand || parsed?.line || parsed?.name) {
+    return [
+      {
+        brand: parsed.brand ?? null,
+        line: parsed.line ?? parsed.name ?? null,
+        vitola: parsed.vitola ?? null,
+        confidence: parsed.confidence ?? 0,
+        reasoning: parsed.reasoning ?? '',
+      },
+    ];
+  }
+  return [];
+}
+
+// Try to match one model candidate to a DB row. Enforces a HARD brand gate
+// (accent-folded exact match, no substring) then scores the returned rows
+// for line-token overlap. Returns null if no row clears MIN_MATCH_SCORE —
+// the caller cascades to the next candidate.
+async function matchCandidateToDb(
+  brandRaw: string,
+  lineRaw: string,
+  vitolaRaw: string | null,
+): Promise<{ cigar: Cigar | null; matchScore: number }> {
+  const brandFolded = foldAccents(brandRaw).trim();
+  if (!brandFolded) return { cigar: null, matchScore: 0 };
+
+  // Brand-exact query. ilike is case-insensitive; we pass no wildcards so
+  // Postgres treats it as straight equality modulo case. Accent-folding on
+  // the DB side is not available without `unaccent` so we rely on the DB
+  // storing ASCII brand names (and flag in telemetry when Sonnet's output
+  // differed). If the DB ever stores "Padrón" we miss — tracked as data
+  // debt to clean up later.
+  const { data, error } = await supabase
+    .from('cigars')
+    .select('*')
+    .ilike('brand', brandFolded)
+    .limit(50);
+  if (error || !data || data.length === 0) return { cigar: null, matchScore: 0 };
+
+  // Strip trailing vitola words off the model's line field before scoring —
+  // Sonnet sometimes ignores the prompt and puts the vitola there.
+  const cleanedLine = stripVitolaFromName(lineRaw, vitolaRaw ?? undefined);
+  const confidentVitola = isConfidentVitola(vitolaRaw) ? (vitolaRaw as string) : null;
+
+  let bestRow: Cigar | null = null;
+  let bestScore = 0;
+  for (const row of data as Cigar[]) {
+    const s = scoreRowAgainstCandidate(row, cleanedLine, confidentVitola);
+    if (s > bestScore) {
+      bestRow = row;
+      bestScore = s;
+    }
+  }
+
+  if (bestScore >= MIN_MATCH_SCORE && bestRow) {
+    return { cigar: bestRow, matchScore: bestScore };
+  }
+  return { cigar: null, matchScore: 0 };
+}
+
+function computeDisplayName(
+  cigar: Cigar | null,
+  rawLine: string | null,
+  vitolaConfident: boolean,
+  rawVitola: string | null,
+): { displayName: string; displayVitola: string | null } {
+  if (cigar) {
+    const displayName = cigar.line ?? stripVitolaFromName(cigar.name, cigar.vitola);
+    const displayVitola = vitolaConfident ? (cigar.vitola ?? rawVitola ?? null) : null;
+    return { displayName, displayVitola };
+  }
+  return {
+    displayName: rawLine ?? 'Unknown',
+    displayVitola: null,
+  };
+}
+
+export async function identifyCigar(
+  imageUriOrUris: string | string[],
+  opts?: { enhance?: boolean },
+): Promise<IdentifyResult> {
   // Normalize to array — supports both single-photo (legacy) and multi-frame burst
   const uris = Array.isArray(imageUriOrUris) ? imageUriOrUris : [imageUriOrUris];
   if (uris.length === 0) throw new Error('No image provided');
@@ -90,12 +271,13 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
   );
 
   const deviceId = await getDeviceId();
+  const invokeStart = Date.now();
 
   // Call our Supabase Edge Function — keeps Anthropic key server-side.
   // supabase.functions.invoke automatically attaches the user's JWT.
   const { data: apiResult, error: invokeError } = await supabase.functions.invoke(
     'identify-cigar',
-    { body: { images, device_id: deviceId } },
+    { body: { images, device_id: deviceId, enhance: opts?.enhance === true } },
   );
 
   if (invokeError) {
@@ -105,6 +287,19 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
       throw new Error('Please sign in again and try scanning.');
     }
     if (status === 429) {
+      // Two server 429 paths share a status code:
+      //  - quota exceeded (free tier only) -> "hit the free-scan limit"
+      //  - hourly/daily rate limit (applies to everyone) -> "too many scans"
+      // Previously we hardcoded the free-tier "upgrade to Pro" copy for
+      // every 429, which meant Pro/comped users saw an "Upgrade to Pro"
+      // nudge when they were rate-limited. If the user is already Pro,
+      // never suggest upgrading — give them the rate-limit copy instead.
+      const isPro = useProStore.getState().isPro;
+      if (isPro) {
+        throw new Error(
+          'Too many scans in a short time — please wait a minute and try again.',
+        );
+      }
       throw new Error('You\'ve hit the scan limit. Upgrade to Pro for unlimited scans.');
     }
     throw new Error('Cigar scanning is temporarily unavailable. Please try again later.');
@@ -114,82 +309,151 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
     throw new Error((apiResult as any)?.error ?? 'Cigar scanning is temporarily unavailable.');
   }
 
-  const textContent = (apiResult as any).content?.find((c: any) => c.type === 'text')?.text ?? '{}';
+  const latency_ms = Date.now() - invokeStart;
 
+  // Parse model output — try to find the JSON blob in the text content,
+  // then either the new candidates array or the legacy flat object.
+  const textContent = (apiResult as any).content?.find((c: any) => c.type === 'text')?.text ?? '{}';
   let parsed: any;
   try {
     const jsonMatch = textContent.match(/\{[\s\S]*\}/);
     parsed = JSON.parse(jsonMatch ? jsonMatch[0] : textContent);
   } catch {
-    parsed = { brand: null, name: null, confidence: 0, reasoning: 'Failed to parse response' };
+    parsed = { candidates: [] };
   }
 
-  // Back-compat: older responses used "name" instead of "line"
-  const parsedLine: string | null = parsed.line ?? parsed.name ?? null;
-  const claudeVitola: string | null = isConfidentVitola(parsed.vitola) ? parsed.vitola : null;
-  const vitolaConfident = claudeVitola !== null;
+  const rawCandidates = extractRawCandidates(parsed);
+  const overallReasoning: string =
+    parsed.overall_reasoning ?? parsed.reasoning ?? rawCandidates[0]?.reasoning ?? '';
 
-  // Try to match against our database using the `line` column
-  let matchedCigar: Cigar | null = null;
+  // Score + DB-match each candidate in rank order. Cascade: stop trying
+  // once one matches. Track which original-rank index won for telemetry.
+  const matched: CigarCandidate[] = [];
+  let chosenCandidateIndex = -1;
+  let anyAccentFolded = false;
+  let anyVitolaStripped = false;
 
-  if (parsed.brand && parsedLine) {
-    // Fetch ALL rows that match brand + line, so we can pick the right vitola.
-    // Query `line` (canonical) — falls back transparently to pre-migration `name` when `line` = `name`.
-    const { data } = await supabase
-      .from('cigars')
-      .select('*')
-      .ilike('brand', `%${parsed.brand}%`)
-      .ilike('line', `%${parsedLine}%`)
-      .limit(20);
+  for (let i = 0; i < rawCandidates.length; i++) {
+    const c = rawCandidates[i];
+    const rawBrand = c.brand ?? null;
+    const rawLine = c.line ?? c.name ?? null;
+    const rawVitola = c.vitola ?? null;
+    const confidence = typeof c.confidence === 'number' ? c.confidence : 0;
+    const reasoning = c.reasoning ?? '';
+    const vitolaConfident = isConfidentVitola(rawVitola);
 
-    if (data && data.length > 0) {
-      if (vitolaConfident && claudeVitola) {
-        // Prefer the SKU whose vitola matches Claude's confident guess
-        const vitolaMatch = data.find(
-          (c: any) => c.vitola && c.vitola.toLowerCase() === claudeVitola.toLowerCase()
-        );
-        matchedCigar = (vitolaMatch ?? data[0]) as Cigar;
-      } else {
-        // Claude couldn't determine size — just grab the first SKU of this line.
-        // UI will show line name + "size unclear" so user isn't misled.
-        matchedCigar = data[0] as Cigar;
-      }
-    } else {
-      // Fallback: brand-only, grab any record for the brand
-      const { data: brandData } = await supabase
-        .from('cigars')
-        .select('*')
-        .ilike('brand', `%${parsed.brand}%`)
-        .limit(1);
+    // Accent-fold + vitola-strip telemetry (flag when the model's output
+    // needed cleanup — drives DB / prompt improvements).
+    if (rawBrand && foldAccents(rawBrand) !== rawBrand) anyAccentFolded = true;
+    if (rawLine && rawVitola && rawLine.toLowerCase().includes(rawVitola.toLowerCase())) {
+      anyVitolaStripped = true;
+    }
 
-      if (brandData && brandData.length > 0) {
-        matchedCigar = brandData[0] as Cigar;
-      }
+    let dbCigar: Cigar | null = null;
+    let matchScore = 0;
+    if (rawBrand && rawLine) {
+      const matchResult = await matchCandidateToDb(rawBrand, rawLine, rawVitola);
+      dbCigar = matchResult.cigar;
+      matchScore = matchResult.matchScore;
+    }
+
+    const { displayName, displayVitola } = computeDisplayName(
+      dbCigar,
+      rawLine,
+      vitolaConfident,
+      rawVitola,
+    );
+
+    matched.push({
+      cigar: dbCigar,
+      rawBrand,
+      rawLine,
+      rawVitola,
+      confidence,
+      reasoning,
+      vitolaConfident,
+      matchScore,
+      displayName,
+      displayVitola,
+    });
+
+    if (dbCigar && chosenCandidateIndex === -1) {
+      chosenCandidateIndex = i;
     }
   }
+
+  // Dedup on (brand, line) — Sonnet sometimes returns near-duplicates as
+  // alternatives. Keep the first, drop subsequent same-key entries. The
+  // winner (captured by reference before dedup) is preserved even if it
+  // was a duplicate of an earlier entry — dedup only drops *later* copies.
+  // Finally, remap chosenCandidateIndex to its new position in the deduped
+  // list so UI consumers don't index out of bounds.
+  const winnerBeforeDedup =
+    chosenCandidateIndex >= 0 ? matched[chosenCandidateIndex] : null;
+
+  const seen = new Set<string>();
+  const dedupedCandidates: CigarCandidate[] = [];
+  const indexRemap = new Map<number, number>();
+  for (let i = 0; i < matched.length; i++) {
+    const c = matched[i];
+    const key = `${foldAccents(c.rawBrand ?? '').toLowerCase()}|${foldAccents(
+      c.rawLine ?? '',
+    ).toLowerCase()}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    indexRemap.set(i, dedupedCandidates.length);
+    dedupedCandidates.push(c);
+  }
+
+  // Defensive: if the winner was dropped by dedup (shouldn't happen because
+  // the winner is always the first match for its (brand,line) key, so it
+  // lands first in the dedup pass too — but we guard anyway), reinstate it
+  // by rehoming the original chosenCandidateIndex.
+  if (winnerBeforeDedup && !indexRemap.has(chosenCandidateIndex)) {
+    // Winner was somehow absent from deduped — put it back at the front.
+    indexRemap.set(chosenCandidateIndex, 0);
+    dedupedCandidates.unshift(winnerBeforeDedup);
+  }
+
+  // Remap chosenCandidateIndex from matched[] space → dedupedCandidates[] space.
+  if (chosenCandidateIndex >= 0) {
+    const remapped = indexRemap.get(chosenCandidateIndex);
+    chosenCandidateIndex = remapped === undefined ? -1 : remapped;
+  }
+
+  // The "winner" is whichever candidate at chosenCandidateIndex (now in
+  // deduped space) actually matched the DB. If nothing did, present
+  // candidate 0 as a best-guess — the UI's Partial/Unknown states handle it.
+  const winner =
+    chosenCandidateIndex >= 0
+      ? dedupedCandidates[chosenCandidateIndex]
+      : dedupedCandidates[0] ?? null;
+
+  const matchedCigar = winner?.cigar ?? null;
+  const confidence = winner?.confidence ?? 0;
+  const vitolaConfident = winner?.vitolaConfident ?? false;
 
   track(EVENTS.SCAN_RESULT_RECEIVED, {
     method: 'concierge',
     frame_count: uris.length,
+    frames_per_scan: uris.length,
     cigar_id: matchedCigar?.id ?? null,
-    raw_brand: parsed.brand ?? null,
-    raw_line: parsedLine,
-    confidence: parsed.confidence ?? 0,
+    raw_brand: winner?.rawBrand ?? null,
+    raw_line: winner?.rawLine ?? null,
+    confidence,
+    latency_ms,
+    candidate_count: rawCandidates.length,
   });
+  track(EVENTS.SCAN_MATCH_SCORE, { score: winner?.matchScore ?? 0 });
+  track(EVENTS.SCAN_CANDIDATE_INDEX_CHOSEN, { index: chosenCandidateIndex });
+  if (anyAccentFolded) track(EVENTS.SCAN_ACCENT_FOLDED, {});
+  if (anyVitolaStripped) track(EVENTS.SCAN_VITOLA_IN_LINE_STRIPPED, {});
 
-  // Compute display fields using the new `line` column (preferred) with name fallback
-  let displayName = parsedLine ?? 'Unknown';
-  let displayVitola: string | null = null;
-
-  if (matchedCigar) {
-    // Prefer the canonical line column; fall back to stripped name for any unmigrated rows
-    displayName = matchedCigar.line ?? stripVitolaFromName(matchedCigar.name, matchedCigar.vitola);
-    if (vitolaConfident) {
-      displayVitola = matchedCigar.vitola ?? claudeVitola;
-    } else {
-      displayVitola = null;
-    }
-  }
+  // Display fields for the winner — used by legacy call sites that haven't
+  // switched to consuming `candidates` directly yet.
+  const { displayName, displayVitola } = winner
+    ? { displayName: winner.displayName, displayVitola: winner.displayVitola }
+    : { displayName: 'Unknown', displayVitola: null };
 
   // Save scan to database for training (use primary frame as the canonical image)
   let scanId: string | null = null;
@@ -216,9 +480,13 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
       scan_method: 'concierge',
       image_url: urlData.publicUrl,
       identified_cigar_id: matchedCigar?.id ?? null,
-      confidence: parsed.confidence ?? null,
+      confidence,
       user_confirmed: false,
-      raw_llm_response: { ...(apiResult as Record<string, unknown>), frame_count: uris.length },
+      raw_llm_response: {
+        ...(apiResult as Record<string, unknown>),
+        frame_count: uris.length,
+        chosen_candidate_index: chosenCandidateIndex,
+      },
     }).select('id').single();
 
     scanId = scanRow?.id ?? null;
@@ -232,8 +500,10 @@ export async function identifyCigar(imageUriOrUris: string | string[]): Promise<
     displayName,
     displayVitola,
     vitolaConfident,
-    confidence: parsed.confidence ?? 0,
-    reasoning: parsed.reasoning ?? '',
+    confidence,
+    reasoning: overallReasoning,
     rawResponse: apiResult as Record<string, unknown>,
+    candidates: dedupedCandidates,
+    chosenCandidateIndex,
   };
 }

@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, Pressable } from 'react-native';
+import { View, Text, StyleSheet, Image, Pressable, ScrollView } from 'react-native';
 import { Alert } from '@/src/components/ui/StyledAlert';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -13,6 +13,8 @@ import { Button } from '@/src/components/ui/Button';
 import { Card } from '@/src/components/ui/Card';
 import { COLORS, SPACING, FONTS } from '@/src/constants/theme';
 import { useProStore } from '@/src/stores/useProStore';
+import { StreakCard } from '@/src/components/streaks/StreakCard';
+import { useIsAdmin } from '@/src/features/admin/useIsAdmin';
 import type { User } from '@supabase/supabase-js';
 
 export default function ProfileScreen() {
@@ -22,6 +24,7 @@ export default function ProfileScreen() {
   const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(null);
   const [uploading, setUploading] = useState(false);
   const [stats, setStats] = useState({ humidor: 0, smoked: 0, scans: 0 });
+  const { isAdmin } = useIsAdmin();
 
   const fetchUser = useCallback(async () => {
     const { data } = await supabase.auth.getUser();
@@ -199,7 +202,14 @@ export default function ProfileScreen() {
   };
 
   return (
-    <View style={[styles.screen, { paddingTop: insets.top + SPACING.md }]}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={[
+        styles.scrollContent,
+        { paddingTop: insets.top + SPACING.md, paddingBottom: insets.bottom + SPACING.xl },
+      ]}
+      showsVerticalScrollIndicator={false}
+    >
       <Text style={styles.title}>Profile</Text>
 
       <Card style={styles.profileCard}>
@@ -241,6 +251,30 @@ export default function ProfileScreen() {
         </Card>
       </Pressable>
 
+      {/* Gamification v1 — three daily streaks. Guests see a sign-in
+          nudge inside the card instead of empty rows. Non-blocking:
+          nothing else on this screen depends on streak state. */}
+      <StreakCard userId={user?.id ?? null} />
+
+      {/* Admin entry — only rendered if useIsAdmin() resolves true.
+          RPC is loading-safe: hook returns isAdmin=false during the
+          initial check, so there's no flash of admin UI on first
+          render. */}
+      {isAdmin && (
+        <Pressable onPress={() => router.push('/admin')}>
+          <Card style={styles.adminTile}>
+            <Ionicons name="shield-checkmark-outline" size={22} color={COLORS.accent} />
+            <View style={styles.adminTextWrap}>
+              <Text style={styles.adminTitle}>Admin</Text>
+              <Text style={styles.adminSubtitle}>
+                Catalog, submissions, invites
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={COLORS.muted} />
+          </Card>
+        </Pressable>
+      )}
+
       <View style={styles.actions}>
         <Button
           title="Sign Out"
@@ -264,7 +298,7 @@ export default function ProfileScreen() {
           <Text style={styles.deleteText}>Delete Account</Text>
         </Pressable>
       )}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -272,6 +306,8 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: COLORS.bg,
+  },
+  scrollContent: {
     paddingHorizontal: SPACING.md,
   },
   title: {
@@ -338,6 +374,28 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     marginBottom: SPACING.md,
+  },
+  adminTile: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+    marginTop: SPACING.md,
+    paddingVertical: SPACING.md,
+  },
+  adminTextWrap: {
+    flex: 1,
+  },
+  adminTitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 16,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  adminSubtitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 13,
+    color: COLORS.muted,
+    marginTop: 2,
   },
   sectionTitle: {
     fontFamily: 'Cormorant',

@@ -104,13 +104,25 @@ export default function HumidorScreen() {
     }
   }, [filter]);
 
-  // Reset filter when navigated to with ?filter=all param
+  // Reset filter when navigated to with ?filter=all param + refetch on focus
+  // (returning from cigar detail after marking as smoked, etc).
   useFocusEffect(
     useCallback(() => {
       if (filterParam === 'all') setFilter(isPro ? 'all' : 'owned');
       fetchItems();
     }, [fetchItems, filterParam, isPro])
   );
+
+  // B2 fix: useFocusEffect only fires on focus events, NOT when fetchItems'
+  // identity changes mid-focus. Tapping a filter chip updates `filter` state
+  // and fetchItems identity, but the list never refetched until the user
+  // tab-away-and-back triggered a focus event — producing the user-reported
+  // "filter chips don't light up / view only sometimes changes" bug. This
+  // plain useEffect re-runs on every fetchItems identity change and covers
+  // the in-focus filter-flip case the focus effect misses.
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
 
   const handleDelete = (item: HumidorItem) => {
     const cigarName = item.cigar?.line ?? item.cigar?.name ?? 'this cigar';
@@ -388,7 +400,16 @@ export default function HumidorScreen() {
                   setFilter(f);
                 }
               }}
-              style={[styles.chip, filter === f && styles.chipActive, locked && styles.chipLocked]}
+              // UX Eyes P1: add a `pressed` opacity nudge so tapping an
+              // already-active chip visibly registers. Prior behavior
+              // left the chip static on re-tap, reading as "tap didn't
+              // work."
+              style={({ pressed }) => [
+                styles.chip,
+                filter === f && styles.chipActive,
+                locked && styles.chipLocked,
+                pressed && { opacity: 0.75 },
+              ]}
             >
               <Text
                 numberOfLines={1}

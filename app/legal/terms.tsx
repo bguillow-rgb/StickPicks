@@ -51,7 +51,7 @@ export default function TermsScreen() {
 
         <Text style={styles.h2}>4. Free Tier</Text>
         <Text style={styles.body}>
-          Free accounts include access to the basic quiz, up to 5 cigar scans, and the ability to track owned cigars in the humidor. Pro features (unlimited scans, advanced quiz, drink pairings, full humidor filters, ratings and reviews, cigar notes) require an active subscription.
+          Free accounts include access to the basic quiz, up to 5 cigar scans, and the ability to track owned cigars in the humidor. Pro features (unlimited scans, advanced quiz, flavor-companion suggestions, full humidor filters, ratings and reviews, cigar notes) require an active subscription.
         </Text>
 
         <Text style={styles.h2}>5. Cigar Identification</Text>

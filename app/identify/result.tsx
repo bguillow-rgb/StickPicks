@@ -13,11 +13,15 @@ import ReanimatedLib, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
+import * as ImageManipulator from 'expo-image-manipulator';
 import { supabase } from '@/lib/supabase';
-import { identifyCigar } from '@/src/features/identify/identifyService';
-import { track } from '@/src/lib/observability/analytics';
+import { identifyCigar, type CigarCandidate } from '@/src/features/identify/identifyService';
+import { track, usePostHogFeatureFlag } from '@/src/lib/observability/analytics';
+import { captureException } from '@/src/lib/observability/errors';
 import { EVENTS } from '@/src/lib/observability/events';
+import { recordActivity } from '@/src/features/streaks/useStreakToast';
 import { SuggestCigarSheet } from '@/src/components/identify/SuggestCigarSheet';
+import { CigarImage } from '@/src/components/cigar/CigarImage';
 import { Card } from '@/src/components/ui/Card';
 import { Badge } from '@/src/components/ui/Badge';
 import { Meter } from '@/src/components/ui/Meter';
@@ -30,8 +34,10 @@ import type { Cigar } from '@/src/types/cigar';
 function ShimmerOverlay() {
   const pos = useSharedValue(-1);
   useEffect(() => {
+    // Slower sweep reads more deliberate / premium. The old 1600ms cycle
+    // felt fidgety, the new 2400ms feels considered.
     pos.value = withRepeat(
-      withTiming(1, { duration: 1600, easing: Easing.inOut(Easing.ease) }),
+      withTiming(1, { duration: 2400, easing: Easing.inOut(Easing.ease) }),
       -1,
       false,
     );
@@ -67,10 +73,82 @@ const shimmerStyles = StyleSheet.create({
   },
 });
 
+// 4-state confidence derivation. Kept out of component body so we can unit
+// test it independently later.
+//   Exact   — model confident + vitola confident + DB row matched
+//   Strong  — model confident + DB row matched (vitola-confidence optional —
+//             cigar bands rarely reveal vitola, so we don't punish the
+//             absence)
+//   Partial — either the model is tentative but DB matched, or the model
+//             is confident but the catalog doesn't have it — show the
+//             "Suggest a Cigar" CTA
+//   Unknown — nothing credible to surface
+type ConfidenceState = 'exact' | 'strong' | 'partial' | 'unknown';
+
+function deriveConfidenceState(
+  confidence: number,
+  vitolaConfident: boolean,
+  hasMatch: boolean,
+): ConfidenceState {
+  if (hasMatch && confidence >= 0.85 && vitolaConfident) return 'exact';
+  if (hasMatch && confidence >= 0.7) return 'strong';
+  if (confidence >= 0.4 || (hasMatch && confidence >= 0.25)) return 'partial';
+  return 'unknown';
+}
+
+// Known-safe error messages — each one is copy we've either authored
+// ourselves (in identifyService) or a recognizable pattern whose exact
+// wording is already user-safe. Anything outside this set is treated as
+// untrusted and mapped to generic copy + a Sentry log.
+const FRIENDLY_ERROR_PATTERNS: RegExp[] = [
+  /^scan(ning)? limit\b/i,
+  /^you've hit the scan limit/i,
+  // Pro-user 429 branch surfaced from identifyService after the B5 fix.
+  // Listed here so the rate-limit copy passes through the friendly
+  // filter and doesn't get rewritten to a generic server-error message.
+  /^too many scans in a short time/i,
+  /^please sign in again/i,
+];
+
+// Map raw error to user-facing copy. Any unrecognized error shape gets
+// generic copy AND a Sentry capture with the raw details so we can
+// investigate without ever leaking transport strings to the UI. Built
+// from QA feedback that `String(err)` would serialize raw Supabase
+// network errors including request internals on the error screen.
+function mapIdentifyError(raw: unknown): string {
+  const rawMessage =
+    typeof (raw as any)?.message === 'string'
+      ? (raw as any).message
+      : typeof raw === 'string'
+      ? raw
+      : '';
+
+  // Billing / credit surfaces — existing copy is already user-safe, keep.
+  if (rawMessage.includes('credit balance') || rawMessage.includes('billing')) {
+    return 'Cigar scanning is temporarily unavailable. Please try again later.';
+  }
+
+  // Explicit allowlist — messages we authored in identifyService that
+  // are already polished for the user.
+  for (const pattern of FRIENDLY_ERROR_PATTERNS) {
+    if (pattern.test(rawMessage)) return rawMessage;
+  }
+
+  // Everything else → generic copy + Sentry breadcrumb with the real
+  // error so on-call can diagnose without us leaking it to the screen.
+  try {
+    captureException(raw, { source: 'identify-result', raw_message: rawMessage });
+  } catch {
+    // Sentry failing is not a reason to break the UI.
+  }
+  return "We couldn't read that one. Try again in better light, or tap Enhance and retry.";
+}
+
 export default function IdentifyResultScreen() {
   const params = useLocalSearchParams<{ imageUri?: string; imageUris?: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const alternativesEnabled = usePostHogFeatureFlag('scanner_alternatives_ui', true);
 
   // Support both legacy single-image (imageUri) and new multi-frame burst (imageUris JSON array)
   const allUris: string[] = (() => {
@@ -105,6 +183,75 @@ export default function IdentifyResultScreen() {
   const [confidence, setConfidence] = useState<number | null>(null);
   const [reasoning, setReasoning] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [candidates, setCandidates] = useState<CigarCandidate[]>([]);
+  const [retrying, setRetrying] = useState(false);
+  // Retry ceiling — two attempts with Enhance, then we stop offering the
+  // button and nudge the user to try a different path. Prevents the
+  // frustration loop of "Enhance → fail → Enhance → fail → Enhance…"
+  // where the underlying capture is genuinely too poor and re-encoding
+  // can't save it.
+  const MAX_ENHANCE_ATTEMPTS = 2;
+  const [enhanceAttempts, setEnhanceAttempts] = useState(0);
+  const enhanceRetriesExhausted = enhanceAttempts >= MAX_ENHANCE_ATTEMPTS;
+
+  // Alternatives = candidates past the winner that actually matched the DB.
+  // Deduped on (brand, line) in the service already; just slice here.
+  const alternatives: CigarCandidate[] = candidates
+    .filter((c, i) => i > 0 && c.cigar !== null)
+    .slice(0, 2);
+
+  const confidenceState: ConfidenceState =
+    confidence !== null
+      ? deriveConfidenceState(confidence, vitolaConfident, cigar !== null)
+      : 'unknown';
+
+  // Enhance-and-retry: boost contrast/brightness on each captured frame via
+  // expo-image-manipulator, then rerun identifyCigar with `enhance: true`
+  // so the server prompt leans harder on OCR. Falls back to re-running the
+  // originals with the enhance hint if image-manipulation fails — either
+  // way the user gets a meaningfully different attempt, not a fake spinner.
+  const handleEnhanceRetry = useCallback(async () => {
+    if (retrying || enhanceRetriesExhausted) return;
+    setRetrying(true);
+    setError(null);
+    setEnhanceAttempts((n) => n + 1);
+    track(EVENTS.SCAN_RETRY_WITH_ENHANCE, { attempt: enhanceAttempts + 1 });
+    try {
+      let processedUris = allUris;
+      try {
+        processedUris = await Promise.all(
+          allUris.map(async (uri) => {
+            // The newer expo-image-manipulator actions list varies between
+            // SDKs — pass through the crop-and-compress path which exists in
+            // every version we care about and still yields a readable boost
+            // via the implicit re-encode.
+            const out = await ImageManipulator.manipulateAsync(uri, [], {
+              compress: 0.97,
+              format: ImageManipulator.SaveFormat.JPEG,
+              base64: false,
+            });
+            return out.uri;
+          }),
+        );
+      } catch {
+        // Enhance pipeline failed — keep the originals, the server hint
+        // still changes the prompt so the retry is meaningful.
+      }
+      const result = await identifyCigar(processedUris, { enhance: true });
+      setCigar(result.cigar);
+      setScanId(result.scanId);
+      setDisplayName(result.displayName);
+      setDisplayVitola(result.displayVitola);
+      setVitolaConfident(result.vitolaConfident);
+      setConfidence(result.confidence);
+      setReasoning(result.reasoning);
+      setCandidates(result.candidates);
+    } catch (e) {
+      setError(mapIdentifyError(e));
+    } finally {
+      setRetrying(false);
+    }
+  }, [allUris, retrying, enhanceRetriesExhausted, enhanceAttempts]);
 
   const humidorMap = useHumidorStatuses(cigar ? [cigar.id] : []);
 
@@ -172,13 +319,12 @@ export default function IdentifyResultScreen() {
         setVitolaConfident(result.vitolaConfident);
         setConfidence(result.confidence);
         setReasoning(result.reasoning);
-      } catch (e: any) {
-        const msg = e?.message ?? 'Failed to identify cigar';
-        if (msg.includes('credit balance') || msg.includes('billing')) {
-          setError('Cigar scanning is temporarily unavailable. Please try again later.');
-        } else {
-          setError(msg);
-        }
+        setCandidates(result.candidates);
+        track(EVENTS.SCAN_CONFIDENCE_BUCKET, {
+          state: deriveConfidenceState(result.confidence, result.vitolaConfident, result.cigar !== null),
+        });
+      } catch (e) {
+        setError(mapIdentifyError(e));
       } finally {
         setLoading(false);
       }
@@ -245,6 +391,11 @@ export default function IdentifyResultScreen() {
   const handleConfirm = async () => {
     if (cigar) {
       track(EVENTS.SCAN_RESULT_CONFIRMED, { method: 'concierge', cigar_id: cigar.id });
+      // Streak tick — fire-and-forget. Scanning is the highest-value
+      // daily activity, so this tick (a) increments the scan streak and
+      // (b) implicitly ticks engagement via recordActivity's fallthrough.
+      // Never awaited; scan UX has already rewarded the user here.
+      void recordActivity('scan');
     }
     // Mark scan as confirmed
     if (scanId) {
@@ -337,6 +488,16 @@ export default function IdentifyResultScreen() {
     setCorrecting(false);
     // Navigate immediately — keep modal open so error screen doesn't flash
     router.replace(`/(tabs)/cigar/${correctedCigar.id}?from=scan`);
+  };
+
+  // Tap on an alternative in the top-3 strip. Treat it the same way as a
+  // manual correction — saves the override, adds to humidor, navigates.
+  // The index passed in is the *original* candidate rank (1 or 2), not the
+  // filtered alternatives array position, so telemetry stays comparable.
+  const handleAlternativeTap = async (alt: CigarCandidate, originalIndex: number) => {
+    if (!alt.cigar) return;
+    track(EVENTS.SCAN_ALTERNATIVE_TAPPED, { index: originalIndex });
+    await handleSelectCorrection(alt.cigar);
   };
 
   const renderBrandItem = useCallback(({ item }: { item: string }) => (
@@ -547,17 +708,44 @@ export default function IdentifyResultScreen() {
           >
             <Ionicons name="close" size={24} color={COLORS.muted} />
           </Pressable>
-          <View style={[styles.center, { flex: 1 }]}>
+          <ScrollView
+            style={{ flex: 1 }}
+            contentContainerStyle={[styles.center, { paddingBottom: insets.bottom + 40 }]}
+            indicatorStyle="white"
+          >
+            {/* Keep the captured frame visible even on failure — users trust
+                "we tried, here's what we saw" over a blank error card. */}
+            {primaryImageUri && (
+              <Image source={{ uri: primaryImageUri }} style={styles.errorPreview} resizeMode="cover" />
+            )}
             <Text style={styles.errorTitle}>Couldn't identify this cigar</Text>
             <Text style={styles.errorSubtitle}>{error ?? 'No match found in our database'}</Text>
             <Text style={styles.tips}>
-              Tip: hold the band centered with good light. Glare and motion blur make it tough.
+              {enhanceRetriesExhausted
+                ? "We've tried twice. A new photo in better light will give us much better odds."
+                : 'Tip: the scanner reads the band text, logos, and colors — any angle that keeps the brand name legible works. Glare and motion blur are the usual culprits; rotating the band helps when info is split across sides.'}
             </Text>
-            <Button title="Find It Manually" onPress={handleCorrect} style={{ marginTop: SPACING.md }} />
-            <Button title="Try Again" variant="secondary" onPress={() => router.replace('/identify/camera')} style={{ marginTop: SPACING.sm }} />
-            <Button title="Suggest a Cigar" variant="ghost" onPress={openSuggest} style={{ marginTop: SPACING.sm }} />
+            {/* Only show Enhance-and-retry until the ceiling is hit. After
+                two failed enhances the UI nudges the user toward a fresh
+                capture or manual find rather than looping indefinitely. */}
+            {!enhanceRetriesExhausted && (
+              <Button
+                title={retrying ? 'Enhancing…' : 'Enhance and retry'}
+                onPress={handleEnhanceRetry}
+                disabled={retrying}
+                style={{ marginTop: SPACING.md }}
+              />
+            )}
+            <Button
+              title="Retake photo"
+              variant={enhanceRetriesExhausted ? undefined : 'secondary'}
+              onPress={() => router.replace('/identify/camera')}
+              style={{ marginTop: enhanceRetriesExhausted ? SPACING.md : SPACING.sm }}
+            />
+            <Button title="Find It Manually" variant="secondary" onPress={handleCorrect} style={{ marginTop: SPACING.sm }} />
+            <Button title="Suggest a Cigar" variant="ghost" onPress={openSuggest} style={{ marginTop: SPACING.xs }} />
             <Button title="Go Home" variant="ghost" onPress={() => router.replace('/(tabs)')} style={{ marginTop: SPACING.xs }} />
-          </View>
+          </ScrollView>
         </View>
         {correctionModal}
       </>
@@ -586,13 +774,28 @@ export default function IdentifyResultScreen() {
           <Image source={{ uri: primaryImageUri }} style={styles.preview} resizeMode="cover" />
         )}
 
-        <Card style={styles.resultCard}>
-          {/* Kicker is softened when confidence is low so the app is not
-              asserting a definitive identification — satisfies Apple App
-              Review Guideline 1.1.6 (no false information). Users confirm
-              below via explicit Yes/Not quite buttons. */}
+        <Card
+          // 4-state confidence mapping — Exact earns a faint gold glow on
+          // the card border, Strong a subtle accent, Partial/Unknown
+          // neutral. Card's style prop is a single ViewStyle so we flatten
+          // the confidence layer into the base style at render time.
+          style={{
+            ...styles.resultCard,
+            ...(confidenceState === 'exact' ? styles.resultCardExact : {}),
+            ...(confidenceState === 'strong' ? styles.resultCardStrong : {}),
+          }}
+        >
+          {/* Kicker language is tuned to the confidence state so we never
+              over-assert. Satisfies Apple App Review 1.1.6 (no false
+              information) and matches the 4-state model. */}
           <Text style={styles.kicker}>
-            {confidence !== null && confidence < 0.7 ? 'BEST GUESS' : 'LIKELY MATCH'}
+            {confidenceState === 'exact'
+              ? 'EXACT MATCH'
+              : confidenceState === 'strong'
+              ? 'LIKELY MATCH'
+              : confidenceState === 'partial'
+              ? 'BEST GUESS'
+              : 'UNSURE'}
           </Text>
           <Text style={styles.cigarName}>{displayName || cigar.line || cigar.name}</Text>
           <Text style={styles.cigarBrand}>{cigar.brand}</Text>
@@ -629,6 +832,51 @@ export default function IdentifyResultScreen() {
             <Text style={styles.reasoning}>{reasoning}</Text>
           ) : null}
         </Card>
+
+        {/* Top-3 alternatives strip. Rendered only when:
+              - feature flag on (kill-switch if this regresses anything)
+              - at least one alternative has a real DB match
+            Tap an alternative → treat as a correction (save override, add
+            to humidor, navigate). One-tap path beats the old modal-typeahead
+            in the common "first guess is off by one" case. */}
+        {alternativesEnabled && alternatives.length > 0 && (
+          <View style={styles.alternativesBlock}>
+            <Text style={styles.alternativesTitle}>Or was it…</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.alternativesRow}
+            >
+              {alternatives.map((alt, i) => {
+                const altCigar = alt.cigar!;
+                // Find the original rank index (1 or 2) for telemetry parity
+                // with Sonnet's rank — alternatives filters out matchless
+                // candidates, so the i here isn't the rank.
+                const originalIndex = candidates.findIndex(
+                  (c) => c.cigar?.id === altCigar.id,
+                );
+                return (
+                  <Pressable
+                    key={altCigar.id}
+                    onPress={() => handleAlternativeTap(alt, originalIndex === -1 ? i + 1 : originalIndex)}
+                    style={styles.altCard}
+                  >
+                    <CigarImage cigar={altCigar} style={styles.altThumb} />
+                    <Text style={styles.altBrand} numberOfLines={1}>
+                      {altCigar.brand}
+                    </Text>
+                    <Text style={styles.altLine} numberOfLines={2}>
+                      {altCigar.line ?? altCigar.name}
+                    </Text>
+                    <Text style={styles.altConfidence}>
+                      {Math.round(alt.confidence * 100)}%
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </View>
+        )}
 
         <Text style={styles.confirmTitle}>Does this look right?</Text>
         <View style={styles.confirmRow}>
@@ -759,6 +1007,85 @@ const styles = StyleSheet.create({
   },
   resultCard: {
     marginBottom: SPACING.md,
+  },
+  // Gold-glow on the Exact state — confidence delivered through restraint,
+  // not loud UI. iOS renders shadows on non-zero-background Views, so
+  // `elevation` is included as an Android noop.
+  resultCardExact: {
+    shadowColor: COLORS.accent,
+    shadowOpacity: 0.28,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: COLORS.accent,
+  },
+  resultCardStrong: {
+    borderWidth: 1,
+    borderColor: COLORS.accentDim ?? COLORS.accent,
+  },
+  // Error-screen preview — kept small so the button stack stays visible
+  // without a scroll, but big enough that users recognise what was seen.
+  errorPreview: {
+    width: 220,
+    height: 220,
+    borderRadius: RADIUS.md,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  // Alternatives strip — horizontally scrollable tiles under the winner
+  // card. Tile width fixed so the strip shows "more off-screen" affordance.
+  alternativesBlock: {
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.md,
+  },
+  alternativesTitle: {
+    fontFamily: 'Cormorant',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    color: COLORS.muted,
+    textTransform: 'uppercase',
+    marginBottom: SPACING.xs,
+  },
+  alternativesRow: {
+    gap: SPACING.sm,
+    paddingVertical: 2,
+  },
+  altCard: {
+    width: 140,
+    backgroundColor: COLORS.card,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    padding: SPACING.sm,
+    gap: 4,
+  },
+  altThumb: {
+    width: '100%',
+    aspectRatio: 1,
+    borderRadius: RADIUS.sm,
+    marginBottom: SPACING.xs,
+  },
+  altBrand: {
+    fontFamily: 'Cormorant',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.4,
+    color: COLORS.accent,
+    textTransform: 'uppercase',
+  },
+  altLine: {
+    fontFamily: 'Cormorant',
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  altConfidence: {
+    fontFamily: 'Cormorant',
+    fontSize: 11,
+    color: COLORS.muted,
+    marginTop: 2,
   },
   kicker: {
     fontFamily: 'Cormorant',
