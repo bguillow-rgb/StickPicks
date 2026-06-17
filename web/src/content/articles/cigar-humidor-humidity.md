@@ -14,6 +14,7 @@ publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
   - "cigar-storage-temperature"
+  - "cigars-cellophane-on-or-off-humidor"
   - "how-to-organize-a-humidor"
   - "how-to-store-cigars"
 faqs:

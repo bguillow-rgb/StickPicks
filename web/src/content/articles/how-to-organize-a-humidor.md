@@ -13,6 +13,7 @@ quickAnswer: "Organize your humidor by separating cigars into three zones: daily
 publishedAt: "2026-06-17"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigars-cellophane-on-or-off-humidor"
   - "cigar-humidor-humidity"
   - "cigar-storage-temperature"
 faqs:

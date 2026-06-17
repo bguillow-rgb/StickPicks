@@ -15,6 +15,7 @@ author: "Bob Guillow"
 relatedSlugs:
   - "cigar-humidor-humidity"
   - "how-to-store-cigars"
+  - "cigars-cellophane-on-or-off-humidor"
   - "how-to-organize-a-humidor"
 faqs:
   - q: "What is the ideal temperature for storing cigars?"

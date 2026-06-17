@@ -14,6 +14,7 @@ publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
   - "boveda-vs-distilled-water-humidor"
+  - "cigars-cellophane-on-or-off-humidor"
   - "cigars-power-outage-survival"
   - "how-to-store-cigars"
 faqs:
