@@ -13,10 +13,9 @@ quickAnswer: "Cigars store best at 65 to 72 percent relative humidity, with 70% 
 publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
-  - "how-to-store-cigars"
-  - "seasoning-a-new-humidor"
-  - "boveda-vs-distilled-water-humidor"
   - "cigar-storage-temperature"
+  - "how-to-organize-a-humidor"
+  - "how-to-store-cigars"
 faqs:
   - q: "Is 70 percent humidity too high for cigars?"
     a: "70% is the long-standing default and most cigars store well there. Drier collectors prefer 65-68% for a firmer draw and faster burn; wetter regions push to 72%. Above 75% mold and beetles become real risks."

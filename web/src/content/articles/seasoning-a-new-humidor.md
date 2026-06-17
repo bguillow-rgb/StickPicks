@@ -13,9 +13,9 @@ quickAnswer: "A new Spanish cedar humidor must be seasoned before holding cigars
 publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
-  - "how-to-store-cigars"
-  - "cigar-humidor-humidity"
   - "boveda-vs-distilled-water-humidor"
+  - "cigars-power-outage-survival"
+  - "how-to-store-cigars"
 faqs:
   - q: "Do you really need to season a humidor?"
     a: "Yes for any new Spanish cedar humidor. The wood is kiln-dried and below 50% internal moisture; without seasoning it will absorb moisture from your cigars and dry them out within days."
