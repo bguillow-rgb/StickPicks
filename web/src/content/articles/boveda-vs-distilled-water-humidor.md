@@ -13,6 +13,7 @@ publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
   - "seasoning-a-new-humidor"
+  - "how-long-to-age-cigars"
 faqs:
   - q: "Are Boveda packs better than a humidifier?"
     a: "More precise, yes. Boveda holds within plus or minus 1 percent of the stated RH; traditional humidifiers drift 5-10 percent. Boveda costs more per year but requires no monitoring or refilling."

@@ -13,6 +13,7 @@ publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
   - "cigars-cellophane-on-or-off-humidor"
+  - "how-long-to-age-cigars"
   - "how-to-store-cigars"
   - "seasoning-a-new-humidor"
 faqs:
