@@ -13,10 +13,10 @@ quickAnswer: "Store cigars at 65 to 70°F. Above 74°F tobacco beetles can hatch
 publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
+  - "cigar-beetles-humidor"
   - "cigar-humidor-humidity"
   - "how-to-store-cigars"
   - "cigars-cellophane-on-or-off-humidor"
-  - "how-to-organize-a-humidor"
 faqs:
   - q: "What is the ideal temperature for storing cigars?"
     a: "65 to 70°F is the standard range. 68°F is a common single-target setpoint that keeps you safely below the 74°F beetle threshold while staying warm enough to preserve aging."
