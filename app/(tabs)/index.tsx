@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, Image } from 'react-native';
+import { View, Text, StyleSheet, Pressable, Image, Platform } from 'react-native';
 import { Alert } from '@/src/components/ui/StyledAlert';
 import { useRouter } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -49,6 +49,7 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top + SPACING.sm }]}>
+     <View style={styles.content}>
       {/* Header */}
       <View style={styles.header}>
         <View>
@@ -148,6 +149,7 @@ export default function HomeScreen() {
           Scanner (~13k) and plants a stale-catalog impression before the
           user has even tried the app. */}
       <Text style={styles.footer}>Premium handmade cigars, curated weekly.</Text>
+     </View>
     </View>
   );
 }
@@ -157,6 +159,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bg,
     paddingHorizontal: SPACING.md,
+  },
+  // On native, content simply fills the screen (cards flex to share height).
+  // On web the viewport can be arbitrarily tall/wide, so we cap the column at
+  // a comfortable reading width and center it instead of letting the phone
+  // layout stretch edge-to-edge.
+  content: {
+    flex: 1,
+    width: '100%',
+    ...Platform.select({
+      web: { maxWidth: 600, alignSelf: 'center' },
+      default: {},
+    }),
   },
   header: {
     flexDirection: 'row',
@@ -206,6 +220,14 @@ const styles = StyleSheet.create({
   cards: {
     flex: 1,
     gap: SPACING.md,
+    // On web, don't stretch to fill a tall viewport — let cards size to their
+    // content so they don't balloon into empty gradient blocks. Use longhand
+    // (flexBasis:'auto') because RN-web maps the `flex:0` shorthand to basis
+    // 0%, which collapses the container to height 0.
+    ...Platform.select({
+      web: { flexGrow: 0, flexShrink: 0, flexBasis: 'auto', marginTop: SPACING.xs },
+      default: {},
+    }),
   },
   ctaCard: {
     flex: 1,
@@ -213,6 +235,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: COLORS.border,
+    ...Platform.select({
+      web: { flexGrow: 0, flexShrink: 0, flexBasis: 'auto', minHeight: 132 },
+      default: {},
+    }),
   },
   pressed: {
     opacity: 0.9,

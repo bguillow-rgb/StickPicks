@@ -344,6 +344,16 @@ th {
   transition: background 0.2s, color 0.2s;
 }
 .cta:hover { background: var(--accent); color: var(--bg); }
+/* Primary, filled CTA — the main "open the web app" action. */
+.cta--primary {
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+}
+.cta--primary:hover {
+  background: transparent;
+  color: var(--accent);
+}
 .cta--disabled {
   border-color: var(--border);
   color: var(--muted);

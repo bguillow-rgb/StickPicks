@@ -9,6 +9,23 @@ import { SITE } from '../consts';
   path="/404"
   noindex={true}
 >
+  {/*
+    SPA deep-link fallback for the Expo web app at /app. GitHub Pages serves
+    this single 404 for every unknown path, including in-app routes such as
+    /app/identify/camera on a hard refresh or shared link. Stash the intended
+    route and bounce to the SPA shell, which restores it before the router
+    boots (see the restore snippet injected into /app/index.html at deploy).
+  */}
+  <script slot="head" is:inline>
+    (function () {
+      var p = location.pathname;
+      if (p === '/app' || p.indexOf('/app/') === 0) {
+        sessionStorage.setItem('spa:redirect', p + location.search + location.hash);
+        location.replace('/app/');
+      }
+    })();
+  </script>
+
   <p class="brand">{SITE.name}</p>
   <h1>Page Not Found</h1>
   <p class="effective">That page does not exist.</p>

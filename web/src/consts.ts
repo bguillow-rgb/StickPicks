@@ -6,7 +6,9 @@ export const SITE = {
   name: 'Stick Picks',
   tagline: 'The Cigar Collector\u2019s Journal',
   description:
-    'Stick Picks is a hobby and lifestyle iOS app for adult cigar collectors. Catalog your humidor, track collection value, and journal your cigars in one reference.',
+    'Stick Picks is a free web app for adult cigar collectors. Catalog your humidor, scan cigar bands to identify what you own, track collection value, and journal every cigar \u2014 right in your browser.',
+  // The in-browser app lives at this path (the Expo SPA mounted under /app).
+  appUrl: 'https://stickpicks.app/app/',
   url: 'https://stickpicks.app',
   locale: 'en-US',
   supportEmail: 'support@stickpicks.app',

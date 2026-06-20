@@ -1,13 +1,14 @@
 # Stick Picks
 
-> Stick Picks is a hobby and lifestyle iOS app for adult cigar collectors.
-> It catalogs your humidor, scans cigar bands to identify what you own,
-> tracks the value of your collection, and provides a private journal for
-> every cigar in your collection. The app does not sell tobacco, show
-> tobacco ads, or promote tobacco use. It is a reference and personal-
-> collection tool for adults aged 21 and over.
+> Stick Picks is a free web app for adult cigar collectors that runs in any
+> browser at https://stickpicks.app/app. It catalogs your humidor, scans
+> cigar bands to identify what you own, tracks the value of your collection,
+> and provides a private journal for every cigar in your collection. The app
+> does not sell tobacco, show tobacco ads, or promote tobacco use. It is a
+> reference and personal-collection tool for adults aged 21 and over.
 
 ## Site
+- [Open the app](https://stickpicks.app/app/): the free in-browser Stick Picks app (humidor catalog, band scanner, journal)
 - [Home](https://stickpicks.app/): app overview, features, FAQ
 - [About](https://stickpicks.app/about): who runs Stick Picks, editorial standards, what the app is and is not
 - [Articles](https://stickpicks.app/articles): guides for cigar collectors (humidor care, valuation, identification, storage)

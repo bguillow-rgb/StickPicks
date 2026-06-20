@@ -7,6 +7,9 @@
 
 User-agent: *
 Allow: /
+# The /app path is the Expo single-page web app — a JS shell with no
+# server-rendered content worth indexing. The Astro pages own SEO.
+Disallow: /app
 
 # AI crawlers, explicitly allowed.
 User-agent: GPTBot
