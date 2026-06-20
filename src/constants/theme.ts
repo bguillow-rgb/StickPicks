@@ -51,6 +51,13 @@ export const RADIUS = {
   full: 9999,
 } as const;
 
+// On web the app is a mobile-first UI rendered in a desktop browser. Without a
+// cap every screen and the tab bar stretch edge-to-edge across a wide monitor
+// and look broken. We constrain the whole app to a centered phone-width column;
+// below this width the column is simply 100% wide, so it stays responsive on
+// narrow/mobile browsers. Native (iOS/Android) ignores this entirely.
+export const WEB_MAX_WIDTH = 600;
+
 export const FONTS = {
   display: 'Cormorant',
   body: 'Cormorant',

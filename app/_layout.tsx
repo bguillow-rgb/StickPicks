@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, LogBox } from 'react-native';
+import { View, Text, StyleSheet, LogBox, Platform } from 'react-native';
 
 // RevenueCat can't fetch offerings until the products are live in App Store
 // Connect, which only happens for release builds. In dev, the expected failure
@@ -27,7 +27,7 @@ import Animated, {
   withRepeat,
 } from 'react-native-reanimated';
 import 'react-native-reanimated';
-import { COLORS, FONTS } from '@/src/constants/theme';
+import { COLORS, FONTS, WEB_MAX_WIDTH } from '@/src/constants/theme';
 import { StyledAlertHost } from '@/src/components/ui/StyledAlert';
 import { supabase } from '@/lib/supabase';
 import { Session } from '@supabase/supabase-js';
@@ -258,6 +258,32 @@ const splashStyles = StyleSheet.create({
   },
 });
 
+const styles = StyleSheet.create({
+  // Full-bleed backdrop. On web it paints the app background behind the
+  // centered column so the area beside the column reads as intentional, not
+  // empty white. On native it's just a transparent flex:1 passthrough.
+  webOuter: {
+    flex: 1,
+    ...Platform.select({
+      web: {
+        backgroundColor: COLORS.bg,
+        alignItems: 'center',
+      },
+      default: {},
+    }),
+  },
+  // The app column. Capped to a phone width on web and centered; full width
+  // (and uncapped) on native and on narrow browsers.
+  webColumn: {
+    flex: 1,
+    width: '100%',
+    ...Platform.select({
+      web: { maxWidth: WEB_MAX_WIDTH },
+      default: {},
+    }),
+  },
+});
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     'Cormorant': require('../assets/fonts/Cormorant-Variable.ttf'),
@@ -348,24 +374,32 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={StickPicksDark}>
       <StatusBar style="light" />
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="age-gate/index" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="age-gate/blocked" options={{ gestureEnabled: false }} />
-        <Stack.Screen name="auth/login" options={{ presentation: 'modal', gestureEnabled: false }} />
-        <Stack.Screen name="quiz/index" />
-        <Stack.Screen name="quiz/results" />
-        <Stack.Screen name="identify/camera" />
-        <Stack.Screen name="identify/result" />
-        <Stack.Screen name="cigar/[id]" />
-        {/* Paywall used to use presentation: 'modal', but the iOS modal sheet
-            stayed layered behind the rest of the app after being dismissed,
-            leaving white space at the top of subsequent screens. A regular
-            stack push pops cleanly on router.back() and on tab navigation. */}
-        <Stack.Screen name="paywall" />
-        <Stack.Screen name="legal/privacy" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="legal/terms" options={{ presentation: 'modal' }} />
-      </Stack>
+      {/* On web, constrain the whole app to a centered phone-width column so it
+          doesn't stretch edge-to-edge on a desktop monitor. webOuter fills the
+          viewport with the app background (dark sides), webColumn caps the width
+          and centers it. On native both are plain flex:1 wrappers — no effect. */}
+      <View style={styles.webOuter}>
+        <View style={styles.webColumn}>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="(tabs)" />
+            <Stack.Screen name="age-gate/index" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="age-gate/blocked" options={{ gestureEnabled: false }} />
+            <Stack.Screen name="auth/login" options={{ presentation: 'modal', gestureEnabled: false }} />
+            <Stack.Screen name="quiz/index" />
+            <Stack.Screen name="quiz/results" />
+            <Stack.Screen name="identify/camera" />
+            <Stack.Screen name="identify/result" />
+            <Stack.Screen name="cigar/[id]" />
+            {/* Paywall used to use presentation: 'modal', but the iOS modal sheet
+                stayed layered behind the rest of the app after being dismissed,
+                leaving white space at the top of subsequent screens. A regular
+                stack push pops cleanly on router.back() and on tab navigation. */}
+            <Stack.Screen name="paywall" />
+            <Stack.Screen name="legal/privacy" options={{ presentation: 'modal' }} />
+            <Stack.Screen name="legal/terms" options={{ presentation: 'modal' }} />
+          </Stack>
+        </View>
+      </View>
       {showSplash && (
         <AnimatedSplash
           onReady={() => setAnimatedSplashReady(true)}
