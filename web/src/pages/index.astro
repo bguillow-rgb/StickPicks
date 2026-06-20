@@ -68,6 +68,7 @@ const faqs = [
   title={SITE.name}
   description={SITE.description}
   path="/"
+  wide
 >
   <Fragment slot="head">
     <SoftwareApplicationSchema />
@@ -76,25 +77,29 @@ const faqs = [
   </Fragment>
 
   <section class="hero">
-    <img src="/icon.png" alt="Stick Picks app icon" class="hero-icon" width="96" height="96" />
-    <p class="brand">{SITE.name}</p>
-    <h1>{SITE.tagline}</h1>
-    <p class="hero-tagline">
-      Catalog your humidor, identify any cigar by its band, and build your
-      tasting log &mdash; free, right in your browser. No download required.
-    </p>
+    <div class="hero-copy">
+      <span class="badge">Free web app &middot; No download</span>
+      <h1>{SITE.tagline}</h1>
+      <p class="hero-tagline">
+        Catalog your humidor, identify any cigar by its band, and build your
+        tasting log &mdash; free, right in your browser.
+      </p>
 
-    <div class="cta-row">
-      <a class="cta cta--primary" href={SITE.appUrl}>Open the app &rarr;</a>
+      <div class="cta-row">
+        <a class="cta cta--primary" href={SITE.appUrl}>Open the app &rarr;</a>
+        <a class="cta" href="/features">See features</a>
+      </div>
+      <p class="hero-trust">No download &middot; No ads &middot; For adults 21+ &middot; Your collection stays yours</p>
     </div>
-    <p class="hero-trust">No download &middot; No ads &middot; For adults 21+ &middot; Your collection stays yours</p>
 
-    <img
-      src="/assets/screenshots/02-home.png"
-      alt="Stick Picks home screen showing Quick Match, Advanced Quiz, and Scan a Stick options"
-      class="hero-shot"
-      loading="eager"
-    />
+    <div class="hero-media">
+      <img
+        src="/assets/screenshots/02-home.png"
+        alt="Stick Picks home screen showing Quick Match, Advanced Quiz, and Scan a Stick options"
+        class="hero-shot"
+        loading="eager"
+      />
+    </div>
   </section>
 
   <QuickAnswer text={quickAnswer} />

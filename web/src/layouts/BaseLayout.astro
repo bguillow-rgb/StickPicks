@@ -18,6 +18,10 @@ interface Props {
   // NOT be emitted (e.g. when an article emits its own and we don\u2019t want
   // duplication). Default is false.
   suppressGlobalSchema?: boolean;
+  // Set true to widen the content column (homepage / feature layouts that
+  // use the two-column hero and grids). Prose pages stay at the narrow
+  // reading width. Default is false.
+  wide?: boolean;
 }
 
 const {
@@ -26,6 +30,7 @@ const {
   path = '',
   noindex = false,
   suppressGlobalSchema = false,
+  wide = false,
 } = Astro.props;
 
 const canonical = `${SITE.url}${path}`;
@@ -62,16 +67,22 @@ const fullTitle =
     <slot name="head" />
   </head>
   <body>
-    <div class="container">
-      <p class="nav">
-        {NAV.map((item, i) => (
-          <>
-            {i > 0 && <span> &middot; </span>}
+    <header class="site-header">
+      <div class="site-header__inner">
+        <a class="site-logo" href="/">
+          <span class="mark">SP</span>
+          {SITE.name}
+        </a>
+        <nav class="site-nav">
+          {NAV.filter((item) => item.href !== '/').map((item) => (
             <a href={item.href}>{item.label}</a>
-          </>
-        ))}
-      </p>
+          ))}
+        </nav>
+        <a class="cta cta--primary cta--sm" href={SITE.appUrl}>Open the app</a>
+      </div>
+    </header>
+    <main class={wide ? 'container container--wide' : 'container'}>
       <slot />
-    </div>
+    </main>
   </body>
 </html>

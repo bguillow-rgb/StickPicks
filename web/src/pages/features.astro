@@ -8,6 +8,7 @@ import { SITE } from '../consts';
   title="Features"
   description="A closer look at Stick Picks: humidor catalog, tasting journal, cigar identification, palate-matching quiz, and curated browse."
   path="/features"
+  wide
 >
   <Fragment slot="head">
     <BreadcrumbSchema crumbs={[{ name: 'Features', url: `${SITE.url}/features` }]} />
@@ -81,9 +82,12 @@ import { SITE } from '../consts';
   <section class="cta">
     <h2 class="section-title">Ready when you are</h2>
     <p class="cta-body">
-      Stick Picks lands on the App Store soon. Questions, feedback, or want a heads-up at launch? Email
-      <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a>.
+      Stick Picks is free and runs right in your browser &mdash; nothing to install.
+      Open it now, or email <a href={`mailto:${SITE.supportEmail}`}>{SITE.supportEmail}</a> with questions or feedback.
     </p>
+    <div class="cta-row">
+      <a class="cta cta--primary" href={SITE.appUrl}>Open the app &rarr;</a>
+    </div>
   </section>
 
   <Footer />
