@@ -14,9 +14,9 @@ publishedAt: "2026-06-17"
 author: "Stick Picks"
 relatedSlugs:
   - "cigars-cellophane-on-or-off-humidor"
+  - "what-size-humidor-do-i-need"
   - "cigar-humidor-humidity"
   - "cigar-storage-temperature"
-  - "how-long-to-age-cigars"
 faqs:
   - q: "Should I organize my humidor by brand, strength, or size?"
     a: "Strength first, then brand. Mixing mild Connecticut shades with full-bodied Nicaraguan maduros in the same open zone risks flavor transfer over weeks and months. Once cigars of similar strength are grouped, organizing within that group by brand or vitola is purely a personal convenience."
