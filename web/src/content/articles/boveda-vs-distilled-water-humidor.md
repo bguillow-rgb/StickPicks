@@ -13,6 +13,7 @@ publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
   - "seasoning-a-new-humidor"
+  - "how-to-calibrate-hygrometer-humidor"
   - "how-long-to-age-cigars"
 faqs:
   - q: "Are Boveda packs better than a humidifier?"
