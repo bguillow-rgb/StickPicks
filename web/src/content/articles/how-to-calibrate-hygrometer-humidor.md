@@ -14,6 +14,7 @@ publishedAt: "2026-06-23"
 author: "Stick Picks"
 relatedSlugs:
   - "boveda-vs-distilled-water-humidor"
+  - "how-to-set-up-a-tupperdor"
   - "seasoning-a-new-humidor"
 faqs:
   - q: "What should a hygrometer read during the salt test?"
