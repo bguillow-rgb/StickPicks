@@ -14,6 +14,7 @@ publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
   - "cigar-sizes-and-shapes-guide"
+  - "cigar-wrapper-types-guide"
   - "cigars-cellophane-on-or-off-humidor"
 faqs:
   - q: "Is white stuff on a cigar mold or plume?"
