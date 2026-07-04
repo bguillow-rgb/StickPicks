@@ -13,10 +13,7 @@ quickAnswer: "Match your cigar's intensity to your drink: mild cigars pair with 
 publishedAt: "2026-06-28"
 author: "Stick Picks"
 relatedSlugs:
-  - "boveda-vs-distilled-water-humidor"
-  - "cigar-beetles-humidor"
-  - "cigar-humidor-humidity"
-  - "cigar-mold-vs-plume"
+  - "how-to-cut-a-cigar"
 faqs:
   - q: "What is the best drink to pair with a cigar?"
     a: "Whiskey is the most popular choice. Bourbon's vanilla-caramel notes complement medium-bodied cigars, while peaty single malt Scotch suits full-bodied smokes. Coffee is the top non-alcoholic option. The best pairing is always the one that balances the cigar's strength and flavor profile."
