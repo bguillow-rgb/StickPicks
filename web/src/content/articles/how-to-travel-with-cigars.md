@@ -14,6 +14,7 @@ publishedAt: "2026-06-21"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-keep-a-cigar-journal"
+  - "how-to-light-a-cigar"
   - "how-to-rehydrate-dry-cigars"
 faqs:
   - q: "Are cigars allowed on airplanes?"

@@ -13,6 +13,7 @@ quickAnswer: "Yes, you can rehydrate dried-out cigars. Place them in an airtight
 publishedAt: "2026-06-24"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-to-light-a-cigar"
   - "cigar-humidor-humidity"
   - "how-to-travel-with-cigars"
 faqs:
