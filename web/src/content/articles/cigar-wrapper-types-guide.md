@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigars-cellophane-on-or-off-humidor"
   - "boveda-vs-distilled-water-humidor"
+  - "can-you-mix-cigars-in-a-humidor"
   - "cigar-mold-vs-plume"
-  - "cigar-sizes-and-shapes-guide"
 faqs:
   - q: "Does a darker cigar wrapper always mean a stronger cigar?"
     a: "No, this is the most common misconception in the cigar world. A Maduro wrapper is dark because it underwent extended fermentation, which actually converts starches to sugars and makes the leaf sweeter and often smoother. True strength comes from the ligero filler tobaccos in the blend, not wrapper color. You can have a very dark Maduro that is medium-bodied, or a light Connecticut-wrapped cigar with a punishing nicotine kick."
