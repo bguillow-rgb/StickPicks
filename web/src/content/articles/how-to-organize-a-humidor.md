@@ -13,10 +13,10 @@ quickAnswer: "Organize your humidor by separating cigars into three zones: daily
 publishedAt: "2026-06-17"
 author: "Stick Picks"
 relatedSlugs:
+  - "why-spanish-cedar-humidor"
   - "cigar-sizes-and-shapes-guide"
   - "cigars-cellophane-on-or-off-humidor"
   - "how-to-keep-a-cigar-journal"
-  - "what-size-humidor-do-i-need"
 faqs:
   - q: "Should I organize my humidor by brand, strength, or size?"
     a: "Strength first, then brand. Mixing mild Connecticut shades with full-bodied Nicaraguan maduros in the same open zone risks flavor transfer over weeks and months. Once cigars of similar strength are grouped, organizing within that group by brand or vitola is purely a personal convenience."
