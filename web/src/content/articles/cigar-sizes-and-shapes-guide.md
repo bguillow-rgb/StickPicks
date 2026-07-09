@@ -14,9 +14,9 @@ publishedAt: "2026-06-26"
 author: "Stick Picks"
 relatedSlugs:
   - "can-you-mix-cigars-in-a-humidor"
+  - "cigar-strength-vs-body"
   - "how-to-keep-a-cigar-journal"
   - "how-to-organize-a-humidor"
-  - "what-size-humidor-do-i-need"
 faqs:
   - q: "What is a vitola?"
     a: "A vitola is the term for a cigar's shape and size, the combination of its length and ring gauge. Names like Robusto, Toro, Corona, and Churchill are all vitola names. Two cigars from different brands sharing the same vitola have essentially the same dimensions."

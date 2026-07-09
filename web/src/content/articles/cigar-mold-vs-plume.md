@@ -13,6 +13,7 @@ quickAnswer: "Plume is harmless crystallized oil that appears as fine white dust
 publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
+  - "cigar-strength-vs-body"
   - "cigar-sizes-and-shapes-guide"
   - "cigar-wrapper-types-guide"
   - "cigars-cellophane-on-or-off-humidor"
