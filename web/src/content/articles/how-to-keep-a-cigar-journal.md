@@ -13,10 +13,10 @@ quickAnswer: "Keep a cigar journal by recording the brand, vitola, wrapper type,
 publishedAt: "2026-06-25"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-to-read-cigar-tasting-notes"
   - "cigar-sizes-and-shapes-guide"
   - "how-to-organize-a-humidor"
   - "why-spanish-cedar-humidor"
-  - "can-you-mix-cigars-in-a-humidor"
 faqs:
   - q: "What's the minimum I should write in a cigar journal entry?"
     a: "At minimum, log the brand and line, vitola (size and ring gauge), wrapper origin, the date you smoked it, and a one-sentence flavor impression. Adding a 1-10 rating and a 'would buy again?' checkbox rounds out a usable entry in under two minutes."

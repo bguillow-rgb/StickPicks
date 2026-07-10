@@ -15,6 +15,7 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-rehydrate-dry-cigars"
   - "how-to-keep-a-cigar-journal"
+  - "how-to-read-cigar-tasting-notes"
   - "how-to-travel-with-cigars"
 faqs:
   - q: "Can I use a Zippo or regular fluid lighter to light a cigar?"

@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-mold-vs-plume"
   - "cigar-sizes-and-shapes-guide"
   - "cigar-wrapper-types-guide"
-  - "cigar-pairing-guide"
+  - "how-to-read-cigar-tasting-notes"
 faqs:
   - q: "What is the difference between cigar strength and cigar body?"
     a: "Strength refers to nicotine content and its physical effect on the smoker. Body refers to the depth, richness, and fullness of flavor experienced on the palate. They are separate dimensions -- a cigar can be high in one and low in the other."
