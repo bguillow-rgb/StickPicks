@@ -15,6 +15,7 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-light-a-cigar"
   - "cigar-humidor-humidity"
+  - "how-to-build-a-cigar-collection"
   - "how-to-travel-with-cigars"
 faqs:
   - q: "How long does it take to rehydrate a dry cigar?"

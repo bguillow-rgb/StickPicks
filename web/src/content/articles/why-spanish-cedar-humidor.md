@@ -16,7 +16,7 @@ relatedSlugs:
   - "how-to-organize-a-humidor"
   - "can-you-mix-cigars-in-a-humidor"
   - "cigar-sizes-and-shapes-guide"
-  - "how-to-keep-a-cigar-journal"
+  - "how-to-build-a-cigar-collection"
 faqs:
   - q: "Is Spanish cedar actually from Spain?"
     a: "No. Despite the name, Spanish cedar (Cedrela odorata) is native to Central and South America, primarily Brazil, Honduras, and neighboring countries. It isn't a true cedar at all; it belongs to the mahogany family (Meliaceae). Early European traders named it for its cedar-like scent, and the name stuck."
