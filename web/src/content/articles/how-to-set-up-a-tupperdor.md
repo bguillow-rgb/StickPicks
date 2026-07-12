@@ -13,10 +13,10 @@ quickAnswer: "A tupperdor is an airtight food-grade plastic container used as a 
 publishedAt: "2026-06-27"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-to-set-up-a-wineador"
   - "how-to-set-up-a-coolidor"
   - "boveda-vs-distilled-water-humidor"
   - "cigar-storage-temperature"
-  - "cigars-cellophane-on-or-off-humidor"
 faqs:
   - q: "Do I need to season a tupperdor like a wooden humidor?"
     a: "No. Plastic doesn't absorb moisture the way Spanish cedar does, so there's no seasoning process. Just add your humidity source, wait 24 hours for the environment to stabilize, then load your cigars."

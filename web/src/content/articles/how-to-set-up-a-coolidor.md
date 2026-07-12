@@ -14,9 +14,9 @@ publishedAt: "2026-07-01"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-set-up-a-tupperdor"
+  - "how-to-set-up-a-wineador"
   - "cigar-humidor-humidity"
   - "cigar-sizes-and-shapes-guide"
-  - "cigar-storage-temperature"
 faqs:
   - q: "What size cooler should I use for a coolidor?"
     a: "A 28, 48 quart cooler handles most home collections and keeps humidity stable without constant maintenance. If you store whole boxes or plan to bulk-buy, size up to 50, 70 quarts. Avoid going smaller than 28 quarts -- tight spaces make humidity management harder and leave no room to grow."
