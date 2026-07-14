@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigars-cellophane-on-or-off-humidor"
   - "how-long-to-age-cigars"
+  - "when-to-remove-cigar-band"
   - "cigar-humidor-humidity"
-  - "cigar-storage-temperature"
 faqs:
   - q: "Can I smoke a cigar right after buying it online?"
     a: "Technically yes, but it often disappoints. Shipping exposes cigars to temperature and humidity swings that can leave tobacco unevenly moist. Letting them rest 1-2 weeks in a properly seasoned humidor gives the moisture time to rebalance, improving both flavor and burn consistency."
