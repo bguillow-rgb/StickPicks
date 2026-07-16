@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-sizes-and-shapes-guide"
   - "how-to-build-a-cigar-collection"
+  - "how-to-clean-a-humidor"
   - "how-to-organize-a-humidor"
-  - "how-to-rotate-cigars-in-a-humidor"
 faqs:
   - q: "How many cigars does a '50-count' humidor actually hold?"
     a: "Manufacturer capacity ratings are based on a standard robusto (roughly 5 x 50 ring gauge). If your collection skews toward larger vitolas, Churchills, double coronas, or big-ring gordos, your real-world capacity will be noticeably lower than the stated count. Budget for at least 20-25% fewer cigars than the listed number when buying larger vitolas."

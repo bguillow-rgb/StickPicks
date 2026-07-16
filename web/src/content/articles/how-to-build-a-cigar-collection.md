@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-organize-a-humidor"
   - "cigar-sizes-and-shapes-guide"
+  - "how-to-clean-a-humidor"
   - "how-to-rotate-cigars-in-a-humidor"
-  - "what-size-humidor-do-i-need"
 faqs:
   - q: "How many cigars should a beginner start with?"
     a: "Start with 10-20 cigars across different strengths and wrapper types. This lets you explore flavor profiles without overspending. Once you identify favorites, scale up by buying boxes of proven performers."

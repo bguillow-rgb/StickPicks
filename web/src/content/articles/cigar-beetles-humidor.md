@@ -14,6 +14,7 @@ publishedAt: "2026-06-19"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-storage-temperature"
+  - "how-to-clean-a-humidor"
   - "how-to-store-cigars"
 faqs:
   - q: "What temperature kills cigar beetles?"
