@@ -13,6 +13,7 @@ quickAnswer: "A cigar sampler is a curated assortment of 5, 20+ cigars from diff
 publishedAt: "2026-07-13"
 author: "Stick Picks"
 relatedSlugs:
+  - "buying-cigars-by-the-box-vs-singles"
   - "cigar-sizes-and-shapes-guide"
   - "how-to-build-a-cigar-collection"
   - "how-to-fix-cigar-draw-problems"
