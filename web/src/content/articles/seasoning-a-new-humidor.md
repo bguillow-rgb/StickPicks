@@ -14,9 +14,9 @@ publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
   - "boveda-vs-distilled-water-humidor"
+  - "cigar-filler-binder-wrapper-explained"
   - "cigars-cellophane-on-or-off-humidor"
   - "cigars-power-outage-survival"
-  - "how-long-to-age-cigars"
 faqs:
   - q: "Do you really need to season a humidor?"
     a: "Yes for any new Spanish cedar humidor. The wood is kiln-dried and below 50% internal moisture; without seasoning it will absorb moisture from your cigars and dry them out within days."

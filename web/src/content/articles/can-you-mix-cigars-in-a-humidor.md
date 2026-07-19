@@ -13,10 +13,10 @@ quickAnswer: "Yes, you can mix different cigar brands and blends in one humidor,
 publishedAt: "2026-07-06"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-filler-binder-wrapper-explained"
   - "cigar-sizes-and-shapes-guide"
   - "why-spanish-cedar-humidor"
   - "cigar-wrapper-types-guide"
-  - "cigars-cellophane-on-or-off-humidor"
 faqs:
   - q: "Will mixing different cigar brands ruin their flavor?"
     a: "For natural, unflavored cigars, meaningful flavor transfer takes many months to become detectable, and even then the effect is subtle. Most experienced collectors mix brands freely with no noticeable negative impact."
