@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-strength-vs-body"
   - "how-to-read-cigar-tasting-notes"
   - "buying-cigars-by-the-box-vs-singles"
-  - "cigar-filler-binder-wrapper-explained"
+  - "cigar-country-of-origin-flavor-guide"
 faqs:
   - q: "What does a 90-rated cigar mean?"
     a: "A score of 90 or above indicates an excellent cigar with superior construction, flavor complexity, and a consistent burn. Most collectors and retailers consider 90+ the threshold for a genuinely standout smoke worth buying in quantity."

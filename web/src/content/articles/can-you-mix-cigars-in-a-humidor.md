@@ -14,9 +14,9 @@ publishedAt: "2026-07-06"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-filler-binder-wrapper-explained"
+  - "cigar-country-of-origin-flavor-guide"
   - "cigar-sizes-and-shapes-guide"
   - "why-spanish-cedar-humidor"
-  - "cigar-wrapper-types-guide"
 faqs:
   - q: "Will mixing different cigar brands ruin their flavor?"
     a: "For natural, unflavored cigars, meaningful flavor transfer takes many months to become detectable, and even then the effect is subtle. Most experienced collectors mix brands freely with no noticeable negative impact."
