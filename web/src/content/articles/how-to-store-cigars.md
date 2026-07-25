@@ -14,9 +14,9 @@ publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
   - "cigars-cellophane-on-or-off-humidor"
+  - "cigar-humidity-by-type-wrapper-origin"
   - "cigar-storage-temperature"
   - "how-to-rotate-cigars-in-a-humidor"
-  - "how-to-set-up-a-wineador"
 faqs:
   - q: "What is the best humidity for storing cigars?"
     a: "65 to 72 percent relative humidity is the standard collector range, with 70% as the most common target. Below 60% the wrapper dries and cracks; above 75% mold and tobacco beetles become real risks."

@@ -13,10 +13,10 @@ quickAnswer: "For short-term storage (under 3 months), leaving cellophane on is 
 publishedAt: "2026-06-17"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-humidity-by-type-wrapper-origin"
   - "how-to-store-cigars"
   - "when-to-remove-cigar-band"
   - "how-long-to-rest-cigars-in-humidor"
-  - "how-to-clean-a-humidor"
 faqs:
   - q: "Does cellophane actually block humidity in a humidor?"
     a: "No. Cellophane is semi-permeable and allows water vapor to pass through its microscopic pores. Humidity still reaches the cigar, just more slowly than it would with a naked stick. Glass or aluminum tubes are a different story: those do block humidity and should always be removed for any meaningful storage."
