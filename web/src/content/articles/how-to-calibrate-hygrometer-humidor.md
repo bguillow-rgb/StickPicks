@@ -14,9 +14,9 @@ publishedAt: "2026-06-23"
 author: "Stick Picks"
 relatedSlugs:
   - "boveda-vs-distilled-water-humidor"
+  - "cigar-humidifier-types-comparison"
   - "how-to-clean-a-humidor"
   - "how-to-rotate-cigars-in-a-humidor"
-  - "how-to-set-up-a-tupperdor"
 faqs:
   - q: "What should a hygrometer read during the salt test?"
     a: "A properly calibrated hygrometer should read exactly 75% RH when sealed with damp (not dissolved) table salt in an airtight bag or container for at least 8 hours. This works because saturated salt in equilibrium with water always produces 75% RH at room temperature, regardless of external conditions."
