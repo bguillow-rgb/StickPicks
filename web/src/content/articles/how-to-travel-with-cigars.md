@@ -13,6 +13,7 @@ quickAnswer: "Yes, you can travel with cigars. TSA permits cigars in both carry-
 publishedAt: "2026-06-21"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-lounge-etiquette"
   - "how-to-keep-a-cigar-journal"
   - "how-to-light-a-cigar"
   - "how-to-rehydrate-dry-cigars"
