@@ -14,9 +14,9 @@ publishedAt: "2026-07-14"
 author: "Stick Picks"
 relatedSlugs:
   - "cigars-cellophane-on-or-off-humidor"
+  - "how-to-smoke-a-cigar"
   - "cigar-humidity-by-type-wrapper-origin"
   - "how-long-to-rest-cigars-in-humidor"
-  - "cigar-lounge-etiquette"
 faqs:
   - q: "Should I remove the cigar band before or after lighting?"
     a: "After. Light the cigar first and smoke for at least 2, 3 minutes. The heat softens the glue holding the band to the wrapper, allowing clean removal without tearing the leaf."

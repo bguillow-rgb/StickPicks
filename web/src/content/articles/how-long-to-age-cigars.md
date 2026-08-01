@@ -16,7 +16,7 @@ relatedSlugs:
   - "which-cigars-age-well"
   - "how-long-to-rest-cigars-in-humidor"
   - "cigars-cellophane-on-or-off-humidor"
-  - "boveda-vs-distilled-water-humidor"
+  - "how-to-smoke-a-cigar"
 faqs:
   - q: "How long should I rest a cigar after buying it before smoking it?"
     a: "Give any newly purchased cigar at least one to two weeks to acclimate in your humidor before smoking. If it was shipped, a short rest period lets it rehydrate and equalize -- many collectors wait 30 days before judging a freshly delivered box."
