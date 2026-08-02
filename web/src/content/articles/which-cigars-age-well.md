@@ -16,7 +16,7 @@ relatedSlugs:
   - "how-long-to-age-cigars"
   - "infused-cigars-vs-natural-cigars"
   - "boveda-vs-distilled-water-humidor"
-  - "buying-cigars-by-the-box-vs-singles"
+  - "box-pressed-cigars-guide"
 faqs:
   - q: "Do all premium cigars get better with age?"
     a: "No. Even premium cigars vary. Full-bodied blends with complex tobacco and high oil content tend to improve noticeably. Milder cigars, even well-made ones, can become too flat or bland after extended aging, losing the delicate nuances that made them enjoyable in the first place."
