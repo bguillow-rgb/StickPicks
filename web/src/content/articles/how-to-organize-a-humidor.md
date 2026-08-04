@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-build-a-cigar-collection"
   - "why-spanish-cedar-humidor"
+  - "cigar-punch-vs-cutter"
   - "cigar-sizes-and-shapes-guide"
-  - "cigars-cellophane-on-or-off-humidor"
 faqs:
   - q: "Should I organize my humidor by brand, strength, or size?"
     a: "Strength first, then brand. Mixing mild Connecticut shades with full-bodied Nicaraguan maduros in the same open zone risks flavor transfer over weeks and months. Once cigars of similar strength are grouped, organizing within that group by brand or vitola is purely a personal convenience."

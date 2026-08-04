@@ -14,9 +14,9 @@ publishedAt: "2026-07-21"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-sizes-and-shapes-guide"
+  - "cigar-punch-vs-cutter"
   - "how-to-read-cigar-tasting-notes"
   - "can-you-mix-cigars-in-a-humidor"
-  - "cigar-filler-binder-wrapper-explained"
 faqs:
   - q: "Does the country listed on a cigar box mean all the tobacco is from that country?"
     a: "Not necessarily. The listed country is usually where the cigar was rolled, not where every leaf originated. Many cigars blend tobaccos from multiple countries, for example, a Dominican-rolled cigar may use Nicaraguan filler for added body. Only a 'puro' guarantees that all components, wrapper, binder, and filler, come from a single country."
