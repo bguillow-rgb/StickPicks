@@ -13,10 +13,10 @@ quickAnswer: "To fix a tight cigar draw, try cutting slightly deeper, gently rol
 publishedAt: "2026-07-17"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-burn-problems-canoeing-tunneling"
   - "cigar-punch-vs-cutter"
   - "cigar-humidor-humidity"
   - "cigar-storage-temperature"
-  - "how-cigar-ratings-work"
 faqs:
   - q: "Why is my cigar drawing so hard even after I cut it?"
     a: "The most common causes are over-humidification (tobacco swells and restricts airflow), a too-shallow cut, a tight filler knot inside the bunch, or over-saturation of the head from moisture in your mouth. Try cutting a hair more off the cap, roll the cigar gently between your palms, or dry-box it for 12-24 hours before smoking."
