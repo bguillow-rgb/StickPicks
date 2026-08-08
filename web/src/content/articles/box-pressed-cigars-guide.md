@@ -14,9 +14,9 @@ publishedAt: "2026-08-02"
 author: "Stick Picks"
 relatedSlugs:
   - "how-long-to-age-cigars"
+  - "how-long-do-cigars-last-without-a-humidor"
   - "which-cigars-age-well"
   - "boveda-vs-distilled-water-humidor"
-  - "buying-cigars-by-the-box-vs-singles"
 faqs:
   - q: "Are box-pressed cigars better than round cigars?"
     a: "Neither is objectively better, it comes down to personal preference. Box-pressed cigars often deliver a cooler, more even burn due to tighter filler packing, while round cigars tend to show more dynamic flavor shifts. The blend quality matters far more than the shape."

@@ -14,8 +14,8 @@ author: "Bob Guillow"
 relatedSlugs:
   - "cigar-filler-binder-wrapper-explained"
   - "cigars-cellophane-on-or-off-humidor"
+  - "how-long-do-cigars-last-without-a-humidor"
   - "how-long-to-age-cigars"
-  - "how-long-to-rest-cigars-in-humidor"
 faqs:
   - q: "Can cigars survive a 24-hour power outage?"
     a: "Yes for almost any sealed humidor. Passive humidors do not need power at all. Electronic humidors lose precision but the cigars inside are buffered by the cedar lining and existing humidification source for at least 24 hours."
