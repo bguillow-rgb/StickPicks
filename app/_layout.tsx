@@ -110,29 +110,30 @@ function AnimatedSplash({
   onReady?: () => void;
   onFinish: () => void;
 }) {
-  const scale = useSharedValue(0.6);
-  const opacity = useSharedValue(0);
-  const textOpacity = useSharedValue(0);
-  const smokeOpacity = useSharedValue(0);
+  // Start at opacity 1 so the hand-off from the native launch screen (which
+  // renders assets/images/splash-icon.png in the same steady-state layout) is
+  // seamless — no disappear/reappear flash. Only the scale bounce animates in.
+  const scale = useSharedValue(1);
+  const opacity = useSharedValue(1);
+  const textOpacity = useSharedValue(1);
+  const smokeOpacity = useSharedValue(0.4);
 
   useEffect(() => {
-    opacity.value = withTiming(1, { duration: 400 });
+    // Subtle scale-bounce gives the monogram a moment of life once React mounts,
+    // without a visible pop-in (opacity is already 1 on the first paint).
     scale.value = withSequence(
-      withTiming(1.1, { duration: 600, easing: Easing.out(Easing.back(1.5)) }),
-      withTiming(0.95, { duration: 300 }),
+      withTiming(1.05, { duration: 400, easing: Easing.out(Easing.quad) }),
       withTiming(1, { duration: 300 }),
     );
 
-    smokeOpacity.value = withDelay(500, withRepeat(
+    smokeOpacity.value = withRepeat(
       withSequence(
         withTiming(0.6, { duration: 800 }),
         withTiming(0.2, { duration: 800 }),
       ),
       3,
       true,
-    ));
-
-    textOpacity.value = withDelay(600, withTiming(1, { duration: 500 }));
+    );
 
     const timeout = setTimeout(() => {
       opacity.value = withTiming(0, { duration: 400 });
@@ -168,11 +169,10 @@ function AnimatedSplash({
     >
       <Animated.View style={[splashStyles.topLine, smokeStyle]} />
 
-      {/* Text-only wordmark splash — the lit-cigar photo was removed so the
-          JS-side splash doesn't violate Apple's 1.4.3 "encourages tobacco use"
-          guideline. Note: the NATIVE launch screen (configured in
-          app.json -> splash.image) still renders splash-icon.png before React
-          mounts, so that PNG must also be replaced before store submission. */}
+      {/* Text-only wordmark splash — matches the native launch screen
+          (assets/images/splash-icon.png) at its steady-state so the hand-off
+          from iOS's pre-splash into this animated view is invisible. Keeping
+          all elements at opacity 1 on first paint is load-bearing for that. */}
       <Animated.View style={[iconStyle, splashStyles.monogram]}>
         <Text style={splashStyles.monogramText}>SP</Text>
       </Animated.View>
