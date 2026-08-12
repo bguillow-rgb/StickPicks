@@ -13,10 +13,10 @@ quickAnswer: "Cigar ratings use a 100-point blind-tasting scale, scoring appeara
 publishedAt: "2026-07-20"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-band-meanings-explained"
   - "cigar-strength-vs-body"
   - "how-to-read-a-cigar-box"
   - "how-to-read-cigar-tasting-notes"
-  - "buying-cigars-by-the-box-vs-singles"
 faqs:
   - q: "What does a 90-rated cigar mean?"
     a: "A score of 90 or above indicates an excellent cigar with superior construction, flavor complexity, and a consistent burn. Most collectors and retailers consider 90+ the threshold for a genuinely standout smoke worth buying in quantity."

@@ -13,6 +13,7 @@ quickAnswer: "Match your cigar's intensity to your drink: mild cigars pair with 
 publishedAt: "2026-06-28"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-band-meanings-explained"
   - "cigar-strength-vs-body"
   - "how-to-cut-a-cigar"
   - "infused-cigars-vs-natural-cigars"

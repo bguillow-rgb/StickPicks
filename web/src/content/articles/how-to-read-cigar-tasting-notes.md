@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-develop-a-cigar-palate"
   - "how-to-keep-a-cigar-journal"
+  - "cigar-band-meanings-explained"
   - "cigar-country-of-origin-flavor-guide"
-  - "cigar-sizes-and-shapes-guide"
 faqs:
   - q: "What are the most common cigar tasting notes?"
     a: "The six main flavor families are earthy, spicy, woody/cedar, nutty, sweet, and floral. Within those you'll encounter sub-notes like black pepper, espresso, dark chocolate, leather, almonds, and dried fruit. Every premium cigar draws from some combination of these based on tobacco origin, fermentation, and aging."
