@@ -13,10 +13,10 @@ quickAnswer: "Without humidity control, unwrapped premium cigars begin to degrad
 publishedAt: "2026-08-08"
 author: "Stick Picks"
 relatedSlugs:
+  - "can-you-relight-a-cigar"
   - "cigars-cellophane-on-or-off-humidor"
   - "how-to-store-cigars"
   - "box-pressed-cigars-guide"
-  - "cigar-humidity-by-type-wrapper-origin"
 faqs:
   - q: "How long can an unwrapped cigar sit out before it goes bad?"
     a: "In typical indoor conditions (40-55% RH), an unwrapped premium cigar shows perceptible drying and flavor loss within 48-72 hours and becomes structurally brittle within about a week. In a dry or air-conditioned room, damage can begin in as little as 24 hours."

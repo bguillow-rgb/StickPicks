@@ -13,10 +13,10 @@ quickAnswer: "Yes, you can rehydrate dried-out cigars. Place them in an airtight
 publishedAt: "2026-06-24"
 author: "Stick Picks"
 relatedSlugs:
+  - "can-you-relight-a-cigar"
   - "how-long-do-cigars-last-without-a-humidor"
   - "how-to-light-a-cigar"
   - "cigar-burn-problems-canoeing-tunneling"
-  - "cigar-humidor-humidity"
 faqs:
   - q: "How long does it take to rehydrate a dry cigar?"
     a: "Expect 3-6 weeks for a mildly dried cigar at 69% RH. Severely desiccated cigars -- ones that crack or crumble -- can take two to three months of gradual rehydration before they're worth smoking. Patience is non-negotiable; rushing the process can crack the wrapper."
