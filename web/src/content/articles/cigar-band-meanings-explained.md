@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-read-a-cigar-box"
   - "how-to-read-cigar-tasting-notes"
+  - "cigar-parts-anatomy-explained"
   - "cigar-strength-vs-body"
-  - "how-cigar-ratings-work"
 faqs:
   - q: "What does the year on a cigar band mean?"
     a: "It typically marks the year the line was founded or first released, not the harvest year of the tobacco inside. A Padrón 1964 band, for example, commemorates the year Padrón was established, not the tobacco's vintage."

@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-country-of-origin-flavor-guide"
   - "cigar-filler-binder-wrapper-explained"
+  - "cigar-parts-anatomy-explained"
   - "cigar-punch-vs-cutter"
-  - "how-to-develop-a-cigar-palate"
 faqs:
   - q: "What is a vitola?"
     a: "A vitola is the term for a cigar's shape and size, the combination of its length and ring gauge. Names like Robusto, Toro, Corona, and Churchill are all vitola names. Two cigars from different brands sharing the same vitola have essentially the same dimensions."

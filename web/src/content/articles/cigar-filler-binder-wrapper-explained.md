@@ -14,9 +14,9 @@ publishedAt: "2026-07-19"
 author: "Stick Picks"
 relatedSlugs:
   - "can-you-mix-cigars-in-a-humidor"
+  - "cigar-parts-anatomy-explained"
   - "cigar-sizes-and-shapes-guide"
   - "can-you-relight-a-cigar"
-  - "cigar-country-of-origin-flavor-guide"
 faqs:
   - q: "Which part of a cigar contributes the most flavor?"
     a: "It depends on ring gauge. In thinner cigars, the wrapper can be the dominant flavor influence. In thicker ring gauges (60+), the filler tobacco takes over. Master blender Hendrik Kelner has noted filler contributes at least 40% of flavor overall, with wrapper and binder each adding around 20%."
