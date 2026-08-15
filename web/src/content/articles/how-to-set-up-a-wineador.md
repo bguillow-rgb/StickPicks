@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-set-up-a-tupperdor"
   - "how-to-set-up-a-coolidor"
+  - "how-to-gift-cigars"
   - "how-to-store-cigars"
-  - "can-you-relight-a-cigar"
 faqs:
   - q: "What is a wineador?"
     a: "A wineador is a wine cooler, typically thermoelectric, that has been converted into a climate-controlled cigar humidor, usually by adding Spanish cedar shelving or drawers and a dedicated humidification system."
