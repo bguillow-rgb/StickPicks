@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-burn-problems-canoeing-tunneling"
   - "cigar-punch-vs-cutter"
+  - "how-to-fix-over-humidified-cigars"
   - "cigar-humidor-humidity"
-  - "cigar-lighter-torch-vs-soft-flame"
 faqs:
   - q: "Why is my cigar drawing so hard even after I cut it?"
     a: "The most common causes are over-humidification (tobacco swells and restricts airflow), a too-shallow cut, a tight filler knot inside the bunch, or over-saturation of the head from moisture in your mouth. Try cutting a hair more off the cap, roll the cigar gently between your palms, or dry-box it for 12-24 hours before smoking."
