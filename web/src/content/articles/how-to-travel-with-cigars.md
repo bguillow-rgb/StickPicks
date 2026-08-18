@@ -14,9 +14,9 @@ publishedAt: "2026-06-21"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-lounge-etiquette"
+  - "do-cigars-go-bad-or-expire"
   - "how-to-keep-a-cigar-journal"
   - "how-to-light-a-cigar"
-  - "how-to-rehydrate-dry-cigars"
 faqs:
   - q: "Are cigars allowed on airplanes?"
     a: "Yes. TSA classifies cigars as a non-hazardous tobacco product and permits them in both carry-on and checked bags with no set quantity limit for personal use."

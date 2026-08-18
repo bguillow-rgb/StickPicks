@@ -16,7 +16,7 @@ relatedSlugs:
   - "how-long-to-rest-cigars-in-humidor"
   - "cigar-country-of-origin-flavor-guide"
   - "cigar-filler-binder-wrapper-explained"
-  - "how-long-to-age-cigars"
+  - "do-cigars-go-bad-or-expire"
 faqs:
   - q: "What is the cigar sick period?"
     a: "The sick period is the window after shipping when a cigar underperforms, tasting harsh, acrid, or flat, because transit stress (temperature swings, humidity loss, and physical jostling) has disrupted the tobacco's internal moisture balance and triggered minor re-fermentation. It typically lasts 1, 4 weeks in a properly maintained humidor."
