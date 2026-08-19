@@ -13,10 +13,10 @@ quickAnswer: "To fix over-humidified cigars, remove them from the humidor and pl
 publishedAt: "2026-08-16"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-to-tell-if-cigar-is-too-dry"
   - "cigar-humidor-humidity"
   - "cigar-storage-temperature"
   - "how-long-do-cigars-last-without-a-humidor"
-  - "how-to-fix-cigar-draw-problems"
 faqs:
   - q: "How can I tell if my cigars are over-humidified?"
     a: "Press the cigar gently between thumb and forefinger. An over-humidified cigar feels spongy and holds the indent instead of rebounding. Visual signs include a darker or slicker wrapper, beads of moisture inside cellophane, and a damp, glossy-looking foot. When smoked, it will draw tight, tunnel, and taste sour or muddy."

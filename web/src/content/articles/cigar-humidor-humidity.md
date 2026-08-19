@@ -15,8 +15,8 @@ author: "Bob Guillow"
 relatedSlugs:
   - "cigar-storage-temperature"
   - "how-to-fix-over-humidified-cigars"
+  - "how-to-tell-if-cigar-is-too-dry"
   - "cigar-humidity-by-type-wrapper-origin"
-  - "how-to-rotate-cigars-in-a-humidor"
 faqs:
   - q: "Is 70 percent humidity too high for cigars?"
     a: "70% is the long-standing default and most cigars store well there. Drier collectors prefer 65-68% for a firmer draw and faster burn; wetter regions push to 72%. Above 75% mold and beetles become real risks."
