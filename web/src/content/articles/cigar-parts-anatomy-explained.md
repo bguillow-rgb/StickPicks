@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-filler-binder-wrapper-explained"
   - "cigar-sizes-and-shapes-guide"
   - "cigar-band-meanings-explained"
-  - "how-to-cut-a-cigar"
+  - "cigar-foot-types-open-closed-shaggy"
 faqs:
   - q: "What is the cap of a cigar?"
     a: "The cap is a small, circular disc of wrapper leaf applied by the roller to seal the head of the cigar. It holds the wrapper in place and is the only part you cut before smoking. Cut within the cap, not past the shoulder, to avoid unraveling the wrapper."

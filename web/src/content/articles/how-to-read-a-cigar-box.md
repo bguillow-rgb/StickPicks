@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-band-meanings-explained"
   - "how-to-read-cigar-tasting-notes"
   - "cigar-country-of-origin-flavor-guide"
-  - "cigar-strength-vs-body"
+  - "cigar-foot-types-open-closed-shaggy"
 faqs:
   - q: "What does the date stamp on the bottom of a cigar box mean?"
     a: "On Cuban cigars it shows the month and year the cigars were boxed, written in Spanish abbreviations (e.g., 'AGO 24' = August 2024). Since Cuban tobacco typically takes 18, 24 months from harvest to production, the box date lets you estimate how old the leaf actually is."

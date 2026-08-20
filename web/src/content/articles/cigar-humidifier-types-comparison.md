@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "boveda-vs-distilled-water-humidor"
   - "cigar-humidity-by-type-wrapper-origin"
+  - "cigar-foot-types-open-closed-shaggy"
   - "cigar-humidor-humidity"
-  - "cigar-storage-temperature"
 faqs:
   - q: "How many Boveda packs do I need for my humidor?"
     a: "Use one Size 60 Boveda pack per 25 cigars of humidor capacity. A 50-count desktop humidor needs two packs; a 100-count humidor needs four. Replace them every 2, 4 months when the pack feels stiff or cardboard-hard."

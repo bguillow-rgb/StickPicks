@@ -16,7 +16,7 @@ relatedSlugs:
   - "how-to-light-a-cigar"
   - "what-size-humidor-do-i-need"
   - "buying-cigars-by-the-box-vs-singles"
-  - "cigar-punch-vs-cutter"
+  - "cigar-foot-types-open-closed-shaggy"
 faqs:
   - q: "Can I use a Zippo to light a cigar?"
     a: "Technically yes, but most experienced smokers avoid it. Zippos burn liquid naphtha fuel, which carries a strong petroleum odor that can seep into the tobacco and ruin the flavor of a premium cigar. Stick to butane lighters or cedar spills."
