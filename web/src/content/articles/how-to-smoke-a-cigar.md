@@ -13,10 +13,10 @@ quickAnswer: "Smoke a cigar slowly, one gentle draw every 30 to 60 seconds. Don'
 publishedAt: "2026-08-01"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-to-ash-a-cigar"
   - "when-to-remove-cigar-band"
   - "how-long-to-rest-cigars-in-humidor"
   - "how-to-retrohale-a-cigar"
-  - "cigar-humidity-by-type-wrapper-origin"
 faqs:
   - q: "How often should you puff on a cigar?"
     a: "One gentle draw every 30 to 60 seconds is the standard guideline. Puffing faster overheats the tobacco, turning the smoke bitter and harsh. Slower is almost always better."

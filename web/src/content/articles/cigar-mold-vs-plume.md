@@ -14,9 +14,9 @@ publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
   - "cigar-strength-vs-body"
+  - "how-to-ash-a-cigar"
   - "how-to-spot-fake-cuban-cigars"
   - "how-to-tell-if-cigar-is-too-dry"
-  - "cigar-country-of-origin-flavor-guide"
 faqs:
   - q: "Is white stuff on a cigar mold or plume?"
     a: "If it brushes off cleanly with a soft brush and the cigar smells normal, it is plume, keep smoking. If it smells musty, looks fuzzy or raised, or appears in concentrated patches, it is mold and the cigar should be removed."
