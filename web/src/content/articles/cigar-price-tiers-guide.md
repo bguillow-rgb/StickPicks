@@ -14,9 +14,9 @@ publishedAt: "2026-07-23"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-punch-vs-cutter"
+  - "do-you-need-two-humidors"
   - "buying-cigars-by-the-box-vs-singles"
   - "cigar-band-meanings-explained"
-  - "cigar-filler-binder-wrapper-explained"
 faqs:
   - q: "What is a reasonable monthly budget for a cigar collector?"
     a: "It varies widely by smoking frequency, but a realistic starting point is $100, $165 per month. That covers 8, 12 cigars at the mid-range tier, leaves room for a box purchase, and still feels manageable. Serious collectors often spend $200, $500+ monthly once aging inventory and limited releases enter the picture."
