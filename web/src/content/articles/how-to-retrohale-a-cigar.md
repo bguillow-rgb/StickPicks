@@ -14,9 +14,9 @@ publishedAt: "2026-07-26"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-smoke-a-cigar"
+  - "how-long-should-a-cigar-last"
   - "when-to-remove-cigar-band"
   - "box-pressed-cigars-guide"
-  - "can-you-mix-cigars-in-a-humidor"
 faqs:
   - q: "Is retrohaling the same as inhaling cigar smoke?"
     a: "No, retrohaling is completely different from inhaling. The smoke stays in your mouth and is redirected out through your nasal passages. It never enters your lungs. Inhaling cigar smoke is strongly discouraged because cigars are not made for that."
