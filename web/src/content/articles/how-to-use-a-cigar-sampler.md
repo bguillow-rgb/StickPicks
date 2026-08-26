@@ -14,9 +14,9 @@ publishedAt: "2026-07-13"
 author: "Stick Picks"
 relatedSlugs:
   - "buying-cigars-by-the-box-vs-singles"
+  - "can-you-use-a-cigar-box-as-a-humidor"
   - "box-pressed-cigars-guide"
   - "cigar-lighter-torch-vs-soft-flame"
-  - "cigar-lounge-etiquette"
 faqs:
   - q: "What is a cigar sampler?"
     a: "A cigar sampler is a pre-curated pack, typically 5 to 20+ cigars, drawn from different blends, wrappers, strengths, or brands so you can compare styles before committing to a full box purchase."
