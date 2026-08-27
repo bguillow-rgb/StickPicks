@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-long-do-cigars-last-without-a-humidor"
   - "how-long-to-rest-cigars-in-humidor"
+  - "can-you-store-cigars-in-a-ziplock-bag"
   - "cigar-filler-binder-wrapper-explained"
-  - "cigars-cellophane-on-or-off-humidor"
 faqs:
   - q: "Can you put a half-smoked cigar back in your humidor?"
     a: "No. A smoked cigar carries stale smoke residue and char odor that will transfer to every other cigar in a well-sealed humidor. Store it separately, in its original cellophane, a small zip bag, or a dedicated travel case, away from your fresh collection."

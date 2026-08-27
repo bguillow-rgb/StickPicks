@@ -14,9 +14,9 @@ publishedAt: "2026-06-17"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-humidity-by-type-wrapper-origin"
+  - "can-you-store-cigars-in-a-ziplock-bag"
   - "how-to-store-cigars"
   - "when-to-remove-cigar-band"
-  - "do-you-need-two-humidors"
 faqs:
   - q: "Does cellophane actually block humidity in a humidor?"
     a: "No. Cellophane is semi-permeable and allows water vapor to pass through its microscopic pores. Humidity still reaches the cigar, just more slowly than it would with a naked stick. Glass or aluminum tubes are a different story: those do block humidity and should always be removed for any meaningful storage."
