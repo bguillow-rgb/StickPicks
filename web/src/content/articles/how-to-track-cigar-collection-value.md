@@ -13,10 +13,10 @@ quickAnswer: "To track your cigar collection's value, catalog every cigar with i
 publishedAt: "2026-08-06"
 author: "Stick Picks"
 relatedSlugs:
+  - "limited-edition-cigars-worth-buying"
   - "buying-cigars-by-the-box-vs-singles"
   - "cigar-price-tiers-guide"
   - "cigar-subscription-box-worth-it"
-  - "how-long-should-a-cigar-last"
 faqs:
   - q: "Do cigars actually increase in value over time?"
     a: "Properly stored limited-edition, boutique, or vintage cigars from prestige brands can appreciate significantly. Everyday production cigars generally do not. Storage provenance, documented humidity, temperature, and ownership history, is a major factor in whether a buyer or auction house assigns premium value."
