@@ -13,10 +13,10 @@ quickAnswer: "To calibrate a humidor hygrometer, use the salt test: seal damp (n
 publishedAt: "2026-06-23"
 author: "Stick Picks"
 relatedSlugs:
+  - "digital-vs-analog-hygrometer-humidor"
   - "boveda-vs-distilled-water-humidor"
   - "can-you-store-cigars-in-a-ziplock-bag"
   - "cigar-humidifier-types-comparison"
-  - "how-to-clean-a-humidor"
 faqs:
   - q: "What should a hygrometer read during the salt test?"
     a: "A properly calibrated hygrometer should read exactly 75% RH when sealed with damp (not dissolved) table salt in an airtight bag or container for at least 8 hours. This works because saturated salt in equilibrium with water always produces 75% RH at room temperature, regardless of external conditions."
