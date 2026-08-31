@@ -13,10 +13,10 @@ quickAnswer: "Keep your humidor between 70, 80% of its rated capacity. Under-fil
 publishedAt: "2026-08-23"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-many-cigars-should-i-own"
   - "cigar-humidity-by-type-wrapper-origin"
   - "what-size-humidor-do-i-need"
   - "buying-cigars-by-the-box-vs-singles"
-  - "can-you-use-a-cigar-box-as-a-humidor"
 faqs:
   - q: "Is it bad to leave a humidor half empty?"
     a: "Yes, a significantly underfilled humidor has too much open air relative to the wood lining, which makes humidity levels harder to stabilize and forces your humidification system to work overtime. Aim to keep at least 50, 60% of rated capacity filled at all times, or fill the empty space with folded cedar sheets or sealed cedar blocks to reduce dead volume."
