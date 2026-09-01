@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-humidity-by-type-wrapper-origin"
   - "cigars-cellophane-on-or-off-humidor"
   - "how-long-to-rest-cigars-in-humidor"
-  - "cigar-price-tiers-guide"
+  - "cigar-nicotine-sickness-how-to-avoid"
 faqs:
   - q: "What humidity should an aging humidor be set to?"
     a: "Most aficionados age long-term at 62, 65% RH rather than the standard 65, 70% RH. The slightly lower humidity slows fermentation to a more deliberate pace, tightens the draw slightly, and reduces mold risk during extended undisturbed storage."
