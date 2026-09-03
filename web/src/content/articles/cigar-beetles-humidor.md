@@ -15,6 +15,7 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-storage-temperature"
   - "how-to-clean-a-humidor"
+  - "how-to-remove-health-warning-labels-cigar-box"
   - "how-to-store-cigars"
 faqs:
   - q: "What temperature kills cigar beetles?"

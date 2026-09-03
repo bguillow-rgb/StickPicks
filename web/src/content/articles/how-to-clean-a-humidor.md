@@ -14,9 +14,9 @@ publishedAt: "2026-07-16"
 author: "Stick Picks"
 relatedSlugs:
   - "cigars-cellophane-on-or-off-humidor"
+  - "how-to-remove-health-warning-labels-cigar-box"
   - "how-to-rotate-cigars-in-a-humidor"
   - "cigar-sick-period-after-shipping"
-  - "cigar-storage-temperature"
 faqs:
   - q: "How often should I clean my humidor?"
     a: "A light dust-out every 2, 3 months is sufficient for a well-maintained humidor. A deeper clean with a damp cloth is only needed when you notice debris buildup, a musty smell, or signs of mold or beetles. Over-cleaning can strip cedar of its natural oils and disrupt humidity stability."
