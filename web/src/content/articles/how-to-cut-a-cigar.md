@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-punch-vs-cutter"
   - "cigar-band-meanings-explained"
   - "cigar-parts-anatomy-explained"
-  - "cigar-filler-binder-wrapper-explained"
+  - "cigar-box-date-codes-how-old-are-my-cigars"
 faqs:
   - q: "How deep should you cut a cigar?"
     a: "Cut only the cap -- about 1/16\" to 1/8\" (2-3 mm) from the tip. Find the shoulder, the curved seam where the cap meets the cigar body, and cut just above it. Going deeper risks unraveling the wrapper and ruining the draw."
