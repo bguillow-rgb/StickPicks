@@ -16,7 +16,7 @@ relatedSlugs:
   - "can-you-store-cigars-in-a-ziplock-bag"
   - "how-long-do-cigars-last-without-a-humidor"
   - "how-to-use-cedar-spills-cigars"
-  - "cigar-subscription-box-worth-it"
+  - "cigar-humidor-alternatives"
 faqs:
   - q: "How long will cigars stay fresh in their original box without a humidifier?"
     a: "Without any humidification source, cigars in a plain wooden or cardboard box will begin drying out within a few days to a week, depending on your local climate. Dry or cold-weather environments accelerate moisture loss significantly."
