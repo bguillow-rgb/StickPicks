@@ -13,10 +13,10 @@ quickAnswer: "A cigar punch preserves the wrapper and delivers a controlled, con
 publishedAt: "2026-08-04"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-ring-gauge-flavor-guide"
   - "cigar-country-of-origin-flavor-guide"
   - "cigar-sizes-and-shapes-guide"
   - "how-to-cut-a-cigar"
-  - "boveda-vs-distilled-water-humidor"
 faqs:
   - q: "Does a cigar punch affect flavor compared to cutting?"
     a: "Yes, subtly. A punch concentrates airflow through a smaller opening, which some smokers find intensifies the tobacco's richness and keeps the smoke warmer. A straight cut opens more surface area and tends to produce a cooler, more voluminous draw, which can make flavors feel less concentrated but smoother."
