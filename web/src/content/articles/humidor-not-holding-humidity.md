@@ -14,9 +14,9 @@ publishedAt: "2026-08-01"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-fix-over-humidified-cigars"
+  - "cedar-sheets-dividers-humidor"
   - "cigar-burn-problems-canoeing-tunneling"
   - "cigar-humidifier-types-comparison"
-  - "cigar-humidity-by-type-wrapper-origin"
 faqs:
   - q: "How long does it take for a humidor to stabilize after fixing a humidity problem?"
     a: "Typically 48-72 hours after you've addressed the root cause, re-seasoning, refilling the humidifier, or resealing. Larger cabinets may take 5-7 days to fully equalize."

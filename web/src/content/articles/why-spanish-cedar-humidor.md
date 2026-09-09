@@ -13,10 +13,10 @@ quickAnswer: "Spanish cedar (Cedrela odorata) is used in humidors because it buf
 publishedAt: "2026-07-07"
 author: "Stick Picks"
 relatedSlugs:
+  - "cedar-sheets-dividers-humidor"
   - "how-to-organize-a-humidor"
   - "can-you-mix-cigars-in-a-humidor"
   - "cigar-punch-vs-cutter"
-  - "cigar-ring-gauge-flavor-guide"
 faqs:
   - q: "Is Spanish cedar actually from Spain?"
     a: "No. Despite the name, Spanish cedar (Cedrela odorata) is native to Central and South America, primarily Brazil, Honduras, and neighboring countries. It isn't a true cedar at all; it belongs to the mahogany family (Meliaceae). Early European traders named it for its cedar-like scent, and the name stuck."

@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-lighter-torch-vs-soft-flame"
   - "can-you-use-a-cigar-box-as-a-humidor"
+  - "cedar-sheets-dividers-humidor"
   - "cigar-subscription-box-worth-it"
-  - "how-to-light-a-cigar"
 faqs:
   - q: "Do cedar spills actually change how a cigar tastes?"
     a: "Yes, subtly. Spanish cedar imparts a faint, complementary cedar note during the toast, most noticeable on the first few puffs. It doesn't overpower the cigar; many aficionados say it actually enhances the opening profile of a full-bodied stick."

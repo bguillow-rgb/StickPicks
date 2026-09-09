@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-use-cedar-spills-cigars"
   - "how-to-light-a-cigar"
+  - "cedar-sheets-dividers-humidor"
   - "what-size-humidor-do-i-need"
-  - "buying-cigars-by-the-box-vs-singles"
 faqs:
   - q: "Can I use a Zippo to light a cigar?"
     a: "Technically yes, but most experienced smokers avoid it. Zippos burn liquid naphtha fuel, which carries a strong petroleum odor that can seep into the tobacco and ruin the flavor of a premium cigar. Stick to butane lighters or cedar spills."
