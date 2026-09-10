@@ -16,7 +16,7 @@ relatedSlugs:
   - "how-to-read-cigar-tasting-notes"
   - "how-to-keep-a-cigar-journal"
   - "cigar-sizes-and-shapes-guide"
-  - "cigar-country-of-origin-flavor-guide"
+  - "what-is-a-maduro-cigar"
 faqs:
   - q: "How long does it take to develop a cigar palate?"
     a: "Most collectors notice meaningful improvement within 6, 12 months of regular, intentional smoking. Tasting frequency matters more than calendar time, someone who smokes and journals once a week will progress faster than someone who smokes daily without paying attention."
