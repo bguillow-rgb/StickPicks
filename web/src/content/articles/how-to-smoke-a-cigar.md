@@ -14,9 +14,9 @@ publishedAt: "2026-08-01"
 author: "Stick Picks"
 relatedSlugs:
   - "how-long-should-a-cigar-last"
+  - "how-often-should-you-smoke-a-cigar"
   - "how-to-ash-a-cigar"
   - "when-to-remove-cigar-band"
-  - "how-long-to-rest-cigars-in-humidor"
 faqs:
   - q: "How often should you puff on a cigar?"
     a: "One gentle draw every 30 to 60 seconds is the standard guideline. Puffing faster overheats the tobacco, turning the smoke bitter and harsh. Slower is almost always better."

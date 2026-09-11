@@ -13,10 +13,10 @@ quickAnswer: "Cigar sickness, nausea, dizziness, cold sweats, is caused by too m
 publishedAt: "2026-09-01"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-often-should-you-smoke-a-cigar"
   - "do-you-need-two-humidors"
   - "how-long-should-a-cigar-last"
   - "how-to-retrohale-a-cigar"
-  - "how-to-smoke-a-cigar"
 faqs:
   - q: "Why do cigars make me feel sick but cigarettes don't?"
     a: "Cigar smoke is alkaline and absorbs nicotine through the mucous membranes of the mouth, a faster and more concentrated delivery than cigarettes, which absorb through the lungs. A single large cigar can contain significantly more total nicotine than a cigarette, so even experienced cigarette smokers can be caught off guard."

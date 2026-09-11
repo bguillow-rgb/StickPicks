@@ -16,7 +16,7 @@ relatedSlugs:
   - "buying-cigars-by-the-box-vs-singles"
   - "how-full-should-a-humidor-be"
   - "what-size-humidor-do-i-need"
-  - "how-to-build-a-cigar-collection"
+  - "how-often-should-you-smoke-a-cigar"
 faqs:
   - q: "Is there a minimum number of cigars I need to keep a humidor stable?"
     a: "There's no hard minimum, but a desktop humidor performs best when it's at least 50-70% full. Below that threshold, there's too much open air relative to the cedar and tobacco mass, making humidity harder to stabilize. If your count is low, add a cedar plank or a few cedar spills to help fill the space."
