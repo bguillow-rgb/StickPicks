@@ -13,10 +13,10 @@ quickAnswer: "Yes, you can relight a cigar, but the window is short and techniqu
 publishedAt: "2026-08-13"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-to-save-a-cigar-for-later"
   - "how-long-do-cigars-last-without-a-humidor"
   - "how-long-to-rest-cigars-in-humidor"
   - "how-to-dry-box-cigars"
-  - "can-you-store-cigars-in-a-ziplock-bag"
 faqs:
   - q: "Can you put a half-smoked cigar back in your humidor?"
     a: "No. A smoked cigar carries stale smoke residue and char odor that will transfer to every other cigar in a well-sealed humidor. Store it separately, in its original cellophane, a small zip bag, or a dedicated travel case, away from your fresh collection."
