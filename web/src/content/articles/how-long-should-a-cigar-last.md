@@ -13,10 +13,10 @@ quickAnswer: "Most premium cigars last between 30 and 90 minutes depending on si
 publishedAt: "2026-08-25"
 author: "Stick Picks"
 relatedSlugs:
+  - "robusto-vs-toro-vs-churchill-cigar"
   - "how-to-smoke-a-cigar"
   - "when-to-remove-cigar-band"
   - "how-long-do-cigars-last-without-a-humidor"
-  - "how-long-to-age-cigars"
 faqs:
   - q: "How long should a Robusto cigar last?"
     a: "A standard Robusto (5 × 50) should last roughly 45, 60 minutes at a relaxed pace of one puff every 30, 60 seconds. Dense construction or a particularly slow smoker can push it past an hour."

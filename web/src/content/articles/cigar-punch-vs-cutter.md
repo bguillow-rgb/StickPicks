@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-cut-types-v-cut-vs-straight-cut-vs-punch"
   - "cigar-ring-gauge-flavor-guide"
+  - "robusto-vs-toro-vs-churchill-cigar"
   - "cigar-country-of-origin-flavor-guide"
-  - "cigar-sizes-and-shapes-guide"
 faqs:
   - q: "Does a cigar punch affect flavor compared to cutting?"
     a: "Yes, subtly. A punch concentrates airflow through a smaller opening, which some smokers find intensifies the tobacco's richness and keeps the smoke warmer. A straight cut opens more surface area and tends to produce a cooler, more voluminous draw, which can make flavors feel less concentrated but smoother."
