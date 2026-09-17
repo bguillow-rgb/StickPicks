@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-wrapper-types-guide"
   - "cigars-cellophane-on-or-off-humidor"
+  - "cigars-in-tubes-humidor-guide"
   - "cigar-storage-temperature"
-  - "do-you-need-two-humidors"
 faqs:
   - q: "What humidity should I store Maduro cigars at?"
     a: "Around 65% RH. Maduro wrappers are thick and oily, so they retain moisture efficiently. Storing them at higher humidity, 70%+, can make them feel spongy, burn unevenly, and lose the clean sweetness the wrapper is known for."
