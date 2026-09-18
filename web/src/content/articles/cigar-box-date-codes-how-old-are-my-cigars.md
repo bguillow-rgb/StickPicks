@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-read-a-cigar-box"
   - "how-to-spot-fake-cuban-cigars"
+  - "how-to-inspect-a-cigar-before-lighting"
   - "box-pressed-cigars-guide"
-  - "buying-cigars-by-the-box-vs-singles"
 faqs:
   - q: "What does a date code on the bottom of a cigar box mean?"
     a: "It marks when the cigars were packed into that box at the factory, not the harvest date of the tobacco. Cuban Habanos use Spanish month abbreviations (ENE = January, AGO = August, DIC = December) followed by a two-digit year. Non-Cuban brands typically print a plain date or batch code on the bottom or side of the box."
