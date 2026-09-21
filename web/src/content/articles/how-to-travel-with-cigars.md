@@ -16,7 +16,7 @@ relatedSlugs:
   - "can-you-use-a-cigar-box-as-a-humidor"
   - "cigar-humidor-alternatives"
   - "cigar-lounge-etiquette"
-  - "do-cigars-go-bad-or-expire"
+  - "cigars-in-box-vs-loose-in-humidor"
 faqs:
   - q: "Are cigars allowed on airplanes?"
     a: "Yes. TSA classifies cigars as a non-hazardous tobacco product and permits them in both carry-on and checked bags with no set quantity limit for personal use."
