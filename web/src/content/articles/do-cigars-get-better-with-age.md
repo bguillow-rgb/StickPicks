@@ -16,7 +16,7 @@ relatedSlugs:
   - "which-cigars-age-well"
   - "how-long-to-age-cigars"
   - "box-pressed-cigars-guide"
-  - "cigar-filler-binder-wrapper-explained"
+  - "cigar-cabinet-humidor-vs-desktop"
 faqs:
   - q: "Do all cigars get better with age?"
     a: "No. Only well-made premium cigars with complex, oil-rich tobacco benefit meaningfully from aging. Machine-made cigars, budget blends, and mild-bodied cigars with little natural oil rarely improve, and cheap tobacco never becomes good tobacco no matter how long you wait."
