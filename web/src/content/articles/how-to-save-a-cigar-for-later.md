@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "can-you-relight-a-cigar"
   - "how-long-do-cigars-last-without-a-humidor"
+  - "65-vs-69-vs-72-humidity-cigars"
   - "can-you-store-cigars-in-a-ziplock-bag"
-  - "cigars-cellophane-on-or-off-humidor"
 faqs:
   - q: "Can you put a half-smoked cigar back in your humidor?"
     a: "No. Never store a half-smoked cigar with your unsmoked collection. The smoky, charred odor will transfer to your fresh cigars and taint their flavor. Store the saved stick separately in an airtight tube or bag at room temperature."

@@ -16,7 +16,7 @@ relatedSlugs:
   - "can-you-mix-cigars-in-a-humidor"
   - "limited-edition-cigars-worth-buying"
   - "which-cigars-age-well"
-  - "buying-cigars-by-the-box-vs-singles"
+  - "65-vs-69-vs-72-humidity-cigars"
 faqs:
   - q: "Will infused cigars ruin my natural cigars if stored together?"
     a: "Yes, infused cigars can transfer their aromas to nearby natural cigars over time, especially in a sealed humidor. Always store them in separate containers, tupperdors, or at minimum on opposite ends of a large humidor with cedar dividers."

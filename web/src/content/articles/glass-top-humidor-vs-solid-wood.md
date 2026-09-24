@@ -13,10 +13,10 @@ quickAnswer: "Glass top humidors excel at display and are fine for active smokin
 publishedAt: "2026-09-14"
 author: "Stick Picks"
 relatedSlugs:
+  - "65-vs-69-vs-72-humidity-cigars"
   - "cigar-cabinet-humidor-vs-desktop"
   - "cigar-humidity-by-type-wrapper-origin"
   - "cigar-punch-vs-cutter"
-  - "cigar-wrapper-types-guide"
 faqs:
   - q: "Do glass top humidors hold humidity as well as solid wood humidors?"
     a: "A well-constructed glass top humidor can hold humidity comparably to solid wood, but it faces two challenges: glass doesn't absorb or buffer moisture the way cedar does, and the glass panel creates a second seal that may leak over time. Quality-tested glass top models with tight gaskets perform fine; budget models often don't."

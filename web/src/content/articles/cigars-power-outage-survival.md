@@ -12,10 +12,10 @@ quickAnswer: "A well-seasoned passive Spanish cedar humidor holds 65-72% RH for 
 publishedAt: "2026-04-29"
 author: "Bob Guillow"
 relatedSlugs:
+  - "65-vs-69-vs-72-humidity-cigars"
   - "can-you-relight-a-cigar"
   - "can-you-store-cigars-in-a-ziplock-bag"
   - "can-you-use-a-cigar-box-as-a-humidor"
-  - "cigar-filler-binder-wrapper-explained"
 faqs:
   - q: "Can cigars survive a 24-hour power outage?"
     a: "Yes for almost any sealed humidor. Passive humidors do not need power at all. Electronic humidors lose precision but the cigars inside are buffered by the cedar lining and existing humidification source for at least 24 hours."

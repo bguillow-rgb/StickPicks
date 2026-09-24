@@ -14,9 +14,9 @@ publishedAt: "2026-09-05"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-store-cigars"
+  - "65-vs-69-vs-72-humidity-cigars"
   - "can-you-store-cigars-in-a-ziplock-bag"
   - "can-you-use-a-cigar-box-as-a-humidor"
-  - "cedar-sheets-dividers-humidor"
 faqs:
   - q: "How long can cigars stay fresh in a tupperdor?"
     a: "A well-maintained tupperdor, an airtight plastic container with a Boveda or silica bead humidity source, can keep cigars fresh and properly humidified for a year or more. Swap out Boveda packs every 2, 3 months and open the lid briefly every few weeks to refresh the air."

@@ -16,7 +16,7 @@ relatedSlugs:
   - "can-you-store-cigars-in-a-ziplock-bag"
   - "how-to-dry-box-cigars"
   - "how-to-save-a-cigar-for-later"
-  - "can-you-relight-a-cigar"
+  - "65-vs-69-vs-72-humidity-cigars"
 faqs:
   - q: "How long can an unwrapped cigar sit out before it goes bad?"
     a: "In typical indoor conditions (40-55% RH), an unwrapped premium cigar shows perceptible drying and flavor loss within 48-72 hours and becomes structurally brittle within about a week. In a dry or air-conditioned room, damage can begin in as little as 24 hours."

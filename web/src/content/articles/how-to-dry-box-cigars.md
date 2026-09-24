@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-long-do-cigars-last-without-a-humidor"
   - "how-long-to-rest-cigars-in-humidor"
+  - "65-vs-69-vs-72-humidity-cigars"
   - "can-you-relight-a-cigar"
-  - "cigar-humidity-by-type-wrapper-origin"
 faqs:
   - q: "What is dry boxing a cigar?"
     a: "Dry boxing is the practice of removing a cigar from a humidified environment, typically your humidor, and resting it in an empty, unhumidified container (ideally a cedar cigar box) for a short period before smoking, to reduce moisture by 5, 10% RH."

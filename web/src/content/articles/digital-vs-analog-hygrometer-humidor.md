@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-calibrate-hygrometer-humidor"
   - "cigar-cabinet-humidor-vs-desktop"
+  - "65-vs-69-vs-72-humidity-cigars"
   - "cigar-cut-types-v-cut-vs-straight-cut-vs-punch"
-  - "what-size-humidor-do-i-need"
 faqs:
   - q: "How accurate is the hygrometer that came with my humidor?"
     a: "Most stock analog hygrometers bundled with entry-level humidors can be off by 10% or more. Calibrate it with the salt test before trusting any reading, many collectors find they're reading several percentage points high or low straight out of the box."

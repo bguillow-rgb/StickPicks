@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-punch-vs-cutter"
   - "how-to-cut-a-cigar"
+  - "65-vs-69-vs-72-humidity-cigars"
   - "cigar-wrapper-types-guide"
-  - "digital-vs-analog-hygrometer-humidor"
 faqs:
   - q: "Does the type of cigar cut actually affect flavor?"
     a: "Yes. The opening size and shape change how much smoke reaches your palate and at what concentration. A straight cut delivers the most volume and the widest range of flavor notes. A V-cut focuses smoke into a narrower channel, amplifying intensity. A punch produces the most restricted draw, concentrating flavors toward the back of the palate. The difference is subtle but real, especially on nuanced, aged cigars."

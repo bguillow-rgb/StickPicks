@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-use-cedar-spills-cigars"
   - "why-spanish-cedar-humidor"
+  - "65-vs-69-vs-72-humidity-cigars"
   - "can-you-mix-cigars-in-a-humidor"
-  - "can-you-relight-a-cigar"
 faqs:
   - q: "Do cedar sheets actually help with humidity?"
     a: "Yes, but they supplement rather than replace your humidifier. Spanish cedar is hygroscopic, it absorbs and slowly releases moisture, so sheets and dividers buffer short-term swings, especially after you open the lid. They won't rescue a humidor with a broken seal or no humidification source."

@@ -14,9 +14,9 @@ publishedAt: "2026-07-15"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-clean-a-humidor"
+  - "65-vs-69-vs-72-humidity-cigars"
   - "cigar-humidity-by-type-wrapper-origin"
   - "cigar-humidor-humidity"
-  - "cigar-storage-temperature"
 faqs:
   - q: "Do you really need to rotate cigars in a humidor?"
     a: "Yes, especially in passive desktop humidors. Cigars nearest the humidification source absorb more moisture over time. Rotating them every 1, 3 months ensures all sticks age evenly. Electric humidors with fans reduce, but don't eliminate, the need."

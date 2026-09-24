@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-sick-period-after-shipping"
   - "how-to-dry-box-cigars"
+  - "65-vs-69-vs-72-humidity-cigars"
   - "can-you-relight-a-cigar"
-  - "cigar-humidity-by-type-wrapper-origin"
 faqs:
   - q: "Can I smoke a cigar right after buying it online?"
     a: "Technically yes, but it often disappoints. Shipping exposes cigars to temperature and humidity swings that can leave tobacco unevenly moist. Letting them rest 1-2 weeks in a properly seasoned humidor gives the moisture time to rebalance, improving both flavor and burn consistency."

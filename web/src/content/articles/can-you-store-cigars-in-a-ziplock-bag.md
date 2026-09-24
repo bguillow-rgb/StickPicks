@@ -14,9 +14,9 @@ publishedAt: "2026-08-27"
 author: "Stick Picks"
 relatedSlugs:
   - "how-long-do-cigars-last-without-a-humidor"
+  - "65-vs-69-vs-72-humidity-cigars"
   - "can-you-use-a-cigar-box-as-a-humidor"
   - "cigars-cellophane-on-or-off-humidor"
-  - "how-to-store-cigars"
 faqs:
   - q: "How long will a cigar stay fresh in a Ziplock bag?"
     a: "Without any humidity source, 2, 3 days at most before moisture loss becomes noticeable. With a Boveda 69% or 72% pack sealed inside, most collectors get 3, 4 weeks of acceptable freshness."
