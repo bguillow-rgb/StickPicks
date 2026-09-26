@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-filler-binder-wrapper-explained"
   - "how-to-read-a-cigar-box"
+  - "nicaraguan-vs-dominican-cigars"
   - "box-pressed-cigars-guide"
-  - "can-you-store-cigars-in-a-ziplock-bag"
 faqs:
   - q: "What does 'Totalmente a Mano' mean on a cigar box?"
     a: "'Totalmente a Mano' means 'completely made by hand', every step from bunching the filler to applying the wrapper was done without machine assistance. It is the highest handcraft designation, particularly meaningful on Cuban Habanos boxes where it also implies long-filler (tripa larga) construction."

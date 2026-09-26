@@ -13,10 +13,10 @@ quickAnswer: "A cigar's country of origin shapes its flavor through terroir, the
 publishedAt: "2026-07-21"
 author: "Stick Picks"
 relatedSlugs:
+  - "nicaraguan-vs-dominican-cigars"
   - "cigar-sizes-and-shapes-guide"
   - "cigar-punch-vs-cutter"
   - "cigar-ring-gauge-flavor-guide"
-  - "how-to-read-cigar-tasting-notes"
 faqs:
   - q: "Does the country listed on a cigar box mean all the tobacco is from that country?"
     a: "Not necessarily. The listed country is usually where the cigar was rolled, not where every leaf originated. Many cigars blend tobaccos from multiple countries, for example, a Dominican-rolled cigar may use Nicaraguan filler for added body. Only a 'puro' guarantees that all components, wrapper, binder, and filler, come from a single country."
