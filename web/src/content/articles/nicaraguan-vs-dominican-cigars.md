@@ -14,9 +14,9 @@ publishedAt: "2026-09-26"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-country-of-origin-flavor-guide"
+  - "connecticut-vs-habano-wrapper-cigar"
   - "cigar-punch-vs-cutter"
   - "robusto-vs-toro-vs-churchill-cigar"
-  - "cigar-sizes-and-shapes-guide"
 faqs:
   - q: "Are Nicaraguan cigars stronger than Dominican cigars?"
     a: "Generally yes. Nicaraguan tobacco, especially from the Estelí region, is known for its intense, full-bodied profiles with natural spice and pepper. Dominican cigars typically fall in the mild-to-medium range, though fuller Dominican blends exist."

@@ -13,10 +13,10 @@ quickAnswer: "A maduro cigar has a dark wrapper leaf that has undergone extended
 publishedAt: "2026-09-10"
 author: "Stick Picks"
 relatedSlugs:
+  - "connecticut-vs-habano-wrapper-cigar"
   - "cigar-strength-vs-body"
   - "cigar-wrapper-types-guide"
   - "how-to-develop-a-cigar-palate"
-  - "nicaraguan-vs-dominican-cigars"
 faqs:
   - q: "Does maduro mean a cigar is strong?"
     a: "No. 'Maduro' describes the wrapper's fermentation process, not nicotine level. Strength is determined by the filler and binder tobaccos. Many maduros are medium-bodied or even mild, with a naturally sweet, rich flavor profile."
