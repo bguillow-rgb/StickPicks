@@ -16,7 +16,7 @@ relatedSlugs:
   - "what-size-humidor-do-i-need"
   - "buying-cigars-by-the-box-vs-singles"
   - "digital-vs-analog-hygrometer-humidor"
-  - "which-cigars-age-well"
+  - "electric-humidor-vs-regular-humidor"
 faqs:
   - q: "How many cigars can a cabinet humidor hold?"
     a: "Most cabinet humidors hold between 500 and 4,000 cigars. Standard furniture-style cabinets typically range from 600 to 2,000 sticks, while large commercial-grade units can exceed 5,000. Desktop humidors, by contrast, generally top out around 100, 150 cigars."
