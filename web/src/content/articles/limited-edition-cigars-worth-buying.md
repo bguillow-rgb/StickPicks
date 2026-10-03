@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "box-pressed-cigars-guide"
   - "buying-cigars-by-the-box-vs-singles"
+  - "cigar-factory-seconds-and-overruns-guide"
   - "cigar-subscription-box-worth-it"
-  - "infused-cigars-vs-natural-cigars"
 faqs:
   - q: "What makes a cigar officially 'limited edition'?"
     a: "There's no regulated definition. Manufacturers self-declare limited editions based on capped production numbers, unique tobacco that won't be replicated, annual vintage releases, or commemorative packaging. The term ranges from a strict one-time batch to an annually recurring small run, always read the fine print."
