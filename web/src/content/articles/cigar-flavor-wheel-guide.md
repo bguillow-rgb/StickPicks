@@ -16,7 +16,7 @@ relatedSlugs:
   - "how-to-develop-a-cigar-palate"
   - "how-to-read-cigar-tasting-notes"
   - "how-to-keep-a-cigar-journal"
-  - "cedar-sheets-dividers-humidor"
+  - "how-to-taste-a-cigar"
 faqs:
   - q: "What is a cigar flavor wheel?"
     a: "A cigar flavor wheel is a circular diagram that groups the hundreds of possible tasting notes found in premium cigars into broad families (Earth, Wood, Spice, Sweet, Savory, Floral, Nutty) and then subdivides each family into progressively more specific descriptors. It gives smokers a shared vocabulary to identify and discuss flavors."
