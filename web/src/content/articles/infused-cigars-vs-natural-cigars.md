@@ -13,10 +13,10 @@ quickAnswer: "Natural cigars derive all flavor from aged, fermented tobacco leaf
 publishedAt: "2026-07-24"
 author: "Stick Picks"
 relatedSlugs:
+  - "storing-flavored-cigars-with-regular-cigars"
   - "can-you-mix-cigars-in-a-humidor"
   - "limited-edition-cigars-worth-buying"
   - "which-cigars-age-well"
-  - "65-vs-69-vs-72-humidity-cigars"
 faqs:
   - q: "Will infused cigars ruin my natural cigars if stored together?"
     a: "Yes, infused cigars can transfer their aromas to nearby natural cigars over time, especially in a sealed humidor. Always store them in separate containers, tupperdors, or at minimum on opposite ends of a large humidor with cedar dividers."
