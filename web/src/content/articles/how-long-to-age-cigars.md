@@ -13,10 +13,10 @@ quickAnswer: "Mild cigars improve noticeably after 3-12 months of proper humidor
 publishedAt: "2026-06-18"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-aging-timeline-what-happens-year-by-year"
   - "which-cigars-age-well"
   - "box-pressed-cigars-guide"
   - "do-cigars-get-better-with-age"
-  - "how-long-should-a-cigar-last"
 faqs:
   - q: "How long should I rest a cigar after buying it before smoking it?"
     a: "Give any newly purchased cigar at least one to two weeks to acclimate in your humidor before smoking. If it was shipped, a short rest period lets it rehydrate and equalize -- many collectors wait 30 days before judging a freshly delivered box."
