@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-lounge-etiquette"
   - "how-to-develop-a-cigar-palate"
   - "how-to-gift-cigars"
-  - "cigar-sizes-and-shapes-guide"
+  - "are-cuban-cigars-worth-it"
 faqs:
   - q: "Where did the word 'herf' come from?"
     a: "The term first appeared on the alt.smokers.cigar (ASC) online newsgroup on November 21, 1996. Its exact origin is uncertain, but it was quickly adopted by the cigar community as slang for a gathering of cigar smokers, and eventually spread into broader use."

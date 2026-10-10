@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "do-cigars-get-better-with-age"
   - "how-long-to-age-cigars"
+  - "are-cuban-cigars-worth-it"
   - "cigar-cabinet-humidor-vs-desktop"
-  - "infused-cigars-vs-natural-cigars"
 faqs:
   - q: "Do all premium cigars get better with age?"
     a: "No. Even premium cigars vary. Full-bodied blends with complex tobacco and high oil content tend to improve noticeably. Milder cigars, even well-made ones, can become too flat or bland after extended aging, losing the delicate nuances that made them enjoyable in the first place."

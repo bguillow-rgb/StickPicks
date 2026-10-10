@@ -14,9 +14,9 @@ publishedAt: "2026-07-22"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-box-date-codes-how-old-are-my-cigars"
+  - "are-cuban-cigars-worth-it"
   - "can-you-use-a-cigar-box-as-a-humidor"
   - "cigar-mold-vs-plume"
-  - "do-cigars-go-bad-or-expire"
 faqs:
   - q: "What is the easiest single way to spot a fake Cuban cigar?"
     a: "Check the Cuba guarantee seal on the left side of the box. Authentic seals include a hologram and a scannable box code verifiable through the official Habanos verification tool. A blurry, faded, misaligned, or glued-on seal is an immediate red flag."

@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-wrapper-cracking-peeling-fix"
   - "how-to-fix-cigar-draw-problems"
   - "how-to-light-a-cigar"
-  - "cigar-nicotine-sickness-how-to-avoid"
+  - "are-cuban-cigars-worth-it"
 faqs:
   - q: "What is cigar canoeing?"
     a: "Canoeing is when one side of a cigar burns significantly faster than the other, hollowing out a channel that resembles the shape of a canoe. It's the most common cigar burn problem and is usually caused by an uneven light or uneven moisture distribution inside the cigar."

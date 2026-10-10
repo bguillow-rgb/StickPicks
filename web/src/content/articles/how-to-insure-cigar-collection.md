@@ -13,10 +13,10 @@ quickAnswer: "Most standard homeowners policies cover only $500, $2,000 of perso
 publishedAt: "2026-10-04"
 author: "Stick Picks"
 relatedSlugs:
+  - "are-cuban-cigars-worth-it"
   - "how-to-track-cigar-collection-value"
   - "how-many-cigars-should-i-own"
   - "how-to-build-a-cigar-collection"
-  - "infused-cigars-vs-natural-cigars"
 faqs:
   - q: "Does homeowners insurance cover my cigar collection?"
     a: "Partially. Standard homeowners and renters policies cover personal property against fire, theft, and named perils, but they cap collectible payouts, often at $500 to $2,000. A serious humidor with premium or limited-edition cigars can easily exceed that cap, leaving you underinsured without a separate rider."
