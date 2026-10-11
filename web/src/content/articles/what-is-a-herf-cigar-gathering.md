@@ -13,10 +13,10 @@ quickAnswer: "A herf is an informal gathering of cigar enthusiasts who get toget
 publishedAt: "2026-09-19"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-to-trade-cigars"
   - "cigar-lounge-etiquette"
   - "how-to-develop-a-cigar-palate"
   - "how-to-gift-cigars"
-  - "are-cuban-cigars-worth-it"
 faqs:
   - q: "Where did the word 'herf' come from?"
     a: "The term first appeared on the alt.smokers.cigar (ASC) online newsgroup on November 21, 1996. Its exact origin is uncertain, but it was quickly adopted by the cigar community as slang for a gathering of cigar smokers, and eventually spread into broader use."
