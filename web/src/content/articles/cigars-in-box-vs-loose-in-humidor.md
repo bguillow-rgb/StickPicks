@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "box-pressed-cigars-guide"
   - "can-you-use-a-cigar-box-as-a-humidor"
+  - "how-to-store-cigar-bundles"
   - "65-vs-69-vs-72-humidity-cigars"
-  - "buying-cigars-by-the-box-vs-singles"
 faqs:
   - q: "Is it okay to leave cigars in the original box inside the humidor?"
     a: "Yes. Storing cigars inside their original cedar box within a properly maintained humidor is a common and effective method, especially for aging. The box creates a micro-environment that helps tobaccos marry and develop a more cohesive flavor profile over time."

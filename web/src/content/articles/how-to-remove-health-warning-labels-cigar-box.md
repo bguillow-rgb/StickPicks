@@ -14,9 +14,9 @@ publishedAt: "2026-09-03"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-clean-a-humidor"
+  - "how-to-store-cigar-bundles"
   - "how-to-use-cedar-spills-cigars"
   - "can-you-use-a-cigar-box-as-a-humidor"
-  - "cigar-subscription-box-worth-it"
 faqs:
   - q: "Will a hair dryer damage the artwork or wood finish on a cigar box?"
     a: "Not if used correctly. Keep the dryer on medium heat 3-4 inches from the surface and keep it moving. Holding it stationary or too close risks warping the wood veneer, lifting paper borders, or scorching the lacquer."

@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigars-cellophane-on-or-off-humidor"
   - "65-vs-69-vs-72-humidity-cigars"
   - "cigar-humidity-by-type-wrapper-origin"
-  - "do-you-need-two-humidors"
+  - "how-to-store-cigar-bundles"
 faqs:
   - q: "Do cigars in tubes still need to be stored in a humidor?"
     a: "Yes. Aluminum and glass tubes are not airtight and will only maintain freshness for a few days at most outside a humidified environment. All tubed cigars should be kept in a humidor for any storage beyond a week."
