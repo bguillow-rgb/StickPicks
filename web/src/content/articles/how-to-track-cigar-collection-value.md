@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-insure-cigar-collection"
   - "do-cigars-get-better-with-age"
+  - "inherited-cigar-collection-what-to-do"
   - "limited-edition-cigars-worth-buying"
-  - "are-cuban-cigars-worth-it"
 faqs:
   - q: "Do cigars actually increase in value over time?"
     a: "Properly stored limited-edition, boutique, or vintage cigars from prestige brands can appreciate significantly. Everyday production cigars generally do not. Storage provenance, documented humidity, temperature, and ownership history, is a major factor in whether a buyer or auction house assigns premium value."
