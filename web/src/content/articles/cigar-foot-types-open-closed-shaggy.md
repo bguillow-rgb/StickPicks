@@ -13,10 +13,10 @@ quickAnswer: "A cigar's foot is the end you light. An open foot exposes the fill
 publishedAt: "2026-08-20"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-to-open-a-cigar-box"
   - "cigar-strength-vs-body"
   - "cigar-band-meanings-explained"
   - "cigar-cap-types-guide"
-  - "cigar-country-of-origin-flavor-guide"
 faqs:
   - q: "What is a closed foot cigar?"
     a: "A closed foot cigar has wrapper-grade tobacco folded over the lighting end, enclosing the filler and binder. You toast it longer than an open foot, and as the wrapper burns away it delivers a pure wrapper flavor in the first third before the full blend opens up."
