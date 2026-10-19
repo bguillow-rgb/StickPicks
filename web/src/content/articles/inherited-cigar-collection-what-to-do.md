@@ -13,10 +13,10 @@ quickAnswer: "If you've inherited a cigar collection, act fast: move everything 
 publishedAt: "2026-10-15"
 author: "Stick Picks"
 relatedSlugs:
+  - "how-to-sell-cigars-from-your-collection"
   - "cigar-factory-seconds-and-overruns-guide"
   - "how-to-track-cigar-collection-value"
   - "how-to-trade-cigars"
-  - "limited-edition-cigars-worth-buying"
 faqs:
   - q: "Are inherited cigars still smokeable?"
     a: "Possibly, it depends entirely on how they were stored. Cigars kept in a properly humidified environment at 65, 70% RH and 65, 70°F can remain excellent for decades. Dry, cracked, or beetle-damaged cigars may be unsalvageable, but even slightly dry sticks can often be slowly rehydrated over weeks in a well-maintained humidor."

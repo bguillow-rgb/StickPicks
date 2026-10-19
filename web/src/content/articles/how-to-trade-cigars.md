@@ -14,9 +14,9 @@ publishedAt: "2026-10-11"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-gift-cigars"
+  - "how-to-sell-cigars-from-your-collection"
   - "what-is-a-herf-cigar-gathering"
   - "cigar-subscription-box-worth-it"
-  - "how-often-should-you-smoke-a-cigar"
 faqs:
   - q: "What is a 'cigar bomb'?"
     a: "A cigar bomb is when a collector ships cigars to a fellow enthusiast completely unannounced, a surprise package from their personal stash. It's a generous act of community goodwill, and the recipient is generally expected to 'retaliate' with a bomb of their own."
