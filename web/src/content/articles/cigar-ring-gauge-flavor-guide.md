@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-sizes-and-shapes-guide"
   - "robusto-vs-toro-vs-churchill-cigar"
+  - "what-is-a-lancero-cigar"
   - "cigar-punch-vs-cutter"
-  - "cigar-country-of-origin-flavor-guide"
 faqs:
   - q: "What does ring gauge mean on a cigar?"
     a: "Ring gauge is the diameter of a cigar expressed in 64ths of an inch. A 50-ring cigar is 50/64 of an inch (about 0.78 inches) across. The number appears after the length when cigars are listed by size, e.g., a 5×50 Robusto is 5 inches long with a 50 ring gauge."
