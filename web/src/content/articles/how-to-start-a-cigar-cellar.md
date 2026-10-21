@@ -14,9 +14,9 @@ publishedAt: "2026-09-20"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-set-up-a-wineador"
+  - "cigar-sampler-vs-5-pack"
   - "cigar-sizes-and-shapes-guide"
   - "how-full-should-a-humidor-be"
-  - "how-many-cigars-should-i-own"
 faqs:
   - q: "What is the difference between a cigar cellar and a humidor?"
     a: "A humidor is any humidity-controlled container, from a small desktop box to a large cabinet. A cigar cellar is a collector's concept, a dedicated aging setup, often using multiple vessels or a large-capacity cooler, cabinet, or wine cooler, specifically organized for long-term storage and intentional aging rather than day-to-day rotation."

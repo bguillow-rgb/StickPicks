@@ -14,9 +14,9 @@ publishedAt: "2026-10-03"
 author: "Stick Picks"
 relatedSlugs:
   - "buying-cigars-by-the-box-vs-singles"
+  - "cigar-sampler-vs-5-pack"
   - "cigar-subscription-box-worth-it"
   - "limited-edition-cigars-worth-buying"
-  - "are-cuban-cigars-worth-it"
 faqs:
   - q: "Are cigar factory seconds the same tobacco as the regular line?"
     a: "In most cases, yes. Seconds are rejected for visual reasons, wrapper color, minor veins, or slight size variance, not because the tobacco blend or fermentation is different. The filler and binder inside are typically identical to the full-priced version."
