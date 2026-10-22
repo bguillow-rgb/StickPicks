@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-open-a-cigar-box"
   - "cigar-strength-vs-body"
+  - "ligero-seco-volado-cigar-leaf-primings"
   - "cigar-band-meanings-explained"
-  - "cigar-cap-types-guide"
 faqs:
   - q: "What is a closed foot cigar?"
     a: "A closed foot cigar has wrapper-grade tobacco folded over the lighting end, enclosing the filler and binder. You toast it longer than an open foot, and as the wrapper burns away it delivers a pure wrapper flavor in the first third before the full blend opens up."

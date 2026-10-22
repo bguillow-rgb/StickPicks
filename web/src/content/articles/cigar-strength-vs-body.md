@@ -13,10 +13,10 @@ quickAnswer: "Cigar strength measures nicotine content, how hard the cigar hits 
 publishedAt: "2026-07-09"
 author: "Stick Picks"
 relatedSlugs:
+  - "ligero-seco-volado-cigar-leaf-primings"
   - "connecticut-vs-habano-wrapper-cigar"
   - "best-cigar-for-time-of-day"
   - "cigar-foot-types-open-closed-shaggy"
-  - "nicaraguan-vs-dominican-cigars"
 faqs:
   - q: "What is the difference between cigar strength and cigar body?"
     a: "Strength refers to nicotine content and its physical effect on the smoker. Body refers to the depth, richness, and fullness of flavor experienced on the palate. They are separate dimensions -- a cigar can be high in one and low in the other."
