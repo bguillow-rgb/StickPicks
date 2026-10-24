@@ -13,10 +13,10 @@ quickAnswer: "Torpedo, belicoso, and pyramid cigars are all figurados with taper
 publishedAt: "2026-10-07"
 author: "Stick Picks"
 relatedSlugs:
+  - "what-is-a-figurado-cigar"
   - "cigar-country-of-origin-flavor-guide"
   - "cigar-factory-seconds-and-overruns-guide"
   - "cigar-foot-types-open-closed-shaggy"
-  - "cigar-mold-vs-plume"
 faqs:
   - q: "What is the main difference between a torpedo and a belicoso cigar?"
     a: "A torpedo features a longer, more dramatically tapered head that starts several inches from the tip, while a belicoso has a shorter, blunter taper beginning about an inch from the head. Both are figurados, but the torpedo is generally longer (6-7\") and the belicoso more compact (5-5.5\")."
