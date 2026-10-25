@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-freeze-cigars-kill-beetles"
   - "cigar-storage-temperature"
+  - "honduran-cigars-flavor-guide"
   - "how-to-clean-a-humidor"
-  - "how-to-remove-health-warning-labels-cigar-box"
 faqs:
   - q: "What temperature kills cigar beetles?"
     a: "Freezer temperatures (0°F / -18°C) kill both adult beetles and their larvae. A 72-hour freeze, followed by 24 hours in the refrigerator to gradually warm the cigars, is the standard treatment protocol. Never move cigars directly from freezer to room temperature -- the thermal shock can crack wrappers."

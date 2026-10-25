@@ -13,10 +13,10 @@ quickAnswer: "A Corojo cigar uses a Cuban-seed wrapper leaf originally grown at 
 publishedAt: "2026-10-05"
 author: "Stick Picks"
 relatedSlugs:
+  - "honduran-cigars-flavor-guide"
   - "cigar-country-of-origin-flavor-guide"
   - "cigar-wrapper-types-guide"
   - "connecticut-vs-habano-wrapper-cigar"
-  - "nicaraguan-vs-dominican-cigars"
 faqs:
   - q: "What does a Corojo cigar taste like?"
     a: "Corojo cigars typically deliver red pepper spice, sweet cedar, caramel, and occasional citrus zest in a medium to medium-full body. Honduran Corojo tends to be spicier and earthier; Nicaraguan Corojo is often smoother with more sweetness. The oily wrapper produces a rich room note and a firm, off-white ash."

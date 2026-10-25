@@ -14,9 +14,9 @@ publishedAt: "2026-08-15"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-trade-cigars"
+  - "honduran-cigars-flavor-guide"
   - "how-often-should-you-smoke-a-cigar"
   - "how-to-clean-a-humidor"
-  - "how-to-set-up-a-coolidor"
 faqs:
   - q: "Is it rude to give someone a cigar without asking if they smoke?"
     a: "It depends on context. For someone you know appreciates cigars, a thoughtfully chosen stick is a flattering gift. For anyone whose habits you're unsure about, pairing the cigar with a note that makes it optional is considerate. Never pressure anyone to smoke."

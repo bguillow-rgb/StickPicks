@@ -13,10 +13,10 @@ quickAnswer: "To taste a cigar properly, start with a cold draw after cutting to
 publishedAt: "2026-10-06"
 author: "Stick Picks"
 relatedSlugs:
+  - "honduran-cigars-flavor-guide"
   - "how-to-develop-a-cigar-palate"
   - "how-to-read-cigar-tasting-notes"
   - "cigar-flavor-wheel-guide"
-  - "how-to-keep-a-cigar-journal"
 faqs:
   - q: "What is a cold draw and why does it matter?"
     a: "A cold draw is pulling unlit air through a cut cigar before lighting. It previews the raw tobacco's flavor, sweetness, spice, cedar, or earthiness, and confirms the draw resistance is right. A very tight draw signals a potential construction issue before you even light up."

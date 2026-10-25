@@ -14,9 +14,9 @@ publishedAt: "2026-10-17"
 author: "Stick Picks"
 relatedSlugs:
   - "connecticut-vs-habano-wrapper-cigar"
+  - "honduran-cigars-flavor-guide"
   - "what-is-a-maduro-cigar"
   - "cigar-country-of-origin-flavor-guide"
-  - "cigar-wrapper-types-guide"
 faqs:
   - q: "Is a Cameroon wrapper mild or strong?"
     a: "Cameroon wrappers are mild to medium in strength. They contribute rich flavor complexity, baking spice, cedar, toasted nuts, without adding significant nicotine intensity, making them approachable for intermediate smokers and experienced collectors alike."

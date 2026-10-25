@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-sizes-and-shapes-guide"
   - "cigar-ring-gauge-flavor-guide"
   - "cigar-country-of-origin-flavor-guide"
-  - "robusto-vs-toro-vs-churchill-cigar"
+  - "honduran-cigars-flavor-guide"
 faqs:
   - q: "What is the standard lancero cigar size?"
     a: "Most lanceros measure 7 to 7.5 inches in length with a 38 ring gauge, though some makers use a 40 RG. The slim profile is what defines the format, not a single fixed spec."
