@@ -16,7 +16,7 @@ relatedSlugs:
   - "how-to-smoke-a-cigar"
   - "cigars-cellophane-on-or-off-humidor"
   - "65-vs-69-vs-72-humidity-cigars"
-  - "cigar-mold-vs-plume"
+  - "cigar-cold-draw-guide"
 faqs:
   - q: "How long should I let cigar ash grow before ashing?"
     a: "Aim for about one inch of ash before tapping it off. Some well-constructed premium cigars can hold two inches or more. Watch for a crack forming in the ash column, that's a reliable cue that it's ready to fall, regardless of length."

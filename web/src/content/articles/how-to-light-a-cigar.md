@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-lighter-torch-vs-soft-flame"
   - "how-to-use-cedar-spills-cigars"
   - "cigar-burn-problems-canoeing-tunneling"
-  - "cigar-foot-types-open-closed-shaggy"
+  - "cigar-cold-draw-guide"
 faqs:
   - q: "Can I use a Zippo or regular fluid lighter to light a cigar?"
     a: "Not recommended. Fluid-based lighters use petroleum or naphtha that can transfer chemical flavors directly into the tobacco. If a torch lighter isn't available, use long sulfur-free wooden matches or a cedar spill instead. If a Zippo is truly your only option, let the flame burn for a few seconds before bringing it near the cigar to let the worst of the fuel odor burn off."

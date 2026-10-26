@@ -13,10 +13,10 @@ quickAnswer: "To tell if a cigar is well made, check five things before lighting
 publishedAt: "2026-09-18"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-cold-draw-guide"
   - "how-to-tell-if-cigar-is-too-dry"
   - "how-to-dry-box-cigars"
   - "how-to-use-cedar-spills-cigars"
-  - "box-pressed-cigars-guide"
 faqs:
   - q: "What should a well-made cigar feel like when you squeeze it?"
     a: "It should feel consistently firm from head to foot, with a slight give, not rock hard and not spongy. Any soft pockets or hard knots signal construction problems that will likely cause uneven burning or a tight draw once lit."
