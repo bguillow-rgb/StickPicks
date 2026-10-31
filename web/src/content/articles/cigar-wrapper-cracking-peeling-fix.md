@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-burn-problems-canoeing-tunneling"
   - "cigars-cellophane-on-or-off-humidor"
+  - "oily-cigar-wrapper-what-it-means"
   - "when-to-remove-cigar-band"
-  - "cigar-cold-draw-guide"
 faqs:
   - q: "What is the best glue to fix a cracked cigar wrapper?"
     a: "The gold standard is gum arabic (acacia powder) or food-grade pectin, both mixed with a few drops of distilled water to a thin paste. They are tasteless, odorless, and what professional cigar rollers use. Saliva works in a pinch mid-smoke but is less durable. Avoid superglue, beeswax lip balm, or any synthetic adhesive."
