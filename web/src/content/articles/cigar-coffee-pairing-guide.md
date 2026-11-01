@@ -14,9 +14,9 @@ publishedAt: "2026-10-30"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-pairing-guide"
+  - "cigar-rum-pairing-guide"
   - "cigar-whiskey-pairing-guide"
   - "best-cigar-for-time-of-day"
-  - "box-pressed-cigars-guide"
 faqs:
   - q: "What is the best coffee to drink with a cigar?"
     a: "It depends on the cigar's body. Medium roast Colombian or Costa Rican coffees are the most versatile, they complement mild-to-medium cigars without overpowering them. For full-bodied Maduros or Nicaraguan puros, go with espresso or a dark French-press roast."

@@ -14,9 +14,9 @@ publishedAt: "2026-06-28"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-coffee-pairing-guide"
+  - "cigar-rum-pairing-guide"
   - "cigar-whiskey-pairing-guide"
   - "best-cigar-for-time-of-day"
-  - "cigar-band-meanings-explained"
 faqs:
   - q: "What is the best drink to pair with a cigar?"
     a: "Whiskey is the most popular choice. Bourbon's vanilla-caramel notes complement medium-bodied cigars, while peaty single malt Scotch suits full-bodied smokes. Coffee is the top non-alcoholic option. The best pairing is always the one that balances the cigar's strength and flavor profile."
