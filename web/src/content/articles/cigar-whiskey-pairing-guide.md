@@ -14,9 +14,9 @@ publishedAt: "2026-10-27"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-rum-pairing-guide"
+  - "cigar-beer-pairing-guide"
   - "cigar-coffee-pairing-guide"
   - "cigar-pairing-guide"
-  - "cigar-strength-vs-body"
 faqs:
   - q: "What whiskey goes best with a full-bodied cigar?"
     a: "High-proof bourbon, cask-strength expressions, or heavily peated Islay Scotch are your best bets. The bold intensity of these spirits can hold its own against a full-bodied Nicaraguan or Maduro without either overpowering the other."
