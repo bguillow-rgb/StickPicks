@@ -13,10 +13,10 @@ quickAnswer: "Match intensity: light lagers and pilsners pair with mild Connecti
 publishedAt: "2026-11-03"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-wine-pairing-guide"
   - "cigar-coffee-pairing-guide"
   - "cigar-rum-pairing-guide"
   - "cigar-whiskey-pairing-guide"
-  - "cigar-pairing-guide"
 faqs:
   - q: "What is the best beer to smoke a cigar with?"
     a: "It depends on the cigar's body. A mild Connecticut pairs beautifully with a crisp pilsner or hefeweizen. A medium Habano finds balance with an amber ale or Belgian dubbel. A full-bodied maduro is a classic match for an imperial stout or robust porter."
