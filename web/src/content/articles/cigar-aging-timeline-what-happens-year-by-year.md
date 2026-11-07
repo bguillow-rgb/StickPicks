@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "do-cigars-get-better-with-age"
   - "how-long-to-age-cigars"
+  - "how-to-tell-when-aged-cigar-is-ready"
   - "cigar-filler-binder-wrapper-explained"
-  - "robusto-vs-toro-vs-churchill-cigar"
 faqs:
   - q: "Does every cigar improve with age?"
     a: "No. Only well-constructed cigars made from quality tobacco improve meaningfully. Aging refines what's already there, it cannot fix poor construction, low-grade leaf, or a fundamentally bland blend. Mild, delicate cigars often peak within 1, 2 years and can fade beyond that."
