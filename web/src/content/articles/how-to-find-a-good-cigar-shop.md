@@ -14,9 +14,9 @@ publishedAt: "2026-11-08"
 author: "Stick Picks"
 relatedSlugs:
   - "boutique-cigars-vs-big-brands"
+  - "cigar-ashtray-guide"
   - "honduran-cigars-flavor-guide"
   - "how-many-cigars-should-i-own"
-  - "how-to-inspect-a-cigar-before-lighting"
 faqs:
   - q: "What is a certified tobacconist and does it matter?"
     a: "A certified tobacconist has completed formal cigar education, typically through the Tobacconist University (TU) program. It signals the retailer takes product knowledge and proper storage seriously. TAA (Tobacconist Association of America) membership is another credibility marker worth looking for."

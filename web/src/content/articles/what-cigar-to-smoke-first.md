@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-sampler-vs-5-pack"
   - "how-often-should-you-smoke-a-cigar"
   - "best-cigar-for-time-of-day"
-  - "cigar-strength-vs-body"
+  - "cigar-ashtray-guide"
 faqs:
   - q: "What strength cigar is best for a first-time smoker?"
     a: "Mild to medium is the right starting zone. A full-bodied cigar can trigger nicotine sickness in someone with little or no tolerance, ruining the experience. Connecticut and Ecuadorian wrappers are reliable indicators of a gentler, more approachable profile."
