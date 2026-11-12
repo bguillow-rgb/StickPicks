@@ -13,10 +13,10 @@ quickAnswer: "To cleanse your palate between cigars, sip room-temperature sparkl
 publishedAt: "2026-10-01"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-food-pairing-guide"
   - "cigar-flavor-wheel-guide"
   - "cigar-sampler-vs-5-pack"
   - "how-long-to-rest-cigars-in-humidor"
-  - "how-often-should-you-smoke-a-cigar"
 faqs:
   - q: "What is the best drink to cleanse your palate between cigars?"
     a: "Sparkling water with a squeeze of lemon or lime is the most universally effective option, the carbonation stimulates the tongue while the citric acid cuts through tobacco oil residue. Black coffee and unsweetened tea are strong runners-up."

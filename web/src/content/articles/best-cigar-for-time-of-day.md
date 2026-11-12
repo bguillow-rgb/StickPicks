@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-coffee-pairing-guide"
   - "cigar-strength-vs-body"
   - "cigar-whiskey-pairing-guide"
-  - "how-long-should-a-cigar-last"
+  - "cigar-food-pairing-guide"
 faqs:
   - q: "Is it okay to smoke a cigar in the morning?"
     a: "Yes, but stick to mild or mild-to-medium cigars with a Connecticut or EMS wrapper. Smoking on an empty or lightly filled stomach speeds nicotine absorption, and a strong cigar early in the day dramatically raises the chance of nausea. Pair it with coffee or a light breakfast."
