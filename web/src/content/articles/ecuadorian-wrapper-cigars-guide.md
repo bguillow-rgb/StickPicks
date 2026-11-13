@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "connecticut-vs-habano-wrapper-cigar"
   - "cigar-wrapper-types-guide"
+  - "oscuro-cigar-wrapper-guide"
   - "what-is-a-cameroon-wrapper-cigar"
-  - "what-is-a-corojo-cigar"
 faqs:
   - q: "What makes Ecuador a good place to grow cigar wrapper tobacco?"
     a: "Ecuador's high-altitude volcanic soil is rich in minerals, and the country's persistent cloud cover acts as a natural sun filter, replicating the shade-grown conditions traditionally created with cloth canopies. The result is thinner, oilier leaves with fewer blemishes and a refined flavor character."

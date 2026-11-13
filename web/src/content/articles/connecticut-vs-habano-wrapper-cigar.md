@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-wrapper-types-guide"
   - "ecuadorian-wrapper-cigars-guide"
   - "nicaraguan-vs-dominican-cigars"
-  - "what-is-a-maduro-cigar"
+  - "oscuro-cigar-wrapper-guide"
 faqs:
   - q: "Is Connecticut or Habano stronger?"
     a: "Habano is stronger. Connecticut Shade is typically mild to medium; Habano runs medium to full. That said, the filler blend matters too, a Connecticut-wrapped cigar with heavy Nicaraguan filler can still punch harder than expected."
