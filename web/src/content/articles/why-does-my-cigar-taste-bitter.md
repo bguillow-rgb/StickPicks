@@ -13,10 +13,10 @@ quickAnswer: "A bitter cigar is almost always caused by smoking too fast, incorr
 publishedAt: "2026-11-05"
 author: "Stick Picks"
 relatedSlugs:
+  - "why-does-my-humidor-smell"
   - "cigar-sick-period-after-shipping"
   - "cigar-wrapper-cracking-peeling-fix"
   - "cigar-burn-problems-canoeing-tunneling"
-  - "cigar-cold-draw-guide"
 faqs:
   - q: "Why does my cigar taste bitter only in the final third?"
     a: "Tar, ammonia, and combustion byproducts accumulate toward the nub as the tobacco column shortens. The last inch or two is naturally harsher on any cigar. Let the cigar rest more frequently in the final third, purge once if needed, and consider putting it down before the last 1.5 inches."
