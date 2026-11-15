@@ -13,10 +13,10 @@ quickAnswer: "Yes, you can travel with cigars. TSA permits cigars in both carry-
 publishedAt: "2026-06-21"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-travel-case-vs-travel-humidor"
   - "can-you-use-a-cigar-box-as-a-humidor"
   - "cigar-humidor-alternatives"
   - "cigar-lounge-etiquette"
-  - "cigar-food-pairing-guide"
 faqs:
   - q: "Are cigars allowed on airplanes?"
     a: "Yes. TSA classifies cigars as a non-hazardous tobacco product and permits them in both carry-on and checked bags with no set quantity limit for personal use."

@@ -16,7 +16,7 @@ relatedSlugs:
   - "how-to-tell-when-aged-cigar-is-ready"
   - "can-you-use-a-cigar-box-as-a-humidor"
   - "cigar-sick-period-after-shipping"
-  - "how-long-to-age-cigars"
+  - "cigar-travel-case-vs-travel-humidor"
 faqs:
   - q: "Do cigars have an expiration date?"
     a: "No. Cigars carry no printed expiration date and don't rot like food. A properly humidified premium cigar can remain fresh, and often improve, for decades. What degrades a cigar is poor storage, not the passage of time."
