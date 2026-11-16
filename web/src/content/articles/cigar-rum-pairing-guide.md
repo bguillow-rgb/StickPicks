@@ -14,9 +14,9 @@ publishedAt: "2026-11-01"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-whiskey-pairing-guide"
+  - "cigar-cognac-brandy-pairing-guide"
   - "cigar-pairing-guide"
   - "cigar-beer-pairing-guide"
-  - "cigar-coffee-pairing-guide"
 faqs:
   - q: "What is the best rum to pair with a cigar?"
     a: "An aged rum of 8, 18 years is the most versatile starting point. Its caramel, dried-fruit, and oak notes complement a wide range of medium to full-bodied cigars without overpowering them."

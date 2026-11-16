@@ -14,9 +14,9 @@ publishedAt: "2026-11-04"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-beer-pairing-guide"
+  - "cigar-cognac-brandy-pairing-guide"
   - "cigar-coffee-pairing-guide"
   - "cigar-rum-pairing-guide"
-  - "cigar-whiskey-pairing-guide"
 faqs:
   - q: "Is red wine or white wine better with cigars?"
     a: "Red wine is generally more forgiving because its tannins and fruit echo tobacco's natural leather and wood notes. White wine can work, but only with mild, light-bodied cigars, it's easily overpowered by a full-bodied smoke."
