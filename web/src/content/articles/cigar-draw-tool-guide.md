@@ -16,7 +16,7 @@ relatedSlugs:
   - "how-to-fix-cigar-draw-problems"
   - "cigar-burn-problems-canoeing-tunneling"
   - "cigar-cold-draw-guide"
-  - "cigar-punch-vs-cutter"
+  - "cigar-nubber-guide"
 faqs:
   - q: "What is a cigar draw tool used for?"
     a: "A cigar draw tool is used to open a channel through tightly packed or plugged tobacco inside a cigar, restoring proper airflow and fixing a tight or blocked draw before or during smoking."
