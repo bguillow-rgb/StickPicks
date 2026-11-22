@@ -13,10 +13,10 @@ quickAnswer: "Handmade cigars are rolled entirely (or mostly) by a skilled torce
 publishedAt: "2026-09-08"
 author: "Stick Picks"
 relatedSlugs:
+  - "long-filler-vs-short-filler-cigar"
   - "cigar-filler-binder-wrapper-explained"
   - "how-to-read-a-cigar-box"
   - "nicaraguan-vs-dominican-cigars"
-  - "are-cuban-cigars-worth-it"
 faqs:
   - q: "What does 'Totalmente a Mano' mean on a cigar box?"
     a: "'Totalmente a Mano' means 'completely made by hand', every step from bunching the filler to applying the wrapper was done without machine assistance. It is the highest handcraft designation, particularly meaningful on Cuban Habanos boxes where it also implies long-filler (tripa larga) construction."
