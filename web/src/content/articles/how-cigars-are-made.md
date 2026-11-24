@@ -13,10 +13,10 @@ quickAnswer: "A premium cigar takes 3, 5 years to make. Tobacco seeds are grown,
 publishedAt: "2026-11-17"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "cigar-aging-timeline-what-happens-year-by-year"
   - "cigar-nicotine-sickness-how-to-avoid"
   - "how-long-should-a-cigar-last"
-  - "how-to-smoke-a-cigar"
 faqs:
   - q: "How long does it take to make a premium cigar from seed to shelf?"
     a: "Typically 3, 5 years, though premium wrappers and aged blends can take considerably longer. Most of that time is spent aging and fermenting the raw tobacco leaf, not rolling."

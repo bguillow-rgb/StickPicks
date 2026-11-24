@@ -14,9 +14,9 @@ publishedAt: "2026-11-09"
 author: "Stick Picks"
 relatedSlugs:
   - "how-to-smoke-a-cigar"
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "how-long-should-a-cigar-last"
   - "how-often-should-you-smoke-a-cigar"
-  - "when-to-remove-cigar-band"
 faqs:
   - q: "What is a cigar nub?"
     a: "A cigar nub is the short remnant left after most of a cigar has been smoked, typically the final 1 to 2 inches. Some collectors prize a good nub for its concentrated flavors; others set the cigar down before that point to avoid harshness."

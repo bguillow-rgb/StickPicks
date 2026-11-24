@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-nicotine-sickness-how-to-avoid"
   - "how-to-smoke-a-cigar"
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "do-you-need-two-humidors"
-  - "how-far-should-you-smoke-a-cigar"
 faqs:
   - q: "How often should a beginner smoke a cigar?"
     a: "Once a week or less is ideal for beginners. A lower frequency lets your palate reset between sessions, keeps nicotine sensitivity manageable, and makes each cigar a genuine learning experience rather than a blur."

@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "how-to-fix-over-humidified-cigars"
   - "how-to-inspect-a-cigar-before-lighting"
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "cigar-humidor-humidity"
-  - "how-to-tell-when-aged-cigar-is-ready"
 faqs:
   - q: "What does a dry cigar feel like?"
     a: "A dry cigar feels noticeably firm and rigid, with little to no spring when you gently squeeze it between your fingers. The wrapper may feel papery or slightly crinkly rather than smooth and supple. In advanced cases you'll actually hear a faint crackling sound when you roll it between your palms."

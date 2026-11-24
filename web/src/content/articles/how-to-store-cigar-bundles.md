@@ -14,9 +14,9 @@ publishedAt: "2026-10-12"
 author: "Stick Picks"
 relatedSlugs:
   - "cigars-cellophane-on-or-off-humidor"
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "cigars-in-box-vs-loose-in-humidor"
   - "cigars-in-tubes-humidor-guide"
-  - "how-to-clean-a-humidor"
 faqs:
   - q: "Should I remove the plastic wrap from a cigar bundle before storing it?"
     a: "Yes. The plastic shrink-wrap on a bundle is not permeable to moisture the way cellophane is on individual cigars. Leaving the bundle in plastic prevents humidity from reaching the cigars and traps any residual ammonia, especially in freshly rolled bundles. Unwrap the bundle, then store the cigars loose or in a cedar-lined tray in your humidor."

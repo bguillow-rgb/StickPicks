@@ -13,10 +13,10 @@ quickAnswer: "For most collectors, 69% RH is the best all-around set-point: it s
 publishedAt: "2026-09-24"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "cigars-cellophane-on-or-off-humidor"
   - "cigar-humidity-by-type-wrapper-origin"
   - "how-to-store-cigars"
-  - "can-you-store-cigars-in-a-ziplock-bag"
 faqs:
   - q: "Is 65% or 69% humidity better for cigars?"
     a: "69% is the better default for a mixed collection. 65% suits collectors who prefer a drier feel, faster even burn, and slower aging, it's also Habanos S.A.'s lower bound for long-term Cuban cigar aging. Neither is wrong; it comes down to personal preference and your cigar mix."

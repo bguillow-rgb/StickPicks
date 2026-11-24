@@ -15,8 +15,8 @@ author: "Bob Guillow"
 relatedSlugs:
   - "65-vs-69-vs-72-humidity-cigars"
   - "cigar-135-rule-explained"
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "cigar-beetles-humidor"
-  - "cigar-cold-draw-guide"
 faqs:
   - q: "What is the ideal temperature for storing cigars?"
     a: "65 to 70°F is the standard range. 68°F is a common single-target setpoint that keeps you safely below the 74°F beetle threshold while staying warm enough to preserve aging."

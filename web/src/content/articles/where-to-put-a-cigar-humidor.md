@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigars-in-box-vs-loose-in-humidor"
   - "65-vs-69-vs-72-humidity-cigars"
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "cigar-ashtray-guide"
-  - "cigar-humidity-by-type-wrapper-origin"
 faqs:
   - q: "Can I keep a cigar humidor in the garage?"
     a: "Garages are almost always a poor choice. They experience dramatic temperature swings, freezing in winter, dangerously hot in summer, that overwhelm even a well-sealed humidor. Unless your garage is fully climate-controlled year-round, find an interior room instead."

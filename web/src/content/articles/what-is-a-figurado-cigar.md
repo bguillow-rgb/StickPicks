@@ -14,9 +14,9 @@ publishedAt: "2026-10-24"
 author: "Stick Picks"
 relatedSlugs:
   - "box-pressed-cigars-guide"
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "how-to-save-a-cigar-for-later"
   - "torpedo-vs-belicoso-vs-pyramid-cigar"
-  - "65-vs-69-vs-72-humidity-cigars"
 faqs:
   - q: "What is the difference between a figurado and a parejo cigar?"
     a: "A parejo has straight, parallel sides from foot to cap, think Robusto or Toro. A figurado departs from that cylinder with a tapered head, tapered foot, bulging middle, or some combination. Every torpedo, pyramid, perfecto, salomon, and culebra is a figurado; most other cigars are parejos."

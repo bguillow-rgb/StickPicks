@@ -13,10 +13,10 @@ quickAnswer: "Cigar lounge etiquette means buying at least one cigar or drink in
 publishedAt: "2026-07-28"
 author: "Stick Picks"
 relatedSlugs:
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "cigar-sizes-and-shapes-guide"
   - "how-to-travel-with-cigars"
   - "what-is-a-herf-cigar-gathering"
-  - "what-is-a-maduro-cigar"
 faqs:
   - q: "Is it rude to bring your own cigars to a cigar lounge?"
     a: "It depends on the lounge's policy. Many permit outside cigars for a small 'cutting fee' -- typically $2, $5 per stick. Always ask before you sit down. Bringing nothing and occupying a seat for hours without buying anything is considered poor form everywhere."

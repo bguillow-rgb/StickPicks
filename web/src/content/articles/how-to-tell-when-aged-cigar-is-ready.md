@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-aging-timeline-what-happens-year-by-year"
   - "how-long-to-age-cigars"
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "do-cigars-go-bad-or-expire"
-  - "how-to-smoke-a-cigar"
 faqs:
   - q: "How do I know if my cigar has peaked and is now declining?"
     a: "If a cigar that previously tasted complex now tastes flat, one-dimensional, or hollow, with flavors that have merged into an indistinct whole, it has likely passed its peak. Smoke one from the box immediately and compare it to your tasting notes from earlier intervals."

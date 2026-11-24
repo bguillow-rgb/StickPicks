@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "robusto-vs-toro-vs-churchill-cigar"
   - "how-to-smoke-a-cigar"
+  - "cigar-aging-humidity-vs-storage-humidity"
   - "when-to-remove-cigar-band"
-  - "how-cigars-are-made"
 faqs:
   - q: "How long should a Robusto cigar last?"
     a: "A standard Robusto (5 × 50) should last roughly 45, 60 minutes at a relaxed pace of one puff every 30, 60 seconds. Dense construction or a particularly slow smoker can push it past an hour."
