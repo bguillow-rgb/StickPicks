@@ -16,7 +16,7 @@ relatedSlugs:
   - "what-is-a-maduro-cigar"
   - "connecticut-vs-habano-wrapper-cigar"
   - "nicaraguan-vs-dominican-cigars"
-  - "cigar-strength-vs-body"
+  - "connecticut-shade-vs-broadleaf-cigar"
 faqs:
   - q: "What does oscuro mean in cigars?"
     a: "Oscuro is Spanish for 'dark.' In the cigar world it refers to the darkest wrapper shade classification, deeper than Maduro, achieved through late harvesting and extended high-temperature fermentation of the tobacco leaf."
