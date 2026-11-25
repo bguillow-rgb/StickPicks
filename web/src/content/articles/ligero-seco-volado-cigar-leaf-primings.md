@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-strength-vs-body"
   - "cigar-filler-binder-wrapper-explained"
   - "cigar-foot-types-open-closed-shaggy"
-  - "cigar-wrapper-types-guide"
+  - "cigar-wrapper-color-guide"
 faqs:
   - q: "What is the difference between ligero, seco, and volado?"
     a: "All three are filler leaf positions on the tobacco plant. Volado (bottom) contributes combustion but almost no flavor. Seco (middle) adds aroma, sweetness, and balance. Ligero (top) brings strength, body, and rich complexity but burns slowly and needs the other leaves around it to burn evenly."
