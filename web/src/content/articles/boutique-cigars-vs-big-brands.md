@@ -16,7 +16,7 @@ relatedSlugs:
   - "infused-cigars-vs-natural-cigars"
   - "which-cigars-age-well"
   - "are-cuban-cigars-worth-it"
-  - "honduran-cigars-flavor-guide"
+  - "cigar-accessories-guide"
 faqs:
   - q: "What officially defines a boutique cigar brand?"
     a: "The industry most commonly defines boutique as any manufacturer producing fewer than one million cigars per year, though many enthusiasts emphasize that true boutique character is about creative independence and hands-on blender control, not just production volume."

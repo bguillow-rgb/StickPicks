@@ -16,7 +16,7 @@ relatedSlugs:
   - "cigar-sampler-vs-5-pack"
   - "cigar-factory-seconds-and-overruns-guide"
   - "how-many-cigars-should-i-own"
-  - "cigar-cabinet-humidor-vs-desktop"
+  - "cigar-accessories-guide"
 faqs:
   - q: "How much cheaper is buying a box of cigars vs. singles?"
     a: "Boxes typically reduce the per-stick price by 15-30% compared to buying the same cigar individually, depending on the brand and retailer. On a $15-per-stick cigar, that can translate to $45-$90 in savings on a 20-count box."

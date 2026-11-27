@@ -15,8 +15,8 @@ author: "Stick Picks"
 relatedSlugs:
   - "cigar-factory-seconds-and-overruns-guide"
   - "buying-cigars-by-the-box-vs-singles"
+  - "cigar-accessories-guide"
   - "how-to-use-cedar-spills-cigars"
-  - "limited-edition-cigars-worth-buying"
 faqs:
   - q: "How many cigars does a typical subscription box include?"
     a: "Most services send 4, 8 cigars per month, though volume tiers can go as high as 10, 12. Industry consensus is that 4, 5 per month hits the sweet spot between variety and value without overwhelming your humidor."

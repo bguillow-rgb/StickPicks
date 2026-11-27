@@ -14,9 +14,9 @@ publishedAt: "2026-10-02"
 author: "Stick Picks"
 relatedSlugs:
   - "cigar-cabinet-humidor-vs-desktop"
+  - "cigar-accessories-guide"
   - "glass-top-humidor-vs-solid-wood"
   - "limited-edition-cigars-worth-buying"
-  - "are-cuban-cigars-worth-it"
 faqs:
   - q: "What is the main difference between an electric and a regular humidor?"
     a: "A regular (passive) humidor relies on Spanish cedar and a manual humidification source, like Boveda packs or a gel humidifier, to hold humidity, typically drifting ±5, 10% RH. An electric humidor uses active sensors and a cooling/heating system to maintain both temperature and humidity automatically, usually to within ±1, 2% RH, with no manual refilling required."
